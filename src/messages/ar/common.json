@@ -1,0 +1,51 @@
+{
+  "app": {
+    "name": "إدارة المنصة"
+  },
+  "actions": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "confirm": "تأكيد",
+    "signOut": "تسجيل الخروج",
+    "retry": "إعادة المحاولة"
+  },
+  "environments": {
+    "dev": "التطوير",
+    "staging": "التجريبي",
+    "production": "الإنتاج"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "users": "المستخدمون",
+    "auditLog": "سجل التدقيق",
+    "settings": "الإعدادات",
+    "styleGuide": "دليل التصميم"
+  },
+  "topbar": {
+    "environment": "البيئة",
+    "tenant": "المستأجر",
+    "myAccount": "حسابي",
+    "profile": "الملف الشخصي",
+    "signedOutToast": "لقد تم تسجيل خروجك."
+  },
+  "toast": {
+    "genericError": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "saved": "تم الحفظ بنجاح."
+  },
+  "table": {
+    "search": "بحث...",
+    "noResults": "لا توجد نتائج.",
+    "rowsPerPage": "صفوف لكل صفحة",
+    "page": "صفحة {page} من {totalPages}",
+    "selectedCount": "تم تحديد {count}"
+  },
+  "loading": "جارٍ التحميل...",
+  "dashboard": {
+    "welcome": "مرحبًا بعودتك، {name}",
+    "subtitle": "هذا ما هو متاح لدورك في {tenant}.",
+    "quickLinks": "روابط سريعة"
+  }
+}

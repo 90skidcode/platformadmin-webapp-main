@@ -1,0 +1,84 @@
+{
+  "employees": {
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "department": "Department",
+      "title": "Title",
+      "startDate": "Start date",
+      "status": "Status"
+    },
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "confirm": {
+      "delete": {
+        "title": "Delete this employee?",
+        "message": "This action cannot be undone."
+      }
+    },
+    "toast": {
+      "deleted": "Employee deleted.",
+      "genericError": "Could not delete the employee. Please try again."
+    }
+  },
+  "users": {
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "roles": "Roles",
+      "tenant": "Tenant",
+      "lastLogin": "Last login",
+      "status": "Status"
+    },
+    "actions": {
+      "editRoles": "Edit roles",
+      "deactivate": "Deactivate",
+      "resendInvite": "Resend invite",
+      "newUser": "Invite user",
+      "save": "Save"
+    },
+    "confirm": {
+      "deactivate": {
+        "title": "Deactivate this user?",
+        "message": "They will immediately lose access to Platform Admin."
+      }
+    },
+    "toast": {
+      "deactivated": "User deactivated.",
+      "inviteResent": "Invite resent.",
+      "rolesUpdated": "Roles updated.",
+      "userInvited": "Invite sent.",
+      "genericError": "That action could not be completed. Please try again."
+    },
+    "editRolesDialog": {
+      "title": "Edit roles for {name}",
+      "roleLabel": "Role"
+    },
+    "inviteDialog": {
+      "title": "Invite a new user"
+    },
+    "roles": {
+      "platform-admin": "Platform Admin",
+      "manager": "Manager",
+      "viewer": "Viewer"
+    }
+  },
+  "auditLog": {
+    "columns": {
+      "actor": "Actor",
+      "action": "Action",
+      "entity": "Entity",
+      "timestamp": "Timestamp"
+    },
+    "actions": {
+      "view": "View"
+    },
+    "dialog": {
+      "title": "Audit entry",
+      "before": "Before",
+      "after": "After"
+    }
+  }
+}

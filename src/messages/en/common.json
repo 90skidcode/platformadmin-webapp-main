@@ -1,0 +1,51 @@
+{
+  "app": {
+    "name": "Platform Admin"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "signOut": "Sign out",
+    "retry": "Retry"
+  },
+  "environments": {
+    "dev": "Development",
+    "staging": "Staging",
+    "production": "Production"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "users": "Users",
+    "auditLog": "Audit Log",
+    "settings": "Settings",
+    "styleGuide": "Style Guide"
+  },
+  "topbar": {
+    "environment": "Environment",
+    "tenant": "Tenant",
+    "myAccount": "My Account",
+    "profile": "Profile",
+    "signedOutToast": "You've been signed out."
+  },
+  "toast": {
+    "genericError": "Something went wrong. Please try again.",
+    "saved": "Saved successfully."
+  },
+  "table": {
+    "search": "Search...",
+    "noResults": "No results.",
+    "rowsPerPage": "Rows per page",
+    "page": "Page {page} of {totalPages}",
+    "selectedCount": "{count} selected"
+  },
+  "loading": "Loading...",
+  "dashboard": {
+    "welcome": "Welcome back, {name}",
+    "subtitle": "Here's what's available to your role in {tenant}.",
+    "quickLinks": "Quick links"
+  }
+}

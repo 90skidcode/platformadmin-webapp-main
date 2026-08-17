@@ -1,0 +1,84 @@
+{
+  "employees": {
+    "columns": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "department": "القسم",
+      "title": "المسمى الوظيفي",
+      "startDate": "تاريخ البدء",
+      "status": "الحالة"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "confirm": {
+      "delete": {
+        "title": "حذف هذا الموظف؟",
+        "message": "لا يمكن التراجع عن هذا الإجراء."
+      }
+    },
+    "toast": {
+      "deleted": "تم حذف الموظف.",
+      "genericError": "تعذر حذف الموظف. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "users": {
+    "columns": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "roles": "الأدوار",
+      "tenant": "المستأجر",
+      "lastLogin": "آخر تسجيل دخول",
+      "status": "الحالة"
+    },
+    "actions": {
+      "editRoles": "تعديل الأدوار",
+      "deactivate": "إلغاء التفعيل",
+      "resendInvite": "إعادة إرسال الدعوة",
+      "newUser": "دعوة مستخدم",
+      "save": "حفظ"
+    },
+    "confirm": {
+      "deactivate": {
+        "title": "إلغاء تفعيل هذا المستخدم؟",
+        "message": "سيفقد الوصول إلى إدارة المنصة فورًا."
+      }
+    },
+    "toast": {
+      "deactivated": "تم إلغاء تفعيل المستخدم.",
+      "inviteResent": "تم إعادة إرسال الدعوة.",
+      "rolesUpdated": "تم تحديث الأدوار.",
+      "userInvited": "تم إرسال الدعوة.",
+      "genericError": "تعذر إتمام هذا الإجراء. يرجى المحاولة مرة أخرى."
+    },
+    "editRolesDialog": {
+      "title": "تعديل أدوار {name}",
+      "roleLabel": "الدور"
+    },
+    "inviteDialog": {
+      "title": "دعوة مستخدم جديد"
+    },
+    "roles": {
+      "platform-admin": "مسؤول المنصة",
+      "manager": "مدير",
+      "viewer": "مشاهد"
+    }
+  },
+  "auditLog": {
+    "columns": {
+      "actor": "المستخدم",
+      "action": "الإجراء",
+      "entity": "الكيان",
+      "timestamp": "التاريخ والوقت"
+    },
+    "actions": {
+      "view": "عرض"
+    },
+    "dialog": {
+      "title": "إدخال التدقيق",
+      "before": "قبل",
+      "after": "بعد"
+    }
+  }
+}

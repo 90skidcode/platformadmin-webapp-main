@@ -1,0 +1,5 @@
+# Full `next build`, the Playwright e2e suite, and the SonarQube scan are
+# deliberately NOT here -- too slow for a local hook, they belong in CI,
+# where they gate the merge instead of gating every push (plan §17).
+npx tsc --noEmit
+npx vitest run

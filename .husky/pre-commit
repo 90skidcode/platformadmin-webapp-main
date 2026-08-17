@@ -1,0 +1,30 @@
+# Block .env commits (except .env.example)
+STAGED_ENV=$(git diff --cached --name-only | grep -E '^\.env' | grep -v '\.env\.example$' || true)
+if [ -n "$STAGED_ENV" ]; then
+  echo "❌ Commit blocked: .env files cannot be committed."
+  exit 1
+fi
+
+# Check for cross-file duplication among staged TS/TSX files
+STAGED_TS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' | grep '^src/' || true)
+if [ -n "$STAGED_TS" ]; then
+  echo "🔍 Checking for code duplication..."
+  if ! npx jscpd src/ --silent; then
+    echo "❌ Commit blocked: duplication check failed. Run 'pnpm duplication' for details."
+    exit 1
+  fi
+fi
+
+echo "🔧 Running linting and formatting checks..."
+npx lint-staged || {
+  echo "❌ Commit blocked: lint-staged failed."
+  exit 1
+}
+
+echo "🏗️  Verifying build passes..."
+pnpm build || {
+  echo "❌ Commit blocked: build verification failed."
+  exit 1
+}
+
+echo "✅ All checks passed!"

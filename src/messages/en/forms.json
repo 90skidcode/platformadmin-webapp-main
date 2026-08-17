@@ -1,0 +1,38 @@
+{
+  "employeeOnboarding": {
+    "fields": {
+      "name": { "label": "Full name" },
+      "email": { "label": "Email" },
+      "department": { "label": "Department" },
+      "title": { "label": "Job title" },
+      "startDate": { "label": "Start date" },
+      "notes": { "label": "Notes" }
+    },
+    "actions": {
+      "submit": "Create employee",
+      "cancel": "Cancel",
+      "preview": "Preview"
+    },
+    "toast": {
+      "employeeCreated": "Employee created.",
+      "genericError": "Could not create the employee. Please try again."
+    }
+  },
+  "settings": {
+    "sectionTitle": "Organization",
+    "fields": {
+      "orgName": { "label": "Organization name" },
+      "defaultEnvironment": { "label": "Default environment" },
+      "sessionTimeoutMinutes": { "label": "Session timeout (minutes)" },
+      "notifyOnLogin": { "label": "Notify on new sign-in" },
+      "notifyOnRoleChange": { "label": "Notify on role change" }
+    },
+    "actions": {
+      "submit": "Save settings"
+    },
+    "toast": {
+      "settingsSaved": "Settings saved.",
+      "genericError": "Could not save settings. Please try again."
+    }
+  }
+}
