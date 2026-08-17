@@ -16,6 +16,10 @@ const messages = {
       page: "Page {page} of {totalPages}",
       selectedCount: "{count} selected",
       allFilterOption: "All {label}",
+      filters: "Filters",
+      filtersDescription: "Narrow the table down using the fields below.",
+      clearFilters: "Clear",
+      applyFilters: "Apply",
     },
     actions: { cancel: "Cancel", confirm: "Confirm" },
   },
@@ -268,29 +272,58 @@ describe("TableRenderer", () => {
       };
     }
 
-    it("client mode: narrows rows to the selected filter value", async () => {
+    async function openFilterSheetAndSelect(optionName: string) {
+      await userEvent.click(screen.getByRole("button", { name: "Filters" }));
+      await userEvent.click(screen.getByRole("combobox", { name: "Status" }));
+      await userEvent.click(screen.getByRole("option", { name: optionName }));
+    }
+
+    it("client mode: opens a sheet with the filter fields", async () => {
       renderTable(schemaWithStatusFilter(), { data: employeesWithStatus });
 
-      await userEvent.click(screen.getByRole("combobox", { name: "Status" }));
-      await userEvent.click(screen.getByRole("option", { name: "Active" }));
+      await userEvent.click(screen.getByRole("button", { name: "Filters" }));
+
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(
+        screen.getByRole("combobox", { name: "Status" }),
+      ).toBeInTheDocument();
+    });
+
+    it("client mode: submitting narrows rows to the selected filter value", async () => {
+      renderTable(schemaWithStatusFilter(), { data: employeesWithStatus });
+
+      await openFilterSheetAndSelect("Active");
+      await userEvent.click(screen.getByRole("button", { name: "Apply" }));
 
       expect(screen.getByText("Kavya Iyer")).toBeInTheDocument();
       expect(screen.queryByText("Rahul Verma")).not.toBeInTheDocument();
     });
 
-    it("client mode: 'All' clears the filter again", async () => {
+    it("client mode: closing without submitting leaves rows unfiltered", async () => {
       renderTable(schemaWithStatusFilter(), { data: employeesWithStatus });
 
-      await userEvent.click(screen.getByRole("combobox", { name: "Status" }));
-      await userEvent.click(screen.getByRole("option", { name: "Active" }));
-      await userEvent.click(screen.getByRole("combobox", { name: "Status" }));
-      await userEvent.click(screen.getByRole("option", { name: /All/ }));
+      await openFilterSheetAndSelect("Active");
+      await userEvent.keyboard("{Escape}");
 
       expect(screen.getByText("Kavya Iyer")).toBeInTheDocument();
       expect(screen.getByText("Rahul Verma")).toBeInTheDocument();
     });
 
-    it("server mode: selecting a filter adds it to the fetch URL as a query param", async () => {
+    it("client mode: Clear removes an already-applied filter", async () => {
+      renderTable(schemaWithStatusFilter(), { data: employeesWithStatus });
+
+      await openFilterSheetAndSelect("Active");
+      await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+      expect(screen.queryByText("Rahul Verma")).not.toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole("button", { name: /Filters/ }));
+      await userEvent.click(screen.getByRole("button", { name: "Clear" }));
+
+      expect(screen.getByText("Kavya Iyer")).toBeInTheDocument();
+      expect(screen.getByText("Rahul Verma")).toBeInTheDocument();
+    });
+
+    it("server mode: submitting a filter adds it to the fetch URL as a query param", async () => {
       const apiFetcher = vi.fn().mockResolvedValue({
         json: async () => ({
           code: "S_200_EMP_LIST_OK",
@@ -308,8 +341,8 @@ describe("TableRenderer", () => {
       };
       renderTable(schema, { apiFetcher });
 
-      await userEvent.click(screen.getByRole("combobox", { name: "Status" }));
-      await userEvent.click(screen.getByRole("option", { name: "Active" }));
+      await openFilterSheetAndSelect("Active");
+      await userEvent.click(screen.getByRole("button", { name: "Apply" }));
 
       await waitFor(() =>
         expect(apiFetcher).toHaveBeenLastCalledWith(

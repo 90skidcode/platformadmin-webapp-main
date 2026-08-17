@@ -29,7 +29,8 @@
     "tenant": "المستأجر",
     "myAccount": "حسابي",
     "profile": "الملف الشخصي",
-    "signedOutToast": "لقد تم تسجيل خروجك."
+    "signedOutToast": "لقد تم تسجيل خروجك.",
+    "sessionExpiredToast": "انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى."
   },
   "toast": {
     "genericError": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
@@ -41,7 +42,11 @@
     "rowsPerPage": "صفوف لكل صفحة",
     "page": "صفحة {page} من {totalPages}",
     "selectedCount": "تم تحديد {count}",
-    "allFilterOption": "الكل - {label}"
+    "allFilterOption": "الكل - {label}",
+    "filters": "الفلاتر",
+    "filtersDescription": "قم بتضييق الجدول باستخدام الحقول أدناه.",
+    "clearFilters": "مسح",
+    "applyFilters": "تطبيق"
   },
   "loading": "جارٍ التحميل...",
   "dashboard": {

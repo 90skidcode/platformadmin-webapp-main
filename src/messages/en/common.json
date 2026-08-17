@@ -29,7 +29,8 @@
     "tenant": "Tenant",
     "myAccount": "My Account",
     "profile": "Profile",
-    "signedOutToast": "You've been signed out."
+    "signedOutToast": "You've been signed out.",
+    "sessionExpiredToast": "Your session has expired. Please sign in again."
   },
   "toast": {
     "genericError": "Something went wrong. Please try again.",
@@ -41,7 +42,11 @@
     "rowsPerPage": "Rows per page",
     "page": "Page {page} of {totalPages}",
     "selectedCount": "{count} selected",
-    "allFilterOption": "All {label}"
+    "allFilterOption": "All {label}",
+    "filters": "Filters",
+    "filtersDescription": "Narrow the table down using the fields below.",
+    "clearFilters": "Clear",
+    "applyFilters": "Apply"
   },
   "loading": "Loading...",
   "dashboard": {

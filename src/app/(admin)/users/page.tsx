@@ -45,17 +45,9 @@ export default function UsersPage() {
 
   return (
     <div className="flex flex-col gap-4 p-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold tracking-tight">
-          {commonT("nav.users")}
-        </h2>
-        {can("users.invite", session) && (
-          <Button onClick={() => setInviteOpen(true)}>
-            <UserPlus />
-            {t("actions.newUser")}
-          </Button>
-        )}
-      </div>
+      <h2 className="text-xl font-semibold tracking-tight">
+        {commonT("nav.users")}
+      </h2>
 
       <TableRenderer<UserRow>
         key={tableKey}
@@ -71,6 +63,14 @@ export default function UsersPage() {
             if (!res.ok) throw new Error(`Request failed with ${res.status}`);
           },
         }}
+        toolbarEnd={
+          can("users.invite", session) && (
+            <Button onClick={() => setInviteOpen(true)}>
+              <UserPlus />
+              {t("actions.newUser")}
+            </Button>
+          )
+        }
       />
 
       <Sheet open={inviteOpen} onOpenChange={setInviteOpen}>

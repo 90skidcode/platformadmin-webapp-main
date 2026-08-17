@@ -15,16 +15,25 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer, type Virtualizer } from "@tanstack/react-virtual";
 import { useTranslations } from "next-intl";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ListFilter } from "lucide-react";
 
 import {
+  Badge,
+  Button,
   Checkbox,
   Input,
+  Label,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
 } from "@/components/ui";
 import { useApiFetcher, type ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { resolveText } from "../form/fields/field-label";
@@ -42,6 +51,10 @@ export interface TableRendererProps<T extends Record<string, unknown>> {
   actionHandlers?: ActionHandlers;
   /** Defaults to `useApiFetcher()` -- tests inject a mock without touching context providers (plan §6.3). */
   apiFetcher?: ApiFetcher;
+  /** Rendered at the right end of the toolbar row, alongside search/filters
+   * (search left, filter + this on the right) -- e.g. a page's "+ New"
+   * button. Page-specific, so it's a slot rather than a schema concept. */
+  toolbarEnd?: React.ReactNode;
 }
 
 /** The JSON-driven table engine (plan §7.2/§9): `schema` in, a sortable,
@@ -52,12 +65,20 @@ export function TableRenderer<T extends Record<string, unknown>>({
   data,
   actionHandlers = {},
   apiFetcher,
+  toolbarEnd,
 }: Readonly<TableRendererProps<T>>) {
   const fallbackFetcher = useApiFetcher();
   const fetcher = apiFetcher ?? fallbackFetcher;
   const translate = useTranslations(schema.i18nNamespace);
   const commonT = useTranslations("common");
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  // Draft filter values edited in the sheet -- kept separate from the
+  // applied `filters` below so Submit/Clear each pick when the table
+  // actually re-filters/re-fetches, instead of every keystroke doing it.
+  const [pendingFilters, setPendingFilters] = useState<Record<string, string>>(
+    {},
+  );
 
   const {
     rows,
@@ -74,6 +95,27 @@ export function TableRenderer<T extends Record<string, unknown>>({
     setFilter,
     refetch,
   } = useTableData(schema, data, fetcher);
+
+  function openFilterSheet() {
+    setPendingFilters(filters);
+    setFilterSheetOpen(true);
+  }
+
+  function submitFilters() {
+    for (const filter of schema.filters ?? []) {
+      setFilter(filter.accessorKey, pendingFilters[filter.accessorKey] ?? "");
+    }
+    setFilterSheetOpen(false);
+  }
+
+  function clearFilters() {
+    setPendingFilters({});
+    for (const filter of schema.filters ?? []) {
+      setFilter(filter.accessorKey, "");
+    }
+  }
+
+  const activeFilterCount = Object.keys(filters).length;
 
   const columns = useMemo<ColumnDef<T>[]>(() => {
     const cols: ColumnDef<T>[] = [];
@@ -236,7 +278,8 @@ export function TableRenderer<T extends Record<string, unknown>>({
     <div className="flex flex-col gap-3">
       {(searchEnabled ||
         schema.filters?.length ||
-        schema.bulkActions?.length) && (
+        schema.bulkActions?.length ||
+        toolbarEnd) && (
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
             {searchEnabled && (
@@ -252,54 +295,112 @@ export function TableRenderer<T extends Record<string, unknown>>({
                 aria-label={commonT("table.search")}
               />
             )}
-            {schema.filters?.map((filter) => {
-              const filterLabel =
-                resolveText(translate, filter.label, filter.labelKey) ??
-                filter.accessorKey;
-              return (
-                <Select
-                  key={filter.accessorKey}
-                  value={filters[filter.accessorKey] ?? ""}
-                  onValueChange={(value) =>
-                    setFilter(filter.accessorKey, value)
-                  }
-                >
-                  <SelectTrigger
-                    aria-label={filterLabel}
-                    className="h-10 w-auto min-w-36"
-                  >
-                    <SelectValue placeholder={filterLabel} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="">
-                      {commonT("table.allFilterOption", { label: filterLabel })}
-                    </SelectItem>
-                    {filter.options.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {resolveText(
-                          translate,
-                          option.label,
-                          option.labelKey,
-                        ) ?? option.value}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              );
-            })}
           </div>
-          {schema.bulkActions && (
-            <BulkActionsBar
-              actions={schema.bulkActions}
-              selectedRows={selectedRows}
-              actionHandlers={actionHandlers}
-              apiFetcher={fetcher}
-              translate={translate}
-              refetch={refetch}
-              onDone={() => setRowSelection({})}
-            />
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {schema.bulkActions && (
+              <BulkActionsBar
+                actions={schema.bulkActions}
+                selectedRows={selectedRows}
+                actionHandlers={actionHandlers}
+                apiFetcher={fetcher}
+                translate={translate}
+                refetch={refetch}
+                onDone={() => setRowSelection({})}
+              />
+            )}
+            {!!schema.filters?.length && (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={openFilterSheet}
+                className="gap-2"
+              >
+                <ListFilter className="size-4" aria-hidden="true" />
+                {commonT("table.filters")}
+                {activeFilterCount > 0 && (
+                  <Badge variant="secondary" className="px-1.5">
+                    {activeFilterCount}
+                  </Badge>
+                )}
+              </Button>
+            )}
+            {toolbarEnd}
+          </div>
         </div>
+      )}
+
+      {!!schema.filters?.length && (
+        <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>{commonT("table.filters")}</SheetTitle>
+              <SheetDescription>
+                {commonT("table.filtersDescription")}
+              </SheetDescription>
+            </SheetHeader>
+            <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
+              {schema.filters.map((filter) => {
+                const filterLabel =
+                  resolveText(translate, filter.label, filter.labelKey) ??
+                  filter.accessorKey;
+                const fieldId = `table-filter-${filter.accessorKey}`;
+                return (
+                  <div
+                    key={filter.accessorKey}
+                    className="flex flex-col gap-1.5"
+                  >
+                    <Label htmlFor={fieldId}>{filterLabel}</Label>
+                    <Select
+                      value={pendingFilters[filter.accessorKey] ?? ""}
+                      onValueChange={(value) =>
+                        setPendingFilters((current) => {
+                          if (!value) {
+                            const rest = { ...current };
+                            delete rest[filter.accessorKey];
+                            return rest;
+                          }
+                          return { ...current, [filter.accessorKey]: value };
+                        })
+                      }
+                    >
+                      <SelectTrigger id={fieldId} aria-label={filterLabel}>
+                        <SelectValue
+                          placeholder={commonT("table.allFilterOption", {
+                            label: filterLabel,
+                          })}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">
+                          {commonT("table.allFilterOption", {
+                            label: filterLabel,
+                          })}
+                        </SelectItem>
+                        {filter.options.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {resolveText(
+                              translate,
+                              option.label,
+                              option.labelKey,
+                            ) ?? option.value}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                );
+              })}
+            </div>
+            <SheetFooter>
+              <Button type="button" variant="outline" onClick={clearFilters}>
+                {commonT("table.clearFilters")}
+              </Button>
+              <Button type="button" onClick={submitFilters}>
+                {commonT("table.applyFilters")}
+              </Button>
+            </SheetFooter>
+          </SheetContent>
+        </Sheet>
       )}
 
       {/* Desktop / `scroll` mode. Hidden entirely under `display.mobile: "cards"`. */}

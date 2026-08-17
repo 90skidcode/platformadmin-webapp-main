@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { LogOut, User as UserIcon } from "lucide-react";
 
 import {
@@ -15,7 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui";
-import { deleteCookie } from "@/lib/utils/cookies";
+import { clearSessionCookiesAndSignOut } from "@/lib/auth/sign-out";
 import { triggerToastFromConfig } from "@/lib/action-handlers";
 import { EnvironmentSwitcher } from "../environment-switcher";
 import { TenantSwitcher } from "../tenant-switcher";
@@ -30,15 +30,11 @@ export function Topbar({ title }: Readonly<TopbarProps>) {
   const t = useTranslations("common");
 
   function handleSignOut() {
-    // §5: signOut() also clears the environment/tenant cookies -- a fresh
-    // sign-in shouldn't inherit the previous user's switcher state.
-    deleteCookie("admin-environment");
-    deleteCookie("admin-tenant");
     triggerToastFromConfig(
       { toast: { messageKey: "topbar.signedOutToast" } },
       { translate: t },
     );
-    signOut({ callbackUrl: "/login" });
+    clearSessionCookiesAndSignOut();
   }
 
   const initials = (session?.user.name ?? session?.user.email ?? "?")
