@@ -11,6 +11,7 @@ describe("parsePageParams", () => {
         pageSize: 10,
         search: "",
         sortDir: "asc",
+        filters: {},
       });
     });
 
@@ -34,7 +35,20 @@ describe("parsePageParams", () => {
         search: "kavya",
         sortBy: "name",
         sortDir: "desc",
+        filters: {},
       });
+    });
+
+    it("treats any other param as a filter", () => {
+      const params = parsePageParams(
+        new URL("http://localhost/x?status=active&role=viewer"),
+      );
+      expect(params.filters).toEqual({ status: "active", role: "viewer" });
+    });
+
+    it("omits a filter param given as an empty string", () => {
+      const params = parsePageParams(new URL("http://localhost/x?status="));
+      expect(params.filters).toEqual({});
     });
   });
 
@@ -66,9 +80,24 @@ describe("parsePageParams", () => {
 
 describe("paginate", () => {
   const items = [
-    { id: "1", name: "Kavya Iyer", email: "kavya@acme.example" },
-    { id: "2", name: "Rahul Verma", email: "rahul@acme.example" },
-    { id: "3", name: "Meera Krishnan", email: "meera@acme.example" },
+    {
+      id: "1",
+      name: "Kavya Iyer",
+      email: "kavya@acme.example",
+      status: "active",
+    },
+    {
+      id: "2",
+      name: "Rahul Verma",
+      email: "rahul@acme.example",
+      status: "invited",
+    },
+    {
+      id: "3",
+      name: "Meera Krishnan",
+      email: "meera@acme.example",
+      status: "active",
+    },
   ];
   const baseParams: PageParams = {
     page: 1,
@@ -76,9 +105,10 @@ describe("paginate", () => {
     search: "",
     sortBy: null,
     sortDir: "asc",
+    filters: {},
   };
 
-  describe("with no search or sort applied", () => {
+  describe("with no search, filter, or sort applied", () => {
     it("returns everything, unsorted", () => {
       const result = paginate(items, baseParams, ["name", "email"]);
       expect(result).toEqual({ data: items, page: 1, pageSize: 10, total: 3 });
@@ -93,6 +123,27 @@ describe("paginate", () => {
       ]);
       expect(result.data).toEqual([items[1]]);
       expect(result.total).toBe(1);
+    });
+  });
+
+  describe("when a filter is applied", () => {
+    it("keeps only rows whose column exactly matches the filter value", () => {
+      const result = paginate(
+        items,
+        { ...baseParams, filters: { status: "active" } },
+        ["name", "email"],
+      );
+      expect(result.data).toEqual([items[0], items[2]]);
+      expect(result.total).toBe(2);
+    });
+
+    it("combines with search -- both narrow the same result set", () => {
+      const result = paginate(
+        items,
+        { ...baseParams, search: "meera", filters: { status: "active" } },
+        ["name", "email"],
+      );
+      expect(result.data).toEqual([items[2]]);
     });
   });
 

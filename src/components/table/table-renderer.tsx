@@ -17,7 +17,15 @@ import { useVirtualizer, type Virtualizer } from "@tanstack/react-virtual";
 import { useTranslations } from "next-intl";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 
-import { Checkbox, Input } from "@/components/ui";
+import {
+  Checkbox,
+  Input,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui";
 import { useApiFetcher, type ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { resolveText } from "../form/fields/field-label";
 import { BulkActionsBar } from "./bulk-actions-bar";
@@ -62,6 +70,8 @@ export function TableRenderer<T extends Record<string, unknown>>({
     setSorting,
     search,
     setSearch,
+    filters,
+    setFilter,
     refetch,
   } = useTableData(schema, data, fetcher);
 
@@ -224,21 +234,60 @@ export function TableRenderer<T extends Record<string, unknown>>({
 
   return (
     <div className="flex flex-col gap-3">
-      {(searchEnabled || schema.bulkActions?.length) && (
+      {(searchEnabled ||
+        schema.filters?.length ||
+        schema.bulkActions?.length) && (
         <div className="flex flex-wrap items-center justify-between gap-3">
-          {searchEnabled && (
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={
-                schema.search?.placeholderKey
-                  ? translate(schema.search.placeholderKey)
-                  : commonT("table.search")
-              }
-              className="max-w-xs"
-              aria-label={commonT("table.search")}
-            />
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {searchEnabled && (
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={
+                  schema.search?.placeholderKey
+                    ? translate(schema.search.placeholderKey)
+                    : commonT("table.search")
+                }
+                className="max-w-xs"
+                aria-label={commonT("table.search")}
+              />
+            )}
+            {schema.filters?.map((filter) => {
+              const filterLabel =
+                resolveText(translate, filter.label, filter.labelKey) ??
+                filter.accessorKey;
+              return (
+                <Select
+                  key={filter.accessorKey}
+                  value={filters[filter.accessorKey] ?? ""}
+                  onValueChange={(value) =>
+                    setFilter(filter.accessorKey, value)
+                  }
+                >
+                  <SelectTrigger
+                    aria-label={filterLabel}
+                    className="h-10 w-auto min-w-36"
+                  >
+                    <SelectValue placeholder={filterLabel} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">
+                      {commonT("table.allFilterOption", { label: filterLabel })}
+                    </SelectItem>
+                    {filter.options.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {resolveText(
+                          translate,
+                          option.label,
+                          option.labelKey,
+                        ) ?? option.value}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              );
+            })}
+          </div>
           {schema.bulkActions && (
             <BulkActionsBar
               actions={schema.bulkActions}
@@ -265,7 +314,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
         />
       ) : (
         <div
-          className={`overflow-x-auto rounded-md border border-border ${mobileCards ? "hidden md:block" : ""}`}
+          className={`overflow-x-auto rounded-lg border border-border ${mobileCards ? "hidden md:block" : ""}`}
         >
           <table className="w-full text-sm">
             <thead className="border-b border-border bg-muted/50">
@@ -291,7 +340,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
       {mobileCards && (
         <div className="flex flex-col gap-3 md:hidden">
           {table.getRowModel().rows.map((row) => (
-            <div key={row.id} className="rounded-md border border-border p-3">
+            <div key={row.id} className="rounded-lg border border-border p-3">
               {row.getVisibleCells().map((cell) => {
                 if (
                   cell.column.id === "__select" ||
@@ -418,7 +467,7 @@ function VirtualizedTable<T extends Record<string, unknown>>({
   return (
     <div
       role="table"
-      className={`overflow-hidden rounded-md border border-border ${hiddenOnMobile ? "hidden md:block" : ""}`}
+      className={`overflow-hidden rounded-lg border border-border ${hiddenOnMobile ? "hidden md:block" : ""}`}
     >
       <div role="rowgroup">
         {table.getHeaderGroups().map((headerGroup) => (

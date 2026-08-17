@@ -152,7 +152,7 @@ export const SelectTrigger = React.forwardRef<
         }
       }}
       className={cn(
-        "flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+        "flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-4 focus:ring-ring/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
         className,
       )}
       {...props}
@@ -271,7 +271,7 @@ export const SelectContent = React.forwardRef<
         style={style}
         onKeyDown={handleKeyDown}
         className={cn(
-          "relative z-popover max-h-96 min-w-32 overflow-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md",
+          "relative z-popover max-h-96 min-w-32 overflow-auto rounded-lg border border-border bg-popover p-1 text-popover-foreground shadow-md",
           className,
         )}
         {...props}

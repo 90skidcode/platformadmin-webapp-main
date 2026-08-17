@@ -49,7 +49,7 @@ export function Topbar({ title }: Readonly<TopbarProps>) {
     .toUpperCase();
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between gap-4 border-b border-border bg-background px-4">
+    <header className="sticky top-0 z-sticky flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-background px-4 shadow-sm">
       <h1 className="truncate text-sm font-semibold">
         {title ?? t("app.name")}
       </h1>
@@ -57,7 +57,7 @@ export function Topbar({ title }: Readonly<TopbarProps>) {
         <EnvironmentSwitcher />
         <TenantSwitcher />
         <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <DropdownMenuTrigger className="flex items-center gap-2 rounded-full outline-none focus-visible:ring-4 focus-visible:ring-ring/15">
             <Avatar className="size-8">
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>

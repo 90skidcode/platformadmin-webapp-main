@@ -7,10 +7,10 @@ import { UserPlus } from "lucide-react";
 
 import {
   Button,
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
 } from "@/components/ui";
 import { FormRenderer, type FormSchema } from "@/components/form";
 import { TableRenderer, type TableSchema } from "@/components/table";
@@ -29,6 +29,10 @@ interface UserRow {
   status: string;
 }
 
+// Edit convention: never a centered popup. invite-user-form.json (3 fields)
+// and edit-user-roles-form.json (1 field) both open in a Sheet (right-side
+// panel); a form with 5+ fields gets a full page instead -- see
+// settings-form.json / src/app/(admin)/settings/page.tsx for that case.
 export default function UsersPage() {
   const { data: session } = useSession();
   const apiFetcher = useApiFetcher();
@@ -69,11 +73,11 @@ export default function UsersPage() {
         }}
       />
 
-      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("inviteDialog.title")}</DialogTitle>
-          </DialogHeader>
+      <Sheet open={inviteOpen} onOpenChange={setInviteOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>{t("inviteDialog.title")}</SheetTitle>
+          </SheetHeader>
           <FormRenderer
             schema={inviteUserFormSchema as unknown as FormSchema}
             onRefetch={refreshTable}
@@ -95,21 +99,21 @@ export default function UsersPage() {
               },
             }}
           />
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
-      <Dialog
+      <Sheet
         open={!!editingUser}
         onOpenChange={(open) => !open && setEditingUser(null)}
       >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>
               {editingUser
                 ? t("editRolesDialog.title", { name: editingUser.name })
                 : ""}
-            </DialogTitle>
-          </DialogHeader>
+            </SheetTitle>
+          </SheetHeader>
           {editingUser && (
             <FormRenderer
               schema={editUserRolesFormSchema as unknown as FormSchema}
@@ -130,8 +134,8 @@ export default function UsersPage() {
               }}
             />
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

@@ -63,6 +63,11 @@
       "platform-admin": "مسؤول المنصة",
       "manager": "مدير",
       "viewer": "مشاهد"
+    },
+    "status": {
+      "active": "نشط",
+      "invited": "مدعو",
+      "deactivated": "معطل"
     }
   },
   "auditLog": {

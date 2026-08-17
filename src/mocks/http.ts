@@ -27,18 +27,35 @@ export function omitPassword(user: MockUser): Omit<MockUser, "password"> {
   return safe as Omit<MockUser, "password">;
 }
 
+const RESERVED_PAGE_PARAMS = new Set([
+  "page",
+  "pageSize",
+  "search",
+  "sortBy",
+  "sortDir",
+]);
+
 export interface PageParams {
   page: number;
   pageSize: number;
   search: string;
   sortBy: string | null;
   sortDir: "asc" | "desc";
+  /** Every non-reserved query param, verbatim -- the table engine's
+   * `TableFilter.accessorKey` doubles as the param name, so a new filter
+   * needs no new backend code (see `paginate()` below). */
+  filters: Record<string, string>;
 }
 
 export function parsePageParams(
   url: URL,
   defaultSortBy: string | null = null,
 ): PageParams {
+  const filters: Record<string, string> = {};
+  for (const [key, value] of url.searchParams) {
+    if (!RESERVED_PAGE_PARAMS.has(key) && value) filters[key] = value;
+  }
+
   return {
     page: Math.max(1, Number(url.searchParams.get("page") ?? "1") || 1),
     pageSize: Math.min(
@@ -48,17 +65,25 @@ export function parsePageParams(
     search: (url.searchParams.get("search") ?? "").trim().toLowerCase(),
     sortBy: url.searchParams.get("sortBy") ?? defaultSortBy,
     sortDir: url.searchParams.get("sortDir") === "desc" ? "desc" : "asc",
+    filters,
   };
 }
 
-/** Filters by a naive substring match across `searchFields`, sorts, and paginates. Mirrors the
- * shape a real server-mode table data source would return: { data, page, pageSize, total }. */
+/** Filters (both the free-text `search` and any exact-match `filters`), sorts, and paginates.
+ * Mirrors the shape a real server-mode table data source would return:
+ * { data, page, pageSize, total }. */
 export function paginate<T extends object>(
   items: T[],
   params: PageParams,
   searchFields: (keyof T)[],
 ) {
   let result = items;
+
+  for (const [key, value] of Object.entries(params.filters)) {
+    result = result.filter(
+      (item) => String(item[key as keyof T] ?? "") === value,
+    );
+  }
 
   if (params.search) {
     result = result.filter((item) =>

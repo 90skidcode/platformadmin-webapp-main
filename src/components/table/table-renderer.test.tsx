@@ -15,6 +15,7 @@ const messages = {
       noResults: "No results.",
       page: "Page {page} of {totalPages}",
       selectedCount: "{count} selected",
+      allFilterOption: "All {label}",
     },
     actions: { cancel: "Cancel", confirm: "Confirm" },
   },
@@ -224,6 +225,82 @@ describe("TableRenderer", () => {
       expect(apiFetcher).toHaveBeenCalledWith(
         "/employees/emp-2",
         expect.objectContaining({ method: "DELETE" }),
+      );
+    });
+  });
+
+  describe("filtering", () => {
+    const employeesWithStatus = [
+      {
+        id: "emp-1",
+        name: "Kavya Iyer",
+        email: "kavya@acme.example",
+        status: "active",
+      },
+      {
+        id: "emp-2",
+        name: "Rahul Verma",
+        email: "rahul@acme.example",
+        status: "offboarded",
+      },
+    ];
+
+    function schemaWithStatusFilter(): TableSchema {
+      return {
+        ...baseSchema,
+        filters: [
+          {
+            accessorKey: "status",
+            label: "Status",
+            options: [
+              { value: "active", label: "Active" },
+              { value: "offboarded", label: "Offboarded" },
+            ],
+          },
+        ],
+      };
+    }
+
+    it("client mode: narrows rows to the selected filter value", async () => {
+      renderTable(schemaWithStatusFilter(), { data: employeesWithStatus });
+
+      await userEvent.click(screen.getByRole("combobox", { name: "Status" }));
+      await userEvent.click(screen.getByRole("option", { name: "Active" }));
+
+      expect(screen.getByText("Kavya Iyer")).toBeInTheDocument();
+      expect(screen.queryByText("Rahul Verma")).not.toBeInTheDocument();
+    });
+
+    it("client mode: 'All' clears the filter again", async () => {
+      renderTable(schemaWithStatusFilter(), { data: employeesWithStatus });
+
+      await userEvent.click(screen.getByRole("combobox", { name: "Status" }));
+      await userEvent.click(screen.getByRole("option", { name: "Active" }));
+      await userEvent.click(screen.getByRole("combobox", { name: "Status" }));
+      await userEvent.click(screen.getByRole("option", { name: /All/ }));
+
+      expect(screen.getByText("Kavya Iyer")).toBeInTheDocument();
+      expect(screen.getByText("Rahul Verma")).toBeInTheDocument();
+    });
+
+    it("server mode: selecting a filter adds it to the fetch URL as a query param", async () => {
+      const apiFetcher = vi.fn().mockResolvedValue({
+        json: async () => ({ data: [], page: 1, pageSize: 10, total: 0 }),
+      });
+      const schema: TableSchema = {
+        ...schemaWithStatusFilter(),
+        mode: "server",
+        endpoint: { url: "/employees" },
+      };
+      renderTable(schema, { apiFetcher });
+
+      await userEvent.click(screen.getByRole("combobox", { name: "Status" }));
+      await userEvent.click(screen.getByRole("option", { name: "Active" }));
+
+      await waitFor(() =>
+        expect(apiFetcher).toHaveBeenLastCalledWith(
+          expect.stringContaining("status=active"),
+        ),
       );
     });
   });

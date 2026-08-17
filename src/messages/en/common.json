@@ -40,7 +40,8 @@
     "noResults": "No results.",
     "rowsPerPage": "Rows per page",
     "page": "Page {page} of {totalPages}",
-    "selectedCount": "{count} selected"
+    "selectedCount": "{count} selected",
+    "allFilterOption": "All {label}"
   },
   "loading": "Loading...",
   "dashboard": {

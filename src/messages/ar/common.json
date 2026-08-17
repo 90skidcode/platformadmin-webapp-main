@@ -40,7 +40,8 @@
     "noResults": "لا توجد نتائج.",
     "rowsPerPage": "صفوف لكل صفحة",
     "page": "صفحة {page} من {totalPages}",
-    "selectedCount": "تم تحديد {count}"
+    "selectedCount": "تم تحديد {count}",
+    "allFilterOption": "الكل - {label}"
   },
   "loading": "جارٍ التحميل...",
   "dashboard": {

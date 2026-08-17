@@ -4,6 +4,17 @@
   "mode": "server",
   "endpoint": { "url": "/users" },
   "search": { "enabled": true },
+  "filters": [
+    {
+      "accessorKey": "status",
+      "labelKey": "columns.status",
+      "options": [
+        { "value": "active", "labelKey": "status.active" },
+        { "value": "invited", "labelKey": "status.invited" },
+        { "value": "deactivated", "labelKey": "status.deactivated" }
+      ]
+    }
+  ],
   "pageSize": 10,
   "columns": [
     { "accessorKey": "name", "headerKey": "columns.name", "sortable": true },

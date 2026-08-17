@@ -65,7 +65,7 @@ const toastVariants = cva(
   // actual bracket syntax here either -- Tailwind's scanner is a plain text
   // match over every file it reads, comments included, and doing so once
   // already reintroduced this exact crash from inside a comment.
-  "pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-md border p-4 shadow-lg transition-all data-[state=closed]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom-full data-[swipe=end]:animate-out data-[swipe=move]:transition-none",
+  "pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-lg border p-4 shadow-lg transition-all data-[state=closed]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:animate-in data-[state=open]:slide-in-from-bottom-full data-[swipe=end]:animate-out data-[swipe=move]:transition-none",
   {
     variants: {
       variant: {
@@ -310,7 +310,7 @@ export const ToastClose = React.forwardRef<
       ref={ref}
       type="button"
       className={cn(
-        "absolute top-2 right-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground focus:opacity-100 focus:ring-2 focus:ring-ring focus:outline-none",
+        "absolute top-2 right-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground focus:opacity-100 focus:ring-4 focus:ring-ring/15 focus:outline-none",
         className,
       )}
       onClick={(event) => {
@@ -334,7 +334,7 @@ export const ToastAction = React.forwardRef<
     ref={ref}
     type="button"
     className={cn(
-      "inline-flex h-8 shrink-0 items-center justify-center rounded-md border border-border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-accent focus:ring-2 focus:ring-ring focus:outline-none",
+      "inline-flex h-8 shrink-0 items-center justify-center rounded-lg border border-border bg-transparent px-3 text-sm font-medium transition-colors hover:bg-accent focus:ring-4 focus:ring-ring/15 focus:outline-none",
       className,
     )}
     {...props}

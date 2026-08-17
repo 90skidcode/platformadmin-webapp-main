@@ -63,6 +63,11 @@
       "platform-admin": "Platform Admin",
       "manager": "Manager",
       "viewer": "Viewer"
+    },
+    "status": {
+      "active": "Active",
+      "invited": "Invited",
+      "deactivated": "Deactivated"
     }
   },
   "auditLog": {

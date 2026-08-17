@@ -7,6 +7,7 @@ import type { ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import type { TablePage, TableSchema } from "./types";
 
 const EMPTY_ROWS: Record<string, unknown>[] = [];
+const EMPTY_FILTERS: Record<string, string> = {};
 
 export interface UseTableDataResult<T> {
   rows: T[];
@@ -20,15 +21,21 @@ export interface UseTableDataResult<T> {
   setSorting: (sorting: SortingState) => void;
   search: string;
   setSearch: (value: string) => void;
+  /** Column accessorKey -> selected filter value; a key is absent (not
+   * `""`) once cleared, so it never gets sent as a query param. */
+  filters: Record<string, string>;
+  setFilter: (accessorKey: string, value: string) => void;
   refetch: () => void;
 }
 
 /**
  * `client` mode (plan §3): fetched once (or given via `data`), then every
- * sort/search/page change is handled in the browser by @tanstack/react-table.
- * `server` mode (plan §4): every sort/search/page change re-fetches through
+ * sort/search/filter/page change is handled in the browser by @tanstack/react-table.
+ * `server` mode (plan §4): every sort/search/filter/page change re-fetches through
  * the BFF proxy, expecting the `{ data, page, pageSize, total }` shape the
- * mock backend's `paginate()` returns.
+ * mock backend's `paginate()` returns. Each filter's `accessorKey` doubles
+ * as its query-param name -- `paginate()` treats every non-reserved param
+ * as an exact-match filter, so this needs no per-filter backend wiring.
  */
 export function useTableData<T extends Record<string, unknown>>(
   schema: TableSchema,
@@ -43,6 +50,7 @@ export function useTableData<T extends Record<string, unknown>>(
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [search, setSearch] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>(EMPTY_FILTERS);
   const [loading, setLoading] = useState(
     schema.mode === "server" || (!staticData && !!schema.endpoint),
   );
@@ -52,12 +60,14 @@ export function useTableData<T extends Record<string, unknown>>(
 
   const sortBy = sorting[0]?.id;
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
-  // Only server mode's page/search should trigger a refetch -- client mode
-  // handles both in the browser (see `clientFiltered` below). Named here,
-  // not inlined in the deps array, so the dependency list stays staticly
-  // checkable.
+  // Only server mode's page/search/filters should trigger a refetch --
+  // client mode handles all three in the browser (see `clientFiltered`
+  // below). Named here, not inlined in the deps array, so the dependency
+  // list stays staticly checkable.
   const serverPageIndex = schema.mode === "server" ? pageIndex : 0;
   const serverSearch = schema.mode === "server" ? search : "";
+  const serverFiltersKey =
+    schema.mode === "server" ? JSON.stringify(filters) : "";
 
   useEffect(() => {
     if (schema.mode === "client" && staticData) return; // static data, nothing to fetch
@@ -75,6 +85,9 @@ export function useTableData<T extends Record<string, unknown>>(
       if (sortBy) {
         params.set("sortBy", sortBy);
         params.set("sortDir", sortDir);
+      }
+      for (const [key, value] of Object.entries(filters)) {
+        if (value) params.set(key, value);
       }
     }
     const url = params.size
@@ -109,22 +122,31 @@ export function useTableData<T extends Record<string, unknown>>(
     schema.endpoint?.url,
     serverPageIndex,
     serverSearch,
+    serverFiltersKey,
     sortBy,
     sortDir,
     refetchToken,
   ]);
 
   const clientFiltered = useMemo(() => {
-    if (schema.mode !== "client" || !search) return allRows;
-    const needle = search.toLowerCase();
-    return allRows.filter((row) =>
-      schema.columns.some((col) =>
-        String(row[col.accessorKey] ?? "")
-          .toLowerCase()
-          .includes(needle),
-      ),
-    );
-  }, [schema.mode, schema.columns, allRows, search]);
+    if (schema.mode !== "client") return allRows;
+    let result = allRows;
+    if (search) {
+      const needle = search.toLowerCase();
+      result = result.filter((row) =>
+        schema.columns.some((col) =>
+          String(row[col.accessorKey] ?? "")
+            .toLowerCase()
+            .includes(needle),
+        ),
+      );
+    }
+    for (const [key, value] of Object.entries(filters)) {
+      if (!value) continue;
+      result = result.filter((row) => String(row[key] ?? "") === value);
+    }
+    return result;
+  }, [schema.mode, schema.columns, allRows, search, filters]);
 
   const rows = schema.mode === "server" ? allRows : clientFiltered;
   const total = schema.mode === "server" ? serverTotal : clientFiltered.length;
@@ -145,6 +167,18 @@ export function useTableData<T extends Record<string, unknown>>(
     search,
     setSearch: (value) => {
       setSearch(value);
+      setPageIndex(0);
+    },
+    filters,
+    setFilter: (accessorKey, value) => {
+      setFilters((current) => {
+        if (!value) {
+          const rest = { ...current };
+          delete rest[accessorKey];
+          return rest;
+        }
+        return { ...current, [accessorKey]: value };
+      });
       setPageIndex(0);
     },
     refetch: () => setRefetchToken((t) => t + 1),

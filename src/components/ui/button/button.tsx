@@ -1,9 +1,9 @@
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils/cn";
 import { Slot } from "../primitives";
+import { Spinner } from "../spinner";
 
 export const buttonVariants = cva(
   // duration-[...] stays arbitrary-value syntax: verified (real `next build`,
@@ -12,7 +12,7 @@ export const buttonVariants = cva(
   // named theme entries, so a `duration-fast` class would silently emit no
   // CSS at all.
   // eslint-disable-next-line tailwindcss/no-arbitrary-value
-  "inline-flex items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors duration-[var(--duration-fast)] ease-standard focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors duration-[var(--duration-fast)] ease-standard focus-visible:ring-4 focus-visible:ring-ring/20 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
   {
     variants: {
       variant: {
@@ -78,7 +78,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           children
         ) : (
           <>
-            {loading && <Loader2 className="animate-spin" aria-hidden="true" />}
+            {loading && <Spinner aria-hidden="true" />}
             {children}
           </>
         )}
