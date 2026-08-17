@@ -1,6 +1,107 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
-import { paginate, parsePageParams, type PageParams } from "./http";
+import enCommon from "@/messages/en/common.json";
+import {
+  failure,
+  fieldErrorMessage,
+  paginate,
+  parsePageParams,
+  success,
+  toListData,
+  type PageParams,
+} from "./http";
+
+// `success`/`failure` resolve `message` via `next-intl/server`'s
+// `getTranslations`, keyed by the business code -- that's the behavior
+// under test here (below), so stub it with the *real* en/common.json
+// dictionary rather than a fake one: a test using a fabricated dictionary
+// would keep passing even if the real `apiMessages`/`apiFieldErrors` keys
+// drifted from what the routes actually pass in. `vi.mock` is hoisted
+// above these imports by vitest's transform, same as jest.mock.
+vi.mock("next-intl/server", () => ({
+  getTranslations: async (namespace: string) => {
+    const bucket =
+      namespace === "common.apiMessages"
+        ? enCommon.apiMessages
+        : enCommon.apiFieldErrors;
+    return (key: string) => (bucket as Record<string, string>)[key];
+  },
+}));
+
+async function readBody(res: Response) {
+  return res.json() as Promise<{
+    code: string;
+    message: string;
+    data: unknown;
+  }>;
+}
+
+describe("success/failure envelopes", () => {
+  describe("success", () => {
+    it("builds an S_-prefixed code, with message resolved from common.apiMessages by business code", async () => {
+      const res = await success(201, "USR_CREATED", { id: "usr_1" });
+      expect(res.status).toBe(201);
+      await expect(readBody(res)).resolves.toEqual({
+        code: "S_201_USR_CREATED",
+        message: enCommon.apiMessages.USR_CREATED,
+        data: { id: "usr_1" },
+      });
+    });
+  });
+
+  describe("failure", () => {
+    it("builds an E_-prefixed code with data: null when no field errors are given", async () => {
+      const res = await failure(404, "USR_NOT_FOUND");
+      expect(res.status).toBe(404);
+      await expect(readBody(res)).resolves.toEqual({
+        code: "E_404_USR_NOT_FOUND",
+        message: enCommon.apiMessages.USR_NOT_FOUND,
+        data: null,
+      });
+    });
+
+    it("nests field errors under data.errors when given", async () => {
+      const res = await failure(422, "VALIDATION_FAILED", [
+        { field: "email", issue: "Email is already registered" },
+      ]);
+      await expect(readBody(res)).resolves.toEqual({
+        code: "E_422_VALIDATION_FAILED",
+        message: enCommon.apiMessages.VALIDATION_FAILED,
+        data: {
+          errors: [{ field: "email", issue: "Email is already registered" }],
+        },
+      });
+    });
+  });
+});
+
+describe("fieldErrorMessage", () => {
+  it("resolves a key from common.apiFieldErrors", async () => {
+    await expect(fieldErrorMessage("nameRequired")).resolves.toBe(
+      enCommon.apiFieldErrors.nameRequired,
+    );
+  });
+});
+
+describe("toListData", () => {
+  it("reshapes a paginate() result into { items, pagination } with limit/totalItems/totalPages", () => {
+    const result = toListData({
+      data: [{ id: "1" }, { id: "2" }],
+      page: 1,
+      pageSize: 2,
+      total: 5,
+    });
+    expect(result).toEqual({
+      items: [{ id: "1" }, { id: "2" }],
+      pagination: { page: 1, limit: 2, totalItems: 5, totalPages: 3 },
+    });
+  });
+
+  it("reports totalPages of at least 1 for an empty result", () => {
+    const result = toListData({ data: [], page: 1, pageSize: 10, total: 0 });
+    expect(result.pagination.totalPages).toBe(1);
+  });
+});
 
 describe("parsePageParams", () => {
   describe("with no query params", () => {

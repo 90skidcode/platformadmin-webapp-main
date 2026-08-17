@@ -48,5 +48,33 @@
     "welcome": "Welcome back, {name}",
     "subtitle": "Here's what's available to your role in {tenant}.",
     "quickLinks": "Quick links"
+  },
+  "apiMessages": {
+    "AUTH_REQUIRED": "Authentication required",
+    "AUTH_LOGIN_OK": "Logged in successfully",
+    "AUTH_INVALID_CREDENTIALS": "Invalid email or password",
+    "AUTH_REFRESH_OK": "Token refreshed successfully",
+    "AUTH_INVALID_REFRESH_TOKEN": "Invalid or expired refresh token",
+    "USR_LIST_OK": "Users fetched successfully",
+    "USR_CREATED": "User created successfully",
+    "USR_UPDATED": "User updated successfully",
+    "USR_NOT_FOUND": "User not found",
+    "USR_ALREADY_ACTIVE": "This user has already accepted their invite",
+    "USR_INVITE_RESENT": "Invite resent successfully",
+    "EMP_LIST_OK": "Employees fetched successfully",
+    "EMP_CREATED": "Employee created successfully",
+    "EMP_FETCH_OK": "Employee fetched successfully",
+    "EMP_UPDATED": "Employee updated successfully",
+    "EMP_DELETED": "Employee deleted successfully",
+    "EMP_NOT_FOUND": "Employee not found",
+    "SETTINGS_FETCH_OK": "Settings fetched successfully",
+    "SETTINGS_UPDATED": "Settings updated successfully",
+    "AUDIT_LIST_OK": "Audit log fetched successfully",
+    "ME_FETCH_OK": "Profile fetched successfully",
+    "VALIDATION_FAILED": "Validation failed"
+  },
+  "apiFieldErrors": {
+    "nameRequired": "Name is required",
+    "emailRequired": "Email is required"
   }
 }

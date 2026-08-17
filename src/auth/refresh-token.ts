@@ -4,6 +4,14 @@
 import "server-only";
 import type { JWT } from "next-auth/jwt";
 
+import type { ApiEnvelope } from "@/lib/api-envelope";
+
+interface RefreshData {
+  accessToken: string;
+  accessTokenExpires: number;
+  refreshToken?: string;
+}
+
 export async function refreshAccessToken(token: JWT): Promise<JWT> {
   try {
     const res = await fetch(`${process.env.AUTH_API_URL}/auth/refresh`, {
@@ -12,7 +20,8 @@ export async function refreshAccessToken(token: JWT): Promise<JWT> {
       body: JSON.stringify({ refreshToken: token.refreshToken }),
     });
     if (!res.ok) throw new Error(`refresh failed with ${res.status}`);
-    const refreshed = await res.json();
+    const body = (await res.json()) as ApiEnvelope<RefreshData>;
+    const refreshed = body.data;
     return {
       ...token,
       accessToken: refreshed.accessToken,

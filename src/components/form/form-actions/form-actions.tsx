@@ -7,6 +7,11 @@ import type { FieldValues, UseFormReturn } from "react-hook-form";
 
 import { Button } from "@/components/ui";
 import { triggerToastFromConfig } from "@/lib/action-handlers";
+import {
+  type ApiEnvelope,
+  type ApiFieldError,
+  isErrorEnvelope,
+} from "@/lib/api-envelope";
 import { can } from "@/lib/permissions";
 import type { ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import type { ActionHandlers, FormAction, FormSchema } from "../types";
@@ -22,6 +27,24 @@ export interface FormActionsProps {
    * dialog next to a table it should refresh once submitted (plan §6.4's
    * `refetch` concept isn't table-only). */
   onRefetch?: () => void;
+}
+
+/** API-Standards-Guide.md §3: on `E_422_VALIDATION_FAILED`, `data.errors`
+ * carries `{ field, issue }` pairs -- surface each as a field-level RHF
+ * error so the form highlights exactly what failed, instead of only the
+ * generic `onError` toast. Best-effort: a non-JSON or differently-shaped
+ * error body just falls through to that toast, same as before. */
+async function applyServerFieldErrors(
+  res: Response,
+  form: UseFormReturn<FieldValues>,
+) {
+  const body = (await res.json().catch(() => null)) as ApiEnvelope<{
+    errors?: ApiFieldError[];
+  }> | null;
+  if (!body || !isErrorEnvelope(body.code)) return;
+  for (const { field, issue } of body.data?.errors ?? []) {
+    form.setError(field as never, { type: "server", message: issue });
+  }
 }
 
 /**
@@ -67,7 +90,10 @@ export function FormActions({
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(values),
           });
-          if (!res.ok) throw new Error(`Request failed with ${res.status}`);
+          if (!res.ok) {
+            await applyServerFieldErrors(res, form);
+            throw new Error(`Request failed with ${res.status}`);
+          }
         }
         await runResult(action, true);
       } catch {

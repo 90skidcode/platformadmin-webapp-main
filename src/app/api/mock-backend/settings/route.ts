@@ -1,16 +1,14 @@
-import { NextResponse } from "next/server";
-
 import { auditLog, settings } from "@/mocks/db";
-import { isAuthError, requireAuth } from "@/mocks/http";
+import { isAuthError, requireAuth, success } from "@/mocks/http";
 
 export async function GET(request: Request) {
-  const auth = requireAuth(request);
+  const auth = await requireAuth(request);
   if (isAuthError(auth)) return auth;
-  return NextResponse.json(settings);
+  return success(200, "SETTINGS_FETCH_OK", settings);
 }
 
 export async function PUT(request: Request) {
-  const auth = requireAuth(request);
+  const auth = await requireAuth(request);
   if (isAuthError(auth)) return auth;
 
   const before = { ...settings };
@@ -27,5 +25,5 @@ export async function PUT(request: Request) {
     after: { ...settings },
   });
 
-  return NextResponse.json(settings);
+  return success(200, "SETTINGS_UPDATED", settings);
 }

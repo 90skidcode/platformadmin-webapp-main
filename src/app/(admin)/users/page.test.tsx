@@ -27,19 +27,21 @@ const session = buildSession({
 function makeUsersResponse() {
   return new Response(
     JSON.stringify({
-      data: [
-        {
-          id: "user-1",
-          name: "Kavya Iyer",
-          email: "kavya@acme.example",
-          roles: ["viewer"],
-          status: "active",
-          lastLoginAt: null,
-        },
-      ],
-      page: 1,
-      pageSize: 10,
-      total: 1,
+      code: "S_200_USR_LIST_OK",
+      message: "Users fetched successfully",
+      data: {
+        items: [
+          {
+            id: "user-1",
+            name: "Kavya Iyer",
+            email: "kavya@acme.example",
+            roles: ["viewer"],
+            status: "active",
+            lastLoginAt: null,
+          },
+        ],
+        pagination: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
+      },
     }),
     { status: 200, headers: { "content-type": "application/json" } },
   );

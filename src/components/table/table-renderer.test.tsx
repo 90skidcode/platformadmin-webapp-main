@@ -38,7 +38,14 @@ function renderTable(
   const apiFetcher =
     opts.apiFetcher ??
     vi.fn().mockResolvedValue({
-      json: async () => ({ data: [], page: 1, pageSize: 10, total: 0 }),
+      json: async () => ({
+        code: "S_200_EMP_LIST_OK",
+        message: "Employees fetched successfully",
+        data: {
+          items: [],
+          pagination: { page: 1, limit: 10, totalItems: 0, totalPages: 1 },
+        },
+      }),
     });
   renderWithProviders(
     <TableRenderer
@@ -285,7 +292,14 @@ describe("TableRenderer", () => {
 
     it("server mode: selecting a filter adds it to the fetch URL as a query param", async () => {
       const apiFetcher = vi.fn().mockResolvedValue({
-        json: async () => ({ data: [], page: 1, pageSize: 10, total: 0 }),
+        json: async () => ({
+          code: "S_200_EMP_LIST_OK",
+          message: "Employees fetched successfully",
+          data: {
+            items: [],
+            pagination: { page: 1, limit: 10, totalItems: 0, totalPages: 1 },
+          },
+        }),
       });
       const schema: TableSchema = {
         ...schemaWithStatusFilter(),
@@ -309,10 +323,12 @@ describe("TableRenderer", () => {
     it("requests resolve to /api/proxy/* style paths via the injected apiFetcher", async () => {
       const apiFetcher = vi.fn().mockResolvedValue({
         json: async () => ({
-          data: employees,
-          page: 1,
-          pageSize: 10,
-          total: 2,
+          code: "S_200_EMP_LIST_OK",
+          message: "Employees fetched successfully",
+          data: {
+            items: employees,
+            pagination: { page: 1, limit: 10, totalItems: 2, totalPages: 1 },
+          },
         }),
       });
       const schema: TableSchema = {

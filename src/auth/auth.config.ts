@@ -1,6 +1,7 @@
 import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
 
+import type { ApiEnvelope } from "@/lib/api-envelope";
 import { resolveAccess, type LoginResponse } from "./resolve-roles";
 import { refreshAccessToken } from "./refresh-token";
 
@@ -25,7 +26,8 @@ export const authConfig: NextAuthConfig = {
         // Wrong password / unknown user -> NextAuth surfaces a generic auth error.
         if (!res.ok) return null;
 
-        const data = (await res.json()) as LoginResponse;
+        const body = (await res.json()) as ApiEnvelope<LoginResponse>;
+        const data = body.data;
         const access = await resolveAccess(data, data.accessToken);
 
         return {

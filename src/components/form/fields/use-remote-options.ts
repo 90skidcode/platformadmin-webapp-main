@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import type { ApiEnvelope, ApiListData } from "@/lib/api-envelope";
 import type { ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import type { FieldOption, OptionsSource } from "../types";
 
@@ -22,12 +23,13 @@ export function useRemoteOptions(
 
     apiFetcher(source.url)
       .then((res) => res.json())
-      .then((data: unknown[]) => {
+      .then((body: ApiEnvelope<ApiListData<unknown> | unknown[]>) => {
         if (cancelled) return;
+        const items = Array.isArray(body.data) ? body.data : body.data.items;
         const valueKey = source.valueKey ?? "value";
         const labelKey = source.labelKey ?? "label";
         setOptions(
-          data.map((item) => {
+          items.map((item) => {
             const record = item as Record<string, unknown>;
             return {
               value: String(record[valueKey]),

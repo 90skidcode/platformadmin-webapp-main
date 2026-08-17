@@ -31,14 +31,27 @@ function Harness({
 }) {
   const form = useForm({ resolver: zodResolver(schemaToZod(schema.fields)) });
   return (
-    <FormActions
-      schema={schema}
-      form={form}
-      actionHandlers={actionHandlers}
-      apiFetcher={apiFetcher as never}
-      translate={(key) => key}
-      onRefetch={onRefetch}
-    />
+    <>
+      {/* Minimal stand-in for a real field's error message -- FormActions
+       * itself renders no fields, so this is what makes `form.setError`
+       * (driven by a 422's `data.errors`) visible to the test. */}
+      {schema.fields.map((field) => {
+        const error = form.formState.errors[field.name];
+        return error ? (
+          <p key={field.name} role="alert">
+            {String(error.message)}
+          </p>
+        ) : null;
+      })}
+      <FormActions
+        schema={schema}
+        form={form}
+        actionHandlers={actionHandlers}
+        apiFetcher={apiFetcher as never}
+        translate={(key) => key}
+        onRefetch={onRefetch}
+      />
+    </>
   );
 }
 
@@ -143,6 +156,54 @@ describe("FormActions", () => {
           expect.objectContaining({ method: "POST" }),
         ),
       );
+    });
+  });
+
+  describe("a 422 response with field-level errors", () => {
+    it("surfaces each data.errors entry on its field, then still fires onError", async () => {
+      const apiFetcher = vi.fn().mockResolvedValue(
+        new Response(
+          JSON.stringify({
+            code: "E_422_VALIDATION_FAILED",
+            message: "Validation failed",
+            data: {
+              errors: [
+                { field: "email", issue: "Email is already registered" },
+              ],
+            },
+          }),
+          { status: 422 },
+        ),
+      );
+      renderHarness({
+        schema: {
+          id: "test-form",
+          fields: [
+            {
+              name: "email",
+              type: "email",
+              defaultValue: "kavya@acme.example",
+            },
+          ],
+          actions: [
+            {
+              id: "submit",
+              type: "submit",
+              label: "Save",
+              endpoint: { method: "POST", url: "/employees" },
+              onError: { toast: { variant: "error", message: "Failed" } },
+            },
+          ],
+        },
+        actionHandlers: {},
+        apiFetcher,
+      });
+
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      expect(
+        await screen.findByText("Email is already registered"),
+      ).toBeInTheDocument();
     });
   });
 

@@ -1,17 +1,81 @@
 import "server-only";
 import { NextResponse } from "next/server";
+import { getTranslations } from "next-intl/server";
 
+import {
+  type ApiFieldError,
+  type ApiListData,
+  type StatusPrefix,
+  buildCode,
+} from "@/lib/api-envelope";
 import { type MockUser, verifyAccessToken } from "./db";
 
+/** `message` is never a hardcoded literal in a route -- it's always resolved
+ * from the request's locale (the same `NEXT_LOCALE` cookie the rest of the
+ * app reads, via `src/i18n/request.ts`), keyed by the business code itself
+ * so `code` and `message` can't drift out of sync with each other.
+ * `messages/{locale}/common.json`'s `apiMessages` is the registry. */
+async function messageFor(businessCode: string): Promise<string> {
+  const t = await getTranslations("common.apiMessages");
+  return t(businessCode);
+}
+
+/** Same idea as `messageFor`, for the per-field validation issue text a
+ * route builds into `data.errors` (see `common.json`'s `apiFieldErrors`). */
+export async function fieldErrorMessage(key: string): Promise<string> {
+  const t = await getTranslations("common.apiFieldErrors");
+  return t(key);
+}
+
+/** API-Standards-Guide.md §1: every mock-backend response uses this
+ * envelope -- `{ code, message, data }`, `code` = `{S|W|E}_{httpStatus}_{BUSINESS_CODE}`. */
+async function envelope<T>(
+  prefix: StatusPrefix,
+  httpStatus: number,
+  businessCode: string,
+  data: T,
+) {
+  return NextResponse.json(
+    {
+      code: buildCode(prefix, httpStatus, businessCode),
+      message: await messageFor(businessCode),
+      data,
+    },
+    { status: httpStatus },
+  );
+}
+
+export function success<T>(httpStatus: number, businessCode: string, data: T) {
+  return envelope("S", httpStatus, businessCode, data);
+}
+
+/** §1: succeeded, but something needs the client's attention (e.g. a
+ * side-effect failed) -- still a 2xx, still carries `data`. */
+export function warning<T>(httpStatus: number, businessCode: string, data: T) {
+  return envelope("W", httpStatus, businessCode, data);
+}
+
+/** §3: `data` is `{ errors }` when field-level validation errors are given,
+ * `null` otherwise (e.g. 404/401/409). */
+export function failure(
+  httpStatus: number,
+  businessCode: string,
+  errors?: ApiFieldError[],
+) {
+  return envelope("E", httpStatus, businessCode, errors ? { errors } : null);
+}
+
 /** Every mock-backend route requires a bearer token, same as the real backend would. */
-export function requireAuth(request: Request): MockUser | NextResponse {
+export async function requireAuth(
+  request: Request,
+): Promise<MockUser | NextResponse> {
   const header = request.headers.get("authorization");
   const token = header?.startsWith("Bearer ")
     ? header.slice("Bearer ".length)
     : null;
   const user = verifyAccessToken(token);
   if (!user) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    return failure(401, "AUTH_REQUIRED");
   }
   return user;
 }
@@ -111,4 +175,23 @@ export function paginate<T extends object>(
   const data = result.slice(start, start + params.pageSize);
 
   return { data, page: params.page, pageSize: params.pageSize, total };
+}
+
+/** §6: reshapes a `paginate()` result into the guide's list-endpoint `data`
+ * shape -- `{ items, pagination: { page, limit, totalItems, totalPages } }`. */
+export function toListData<T>(page: {
+  data: T[];
+  page: number;
+  pageSize: number;
+  total: number;
+}): ApiListData<T> {
+  return {
+    items: page.data,
+    pagination: {
+      page: page.page,
+      limit: page.pageSize,
+      totalItems: page.total,
+      totalPages: Math.max(1, Math.ceil(page.total / page.pageSize)),
+    },
+  };
 }

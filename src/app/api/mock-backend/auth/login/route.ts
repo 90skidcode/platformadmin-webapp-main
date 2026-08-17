@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
-
 import { findUserByEmail, issueTokenPair, touchLastLogin } from "@/mocks/db";
+import { failure, success } from "@/mocks/http";
 
 /**
  * Stands in for `${AUTH_API_URL}/auth/login` (plan §4.1). Real shape:
@@ -13,7 +12,7 @@ export async function POST(request: Request) {
 
   const user = findUserByEmail(email);
   if (!user || user.password !== password || user.status === "deactivated") {
-    return NextResponse.json({ error: "invalid_credentials" }, { status: 401 });
+    return failure(401, "AUTH_INVALID_CREDENTIALS");
   }
 
   const { accessToken, refreshToken, accessTokenExpires } = issueTokenPair(
@@ -21,7 +20,7 @@ export async function POST(request: Request) {
   );
   touchLastLogin(user.id);
 
-  return NextResponse.json({
+  return success(200, "AUTH_LOGIN_OK", {
     user: { id: user.id, name: user.name, email: user.email },
     accessToken,
     refreshToken,

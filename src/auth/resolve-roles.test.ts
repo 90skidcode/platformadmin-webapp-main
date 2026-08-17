@@ -39,9 +39,13 @@ describe("resolveAccess", () => {
       const fetchMock = vi.fn().mockResolvedValue({
         ok: true,
         json: async () => ({
-          roles: ["viewer"],
-          permissions: ["employees.read"],
-          tenants: [{ id: "acme", name: "Acme" }],
+          code: "S_200_ME_FETCH_OK",
+          message: "Profile fetched successfully",
+          data: {
+            roles: ["viewer"],
+            permissions: ["employees.read"],
+            tenants: [{ id: "acme", name: "Acme" }],
+          },
         }),
       });
       vi.stubGlobal("fetch", fetchMock);

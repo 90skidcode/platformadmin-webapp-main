@@ -79,10 +79,12 @@ describe("useTableData", () => {
     it("fetches from schema.endpoint with page/pageSize query params", async () => {
       const apiFetcher = vi.fn().mockResolvedValue({
         json: async () => ({
-          data: [{ name: "Kavya" }],
-          page: 1,
-          pageSize: 10,
-          total: 1,
+          code: "S_200_EMP_LIST_OK",
+          message: "Employees fetched successfully",
+          data: {
+            items: [{ name: "Kavya" }],
+            pagination: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
+          },
         }),
       });
 
@@ -100,7 +102,14 @@ describe("useTableData", () => {
 
     it("refetches with sortBy/sortDir when sorting changes", async () => {
       const apiFetcher = vi.fn().mockResolvedValue({
-        json: async () => ({ data: [], page: 1, pageSize: 10, total: 0 }),
+        json: async () => ({
+          code: "S_200_EMP_LIST_OK",
+          message: "Employees fetched successfully",
+          data: {
+            items: [],
+            pagination: { page: 1, limit: 10, totalItems: 0, totalPages: 1 },
+          },
+        }),
       });
       const { result } = renderHook(() =>
         useTableData(serverSchema, undefined, apiFetcher),

@@ -3,8 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SortingState } from "@tanstack/react-table";
 
+import type { ApiEnvelope, ApiListData } from "@/lib/api-envelope";
 import type { ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
-import type { TablePage, TableSchema } from "./types";
+import type { TableSchema } from "./types";
 
 const EMPTY_ROWS: Record<string, unknown>[] = [];
 const EMPTY_FILTERS: Record<string, string> = {};
@@ -32,8 +33,9 @@ export interface UseTableDataResult<T> {
  * `client` mode (plan §3): fetched once (or given via `data`), then every
  * sort/search/filter/page change is handled in the browser by @tanstack/react-table.
  * `server` mode (plan §4): every sort/search/filter/page change re-fetches through
- * the BFF proxy, expecting the `{ data, page, pageSize, total }` shape the
- * mock backend's `paginate()` returns. Each filter's `accessorKey` doubles
+ * the BFF proxy, expecting the API-Standards-Guide envelope with
+ * `data: { items, pagination }` (the mock backend's `toListData()` shape).
+ * Each filter's `accessorKey` doubles
  * as its query-param name -- `paginate()` treats every non-reserved param
  * as an exact-match filter, so this needs no per-filter backend wiring.
  */
@@ -96,14 +98,15 @@ export function useTableData<T extends Record<string, unknown>>(
 
     apiFetcher(url)
       .then((res) => res.json())
-      .then((body: TablePage<T> | T[]) => {
+      .then((body: ApiEnvelope<ApiListData<T> | T[]>) => {
         if (cancelled) return;
-        if (Array.isArray(body)) {
-          setAllRows(body);
-          setServerTotal(body.length);
+        const { data } = body;
+        if (Array.isArray(data)) {
+          setAllRows(data);
+          setServerTotal(data.length);
         } else {
-          setAllRows(body.data);
-          setServerTotal(body.total);
+          setAllRows(data.items);
+          setServerTotal(data.pagination.totalItems);
         }
       })
       .catch(() => {

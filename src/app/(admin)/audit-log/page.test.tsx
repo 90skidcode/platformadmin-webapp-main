@@ -29,7 +29,14 @@ function renderPage() {
     "fetch",
     vi.fn().mockResolvedValue(
       new Response(
-        JSON.stringify({ data: [entry], page: 1, pageSize: 10, total: 1 }),
+        JSON.stringify({
+          code: "S_200_AUDIT_LIST_OK",
+          message: "Audit log fetched successfully",
+          data: {
+            items: [entry],
+            pagination: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
+          },
+        }),
         {
           status: 200,
           headers: { "content-type": "application/json" },

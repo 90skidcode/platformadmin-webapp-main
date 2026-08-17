@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
-
 import { rotateTokens } from "@/mocks/db";
+import { failure, success } from "@/mocks/http";
 
 /** Stands in for `${AUTH_API_URL}/auth/refresh` (plan §4.3). */
 export async function POST(request: Request) {
@@ -10,11 +9,8 @@ export async function POST(request: Request) {
 
   const rotated = rotateTokens(refreshToken);
   if (!rotated) {
-    return NextResponse.json(
-      { error: "invalid_refresh_token" },
-      { status: 401 },
-    );
+    return failure(401, "AUTH_INVALID_REFRESH_TOKEN");
   }
 
-  return NextResponse.json(rotated);
+  return success(200, "AUTH_REFRESH_OK", rotated);
 }

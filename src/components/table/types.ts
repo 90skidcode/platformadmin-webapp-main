@@ -115,11 +115,4 @@ export interface TableSchema {
   display?: { mobile?: "scroll" | "cards" };
 }
 
-/** Server-mode list response shape -- matches what the mock backend's
- * `paginate()` helper returns (plan §15's `backend-client.test.ts` spirit). */
-export interface TablePage<T> {
-  data: T[];
-  page: number;
-  pageSize: number;
-  total: number;
-}
+export type { ApiEnvelope, ApiListData } from "@/lib/api-envelope";

@@ -1,20 +1,23 @@
-import { NextResponse } from "next/server";
-
 import { users } from "@/mocks/db";
-import { isAuthError, omitPassword, requireAuth } from "@/mocks/http";
+import {
+  failure,
+  isAuthError,
+  omitPassword,
+  requireAuth,
+  success,
+} from "@/mocks/http";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
 export async function PATCH(request: Request, { params }: RouteContext) {
-  const auth = requireAuth(request);
+  const auth = await requireAuth(request);
   if (isAuthError(auth)) return auth;
 
   const { id } = await params;
   const index = users.findIndex((u) => u.id === id);
-  if (index === -1)
-    return NextResponse.json({ error: "not_found" }, { status: 404 });
+  if (index === -1) return failure(404, "USR_NOT_FOUND");
 
   const patch = await request.json().catch(() => ({}));
   users[index] = { ...users[index], ...patch, id };
-  return NextResponse.json(omitPassword(users[index]));
+  return success(200, "USR_UPDATED", omitPassword(users[index]));
 }

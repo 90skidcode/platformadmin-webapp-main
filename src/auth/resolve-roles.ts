@@ -6,6 +6,8 @@
  */
 import "server-only";
 
+import type { ApiEnvelope } from "@/lib/api-envelope";
+
 export interface LoginResponse {
   user: { id: string; name: string; email: string };
   accessToken: string;
@@ -41,11 +43,15 @@ export async function resolveAccess(
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (!res.ok) throw new Error(`GET /me failed with ${res.status}`);
-    const me = await res.json();
+    const body = (await res.json()) as ApiEnvelope<{
+      roles?: string[];
+      permissions?: string[];
+      tenants?: { id: string; name: string }[];
+    }>;
     return {
-      roles: me.roles ?? [],
-      permissions: me.permissions ?? [],
-      tenants: me.tenants ?? [],
+      roles: body.data.roles ?? [],
+      permissions: body.data.permissions ?? [],
+      tenants: body.data.tenants ?? [],
     };
   } catch {
     console.warn(

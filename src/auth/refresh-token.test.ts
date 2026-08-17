@@ -21,9 +21,13 @@ describe("refreshAccessToken", () => {
         vi.fn().mockResolvedValue({
           ok: true,
           json: async () => ({
-            accessToken: "new-access-token",
-            accessTokenExpires: Date.now() + 300_000,
-            refreshToken: "new-refresh-token",
+            code: "S_200_AUTH_REFRESH_OK",
+            message: "Token refreshed successfully",
+            data: {
+              accessToken: "new-access-token",
+              accessTokenExpires: Date.now() + 300_000,
+              refreshToken: "new-refresh-token",
+            },
           }),
         }),
       );
@@ -41,8 +45,12 @@ describe("refreshAccessToken", () => {
         vi.fn().mockResolvedValue({
           ok: true,
           json: async () => ({
-            accessToken: "new-access-token",
-            accessTokenExpires: Date.now() + 300_000,
+            code: "S_200_AUTH_REFRESH_OK",
+            message: "Token refreshed successfully",
+            data: {
+              accessToken: "new-access-token",
+              accessTokenExpires: Date.now() + 300_000,
+            },
           }),
         }),
       );

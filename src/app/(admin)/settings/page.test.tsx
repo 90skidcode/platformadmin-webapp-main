@@ -20,11 +20,16 @@ function renderPage(
 ) {
   vi.stubGlobal(
     "fetch",
-    vi
-      .fn()
-      .mockResolvedValue(
-        new Response(JSON.stringify(settings), { status: 200 }),
+    vi.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          code: "S_200_SETTINGS_FETCH_OK",
+          message: "Settings fetched successfully",
+          data: settings,
+        }),
+        { status: 200 },
       ),
+    ),
   );
   renderWithProviders(<SettingsPage />, {
     messages: { common: commonMessages, forms: formsMessages },
