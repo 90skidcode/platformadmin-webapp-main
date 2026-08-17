@@ -1,12 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { NextIntlClientProvider } from "next-intl";
-import { SessionProvider } from "next-auth/react";
-import type { Session } from "next-auth";
 
 import { EnvironmentProvider } from "@/lib/environment";
 import { TenantProvider } from "@/lib/tenant";
+import { renderWithProviders } from "@/test/test-utils";
+import { buildSession } from "@/test/session-factory";
 import { Topbar } from "./topbar";
 
 const signOutMock = vi.fn();
@@ -34,58 +33,53 @@ const messages = {
   },
 };
 
-const session = {
-  user: {
-    id: "u1",
-    name: "Priya Sharma",
-    email: "admin@platform.local",
-    roles: ["platform-admin"],
-    permissions: [],
-    tenants: [],
-  },
-  accessToken: "token",
-  expires: "2099-01-01T00:00:00.000Z",
-} as Session;
+const session = buildSession({
+  name: "Priya Sharma",
+  email: "admin@platform.local",
+  roles: ["platform-admin"],
+});
 
 function renderTopbar(title?: string) {
-  render(
-    <NextIntlClientProvider locale="en" messages={messages}>
-      <SessionProvider session={session}>
-        <EnvironmentProvider>
-          <TenantProvider>
-            <Topbar title={title} />
-          </TenantProvider>
-        </EnvironmentProvider>
-      </SessionProvider>
-    </NextIntlClientProvider>,
-  );
+  renderWithProviders(<Topbar title={title} />, {
+    messages,
+    session,
+    wrap: (children) => (
+      <EnvironmentProvider>
+        <TenantProvider>{children}</TenantProvider>
+      </EnvironmentProvider>
+    ),
+  });
 }
 
 describe("Topbar", () => {
-  it("shows the given title, falling back to the app name", () => {
-    renderTopbar("Priya Sharma");
-    expect(screen.getByText("Priya Sharma")).toBeInTheDocument();
+  describe("the title", () => {
+    it("shows the given title", () => {
+      renderTopbar("Priya Sharma");
+      expect(screen.getByText("Priya Sharma")).toBeInTheDocument();
+    });
+
+    it("falls back to the user's initials as the avatar fallback when no title is given", () => {
+      renderTopbar();
+      expect(screen.getByText("PS")).toBeInTheDocument();
+    });
   });
 
-  it("shows the user's initials as the avatar fallback", () => {
-    renderTopbar();
-    expect(screen.getByText("PS")).toBeInTheDocument();
-  });
+  describe("the account menu", () => {
+    it("opens and shows the session's role badges", async () => {
+      renderTopbar();
+      await userEvent.click(screen.getByRole("button", { name: /PS/i }));
+      expect(screen.getByText("platform-admin")).toBeInTheDocument();
+    });
 
-  it("opens the user menu and shows the session's role badges", async () => {
-    renderTopbar();
-    await userEvent.click(screen.getByRole("button", { name: /PS/i }));
-    expect(screen.getByText("platform-admin")).toBeInTheDocument();
-  });
-
-  it("sign out clears the environment/tenant cookies and calls next-auth signOut", async () => {
-    document.cookie = "admin-environment=staging; path=/";
-    document.cookie = "admin-tenant=globex; path=/";
-    renderTopbar();
-    await userEvent.click(screen.getByRole("button", { name: /PS/i }));
-    await userEvent.click(screen.getByRole("menuitem", { name: "Sign out" }));
-    expect(signOutMock).toHaveBeenCalledWith({ callbackUrl: "/login" });
-    expect(document.cookie).not.toContain("admin-environment=staging");
-    expect(document.cookie).not.toContain("admin-tenant=globex");
+    it("sign out clears the environment/tenant cookies and calls next-auth signOut", async () => {
+      document.cookie = "admin-environment=staging; path=/";
+      document.cookie = "admin-tenant=globex; path=/";
+      renderTopbar();
+      await userEvent.click(screen.getByRole("button", { name: /PS/i }));
+      await userEvent.click(screen.getByRole("menuitem", { name: "Sign out" }));
+      expect(signOutMock).toHaveBeenCalledWith({ callbackUrl: "/login" });
+      expect(document.cookie).not.toContain("admin-environment=staging");
+      expect(document.cookie).not.toContain("admin-tenant=globex");
+    });
   });
 });

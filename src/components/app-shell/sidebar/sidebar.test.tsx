@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
-import { NextIntlClientProvider } from "next-intl";
+import { screen } from "@testing-library/react";
 import type { Session } from "next-auth";
 
 import { filterNavByAccess } from "@/lib/permissions";
+import { renderWithProviders } from "@/test/test-utils";
 import { NAV_FIXTURE } from "../nav-fixture.test-util";
 import { Sidebar } from "./sidebar";
 
@@ -25,35 +25,44 @@ function makeSession(
 }
 
 function renderSidebar(session: Session | null) {
-  render(
-    <NextIntlClientProvider locale="en" messages={messages}>
-      <Sidebar nav={filterNavByAccess(NAV_FIXTURE, session)} />
-    </NextIntlClientProvider>,
+  renderWithProviders(
+    <Sidebar nav={filterNavByAccess(NAV_FIXTURE, session)} />,
+    { messages },
   );
 }
 
 describe("Sidebar", () => {
-  it("hides a role-gated item for a session lacking that role", () => {
-    renderSidebar(makeSession(["viewer"]));
-    expect(
-      screen.queryByRole("link", { name: "Settings" }),
-    ).not.toBeInTheDocument();
+  describe("role-gated items", () => {
+    it("hides an item for a session lacking the required role", () => {
+      renderSidebar(makeSession(["viewer"]));
+      expect(
+        screen.queryByRole("link", { name: "Settings" }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("shows an item once the session has the required role", () => {
+      renderSidebar(makeSession(["admin"]));
+      expect(
+        screen.getByRole("link", { name: "Settings" }),
+      ).toBeInTheDocument();
+    });
   });
 
-  it("shows a role-gated item once the session has that role", () => {
-    renderSidebar(makeSession(["admin"]));
-    expect(screen.getByRole("link", { name: "Settings" })).toBeInTheDocument();
+  describe("permission-gated items", () => {
+    it("hides an item the session lacks the permission for", () => {
+      renderSidebar(makeSession());
+      expect(
+        screen.queryByRole("link", { name: "Users" }),
+      ).not.toBeInTheDocument();
+    });
   });
 
-  it("always shows an item with neither roles nor permission set", () => {
-    renderSidebar(makeSession());
-    expect(screen.getByRole("link", { name: "Dashboard" })).toBeInTheDocument();
-  });
-
-  it("hides a permission-gated item the session lacks", () => {
-    renderSidebar(makeSession());
-    expect(
-      screen.queryByRole("link", { name: "Users" }),
-    ).not.toBeInTheDocument();
+  describe("ungated items", () => {
+    it("always shows an item with neither roles nor permission set", () => {
+      renderSidebar(makeSession());
+      expect(
+        screen.getByRole("link", { name: "Dashboard" }),
+      ).toBeInTheDocument();
+    });
   });
 });

@@ -14,37 +14,41 @@ describe("callBackend", () => {
     vi.unstubAllGlobals();
   });
 
-  it("builds the upstream URL from the resolved environment and attaches auth/tenant headers", async () => {
-    const { callBackend } = await import("./backend-client.server");
-    await callBackend(
-      "/employees",
-      { method: "GET" },
-      { accessToken: "token-123", envId: "staging", tenantId: "acme" },
-    );
+  describe("with a known environment", () => {
+    it("builds the upstream URL from the resolved environment and attaches auth/tenant headers", async () => {
+      const { callBackend } = await import("./backend-client.server");
+      await callBackend(
+        "/employees",
+        { method: "GET" },
+        { accessToken: "token-123", envId: "staging", tenantId: "acme" },
+      );
 
-    expect(fetch).toHaveBeenCalledWith(
-      "https://staging.backend.example/employees",
-      expect.objectContaining({
-        method: "GET",
-        headers: expect.objectContaining({
-          Authorization: "Bearer token-123",
-          "X-Tenant-Id": "acme",
+      expect(fetch).toHaveBeenCalledWith(
+        "https://staging.backend.example/employees",
+        expect.objectContaining({
+          method: "GET",
+          headers: expect.objectContaining({
+            Authorization: "Bearer token-123",
+            "X-Tenant-Id": "acme",
+          }),
         }),
-      }),
-    );
+      );
+    });
   });
 
-  it("falls back to production for an unknown envId instead of throwing", async () => {
-    const { callBackend } = await import("./backend-client.server");
-    await callBackend(
-      "/employees",
-      { method: "GET" },
-      { accessToken: "t", envId: "bogus", tenantId: "" },
-    );
+  describe("with an unrecognized environment id", () => {
+    it("falls back to production instead of throwing", async () => {
+      const { callBackend } = await import("./backend-client.server");
+      await callBackend(
+        "/employees",
+        { method: "GET" },
+        { accessToken: "t", envId: "bogus", tenantId: "" },
+      );
 
-    expect(fetch).toHaveBeenCalledWith(
-      "https://api.backend.example/employees",
-      expect.anything(),
-    );
+      expect(fetch).toHaveBeenCalledWith(
+        "https://api.backend.example/employees",
+        expect.anything(),
+      );
+    });
   });
 });

@@ -18,75 +18,90 @@ function makeSession(overrides: Partial<Session["user"]> = {}): Session {
 }
 
 describe("can", () => {
-  it("returns false for a null session", () => {
-    expect(can("employees.read", null)).toBe(false);
+  describe("with no session", () => {
+    it("denies the permission", () => {
+      expect(can("employees.read", null)).toBe(false);
+    });
   });
 
-  it("returns true when the session has the permission", () => {
-    expect(can("employees.read", makeSession())).toBe(true);
-  });
+  describe("with a session", () => {
+    it("grants a permission the session has", () => {
+      expect(can("employees.read", makeSession())).toBe(true);
+    });
 
-  it("returns false when the session lacks the permission", () => {
-    expect(can("employees.delete", makeSession())).toBe(false);
+    it("denies a permission the session lacks", () => {
+      expect(can("employees.delete", makeSession())).toBe(false);
+    });
   });
 });
 
 describe("hasAnyRole", () => {
-  it("returns true when no roles are required", () => {
-    expect(hasAnyRole(undefined, null)).toBe(true);
-    expect(hasAnyRole([], makeSession())).toBe(true);
+  describe("when no roles are required", () => {
+    it("grants access even with no session", () => {
+      expect(hasAnyRole(undefined, null)).toBe(true);
+    });
+
+    it("grants access to any session", () => {
+      expect(hasAnyRole([], makeSession())).toBe(true);
+    });
   });
 
-  it("returns false for a null session when roles are required", () => {
-    expect(hasAnyRole(["admin"], null)).toBe(false);
-  });
+  describe("when roles are required", () => {
+    it("denies access with no session", () => {
+      expect(hasAnyRole(["admin"], null)).toBe(false);
+    });
 
-  it("returns true when the session has any of the required roles (OR)", () => {
-    expect(
-      hasAnyRole(["admin", "viewer"], makeSession({ roles: ["viewer"] })),
-    ).toBe(true);
-  });
+    it("grants access when the session has any of the required roles (OR)", () => {
+      expect(
+        hasAnyRole(["admin", "viewer"], makeSession({ roles: ["viewer"] })),
+      ).toBe(true);
+    });
 
-  it("returns false when the session has none of the required roles", () => {
-    expect(hasAnyRole(["admin"], makeSession({ roles: ["viewer"] }))).toBe(
-      false,
-    );
+    it("denies access when the session has none of the required roles", () => {
+      expect(hasAnyRole(["admin"], makeSession({ roles: ["viewer"] }))).toBe(
+        false,
+      );
+    });
   });
 });
 
 describe("hasAccess", () => {
-  it("hides an item with roles the session lacks, even if permission matches", () => {
-    const session = makeSession({
-      roles: ["viewer"],
-      permissions: ["settings.read"],
+  describe("when an item gates on both roles and permission", () => {
+    it("hides the item if roles don't match, even if permission does", () => {
+      const session = makeSession({
+        roles: ["viewer"],
+        permissions: ["settings.read"],
+      });
+      expect(
+        hasAccess(
+          { roles: ["platform-admin"], permission: "settings.read" },
+          session,
+        ),
+      ).toBe(false);
     });
-    expect(
-      hasAccess(
-        { roles: ["platform-admin"], permission: "settings.read" },
-        session,
-      ),
-    ).toBe(false);
-  });
 
-  it("shows an item when both roles and permission match", () => {
-    const session = makeSession({
-      roles: ["platform-admin"],
-      permissions: ["settings.read"],
+    it("shows the item when both roles and permission match", () => {
+      const session = makeSession({
+        roles: ["platform-admin"],
+        permissions: ["settings.read"],
+      });
+      expect(
+        hasAccess(
+          { roles: ["platform-admin"], permission: "settings.read" },
+          session,
+        ),
+      ).toBe(true);
     });
-    expect(
-      hasAccess(
-        { roles: ["platform-admin"], permission: "settings.read" },
-        session,
-      ),
-    ).toBe(true);
   });
 
-  it("shows an item with neither roles nor permission set, for any session", () => {
-    expect(hasAccess({}, makeSession())).toBe(true);
-  });
+  describe("when an item has no gate at all", () => {
+    it("shows the item for any session", () => {
+      expect(hasAccess({}, makeSession())).toBe(true);
+    });
 
-  it("hides everything for a null session", () => {
-    expect(hasAccess({}, null)).toBe(false);
+    it("still hides it for a null session", () => {
+      expect(hasAccess({}, null)).toBe(false);
+    });
   });
 });
 
@@ -97,40 +112,45 @@ describe("filterNavByAccess", () => {
     { id: "users", label: "Users", permission: "users.read" },
   ];
 
-  it("keeps items with no gate and items whose gate the session satisfies", () => {
-    const session = makeSession({
-      roles: ["platform-admin"],
-      permissions: ["users.read"],
+  describe("at the top level", () => {
+    it("keeps items with no gate and items whose gate the session satisfies", () => {
+      const session = makeSession({
+        roles: ["platform-admin"],
+        permissions: ["users.read"],
+      });
+      const visible = filterNavByAccess(items, session).map((i) => i.id);
+      expect(visible).toEqual(["dashboard", "settings", "users"]);
     });
-    const visible = filterNavByAccess(items, session).map((i) => i.id);
-    expect(visible).toEqual(["dashboard", "settings", "users"]);
+
+    it("drops items whose gate the session fails", () => {
+      const session = makeSession({ roles: ["viewer"], permissions: [] });
+      const visible = filterNavByAccess(items, session).map((i) => i.id);
+      expect(visible).toEqual(["dashboard"]);
+    });
   });
 
-  it("drops items whose gate the session fails", () => {
-    const session = makeSession({ roles: ["viewer"], permissions: [] });
-    const visible = filterNavByAccess(items, session).map((i) => i.id);
-    expect(visible).toEqual(["dashboard"]);
-  });
-
-  it("recurses into children, same rule applied at every level", () => {
+  describe("with nested children", () => {
     interface NestedItem {
       id: string;
       label: string;
       roles?: string[];
       children?: NestedItem[];
     }
-    const nested: NestedItem[] = [
-      {
-        id: "parent",
-        label: "Parent",
-        children: [
-          { id: "child-visible", label: "Child" },
-          { id: "child-hidden", label: "Child", roles: ["platform-admin"] },
-        ],
-      },
-    ];
-    const session = makeSession({ roles: ["viewer"] });
-    const result = filterNavByAccess(nested, session);
-    expect(result[0].children?.map((c) => c.id)).toEqual(["child-visible"]);
+
+    it("recurses into children, same rule applied at every level", () => {
+      const nested: NestedItem[] = [
+        {
+          id: "parent",
+          label: "Parent",
+          children: [
+            { id: "child-visible", label: "Child" },
+            { id: "child-hidden", label: "Child", roles: ["platform-admin"] },
+          ],
+        },
+      ];
+      const session = makeSession({ roles: ["viewer"] });
+      const result = filterNavByAccess(nested, session);
+      expect(result[0].children?.map((c) => c.id)).toEqual(["child-visible"]);
+    });
   });
 });

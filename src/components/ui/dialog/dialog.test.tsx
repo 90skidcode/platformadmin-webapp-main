@@ -33,23 +33,27 @@ function renderDialog() {
 }
 
 describe("Dialog", () => {
-  it("is closed until the trigger is clicked", () => {
-    renderDialog();
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  describe("before the trigger is clicked", () => {
+    it("is closed", () => {
+      renderDialog();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
   });
 
-  it("opens on trigger click and shows its title/description", async () => {
-    renderDialog();
-    await userEvent.click(screen.getByRole("button", { name: "Open" }));
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-    expect(screen.getByText("Deactivate user")).toBeInTheDocument();
-    expect(screen.getByText("This cannot be undone.")).toBeInTheDocument();
-  });
+  describe("after the trigger is clicked", () => {
+    it("opens and shows its title/description", async () => {
+      renderDialog();
+      await userEvent.click(screen.getByRole("button", { name: "Open" }));
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+      expect(screen.getByText("Deactivate user")).toBeInTheDocument();
+      expect(screen.getByText("This cannot be undone.")).toBeInTheDocument();
+    });
 
-  it("closes via the built-in close button", async () => {
-    renderDialog();
-    await userEvent.click(screen.getByRole("button", { name: "Open" }));
-    await userEvent.click(screen.getByRole("button", { name: "Close" }));
-    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    it("closes via the built-in close button", async () => {
+      renderDialog();
+      await userEvent.click(screen.getByRole("button", { name: "Open" }));
+      await userEvent.click(screen.getByRole("button", { name: "Close" }));
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    });
   });
 });

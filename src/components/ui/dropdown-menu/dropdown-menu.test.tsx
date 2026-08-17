@@ -29,24 +29,28 @@ function renderMenu(onSignOut = vi.fn()) {
 }
 
 describe("DropdownMenu", () => {
-  it("is closed until the trigger is clicked", () => {
-    renderMenu();
-    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+  describe("before the trigger is clicked", () => {
+    it("is closed", () => {
+      renderMenu();
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    });
   });
 
-  it("opens on trigger click and shows its items", async () => {
-    renderMenu();
-    await userEvent.click(screen.getByRole("button", { name: "Priya S." }));
-    expect(
-      screen.getByRole("menuitem", { name: "Sign out" }),
-    ).toBeInTheDocument();
-  });
+  describe("after the trigger is clicked", () => {
+    it("opens and shows its items", async () => {
+      renderMenu();
+      await userEvent.click(screen.getByRole("button", { name: "Priya S." }));
+      expect(
+        screen.getByRole("menuitem", { name: "Sign out" }),
+      ).toBeInTheDocument();
+    });
 
-  it("selecting an item fires onSelect and closes the menu", async () => {
-    const onSignOut = renderMenu();
-    await userEvent.click(screen.getByRole("button", { name: "Priya S." }));
-    await userEvent.click(screen.getByRole("menuitem", { name: "Sign out" }));
-    expect(onSignOut).toHaveBeenCalledOnce();
-    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    it("selecting an item fires onSelect and closes the menu", async () => {
+      const onSignOut = renderMenu();
+      await userEvent.click(screen.getByRole("button", { name: "Priya S." }));
+      await userEvent.click(screen.getByRole("menuitem", { name: "Sign out" }));
+      expect(onSignOut).toHaveBeenCalledOnce();
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
+    });
   });
 });

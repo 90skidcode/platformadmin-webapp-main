@@ -1,27 +1,22 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { SessionProvider } from "next-auth/react";
-import type { Session } from "next-auth";
 
+import { renderWithProviders } from "@/test/test-utils";
+import { buildSession } from "@/test/session-factory";
 import { schemaToZod } from "../schema-to-zod";
 import type { ActionHandlers, FormSchema } from "../types";
 import { FormActions } from "./form-actions";
 
-const session = {
-  user: {
-    id: "user-1",
-    name: "Priya",
-    email: "admin@platform.local",
-    roles: ["platform-admin"],
-    permissions: ["employees.write"],
-    tenants: [],
-  },
-  accessToken: "token",
-  expires: "2099-01-01T00:00:00.000Z",
-} as Session;
+const session = buildSession({
+  id: "user-1",
+  name: "Priya",
+  email: "admin@platform.local",
+  roles: ["platform-admin"],
+  permissions: ["employees.write"],
+});
 
 function Harness({
   schema,
@@ -36,17 +31,19 @@ function Harness({
 }) {
   const form = useForm({ resolver: zodResolver(schemaToZod(schema.fields)) });
   return (
-    <SessionProvider session={session}>
-      <FormActions
-        schema={schema}
-        form={form}
-        actionHandlers={actionHandlers}
-        apiFetcher={apiFetcher as never}
-        translate={(key) => key}
-        onRefetch={onRefetch}
-      />
-    </SessionProvider>
+    <FormActions
+      schema={schema}
+      form={form}
+      actionHandlers={actionHandlers}
+      apiFetcher={apiFetcher as never}
+      translate={(key) => key}
+      onRefetch={onRefetch}
+    />
   );
+}
+
+function renderHarness(props: Parameters<typeof Harness>[0]) {
+  renderWithProviders(<Harness {...props} />, { session });
 }
 
 const requiredFieldSchema: FormSchema = {
@@ -56,11 +53,11 @@ const requiredFieldSchema: FormSchema = {
 };
 
 describe("FormActions", () => {
-  it("a 'button' action's onClick fires immediately, without RHF validation, even with an invalid form", async () => {
-    const onClick = vi.fn();
-    render(
-      <Harness
-        schema={{
+  describe("a 'button' action", () => {
+    it("fires onClick immediately, without RHF validation, even with an invalid form", async () => {
+      const onClick = vi.fn();
+      renderHarness({
+        schema: {
           ...requiredFieldSchema,
           actions: [
             {
@@ -70,24 +67,24 @@ describe("FormActions", () => {
               onClick: "preview",
             },
           ],
-        }}
-        actionHandlers={{ preview: onClick }}
-      />,
-    );
+        },
+        actionHandlers: { preview: onClick },
+      });
 
-    await userEvent.click(screen.getByRole("button", { name: "Preview" }));
+      await userEvent.click(screen.getByRole("button", { name: "Preview" }));
 
-    expect(onClick).toHaveBeenCalledOnce();
+      expect(onClick).toHaveBeenCalledOnce();
+    });
   });
 
-  it("a 'submit' action with onClick still validates first, then calls the handler instead of hitting endpoint", async () => {
-    const onClick = vi.fn();
-    const apiFetcher = vi
-      .fn()
-      .mockResolvedValue(new Response("{}", { status: 200 }));
-    render(
-      <Harness
-        schema={{
+  describe("a 'submit' action with an onClick", () => {
+    it("still validates first, then calls the handler instead of hitting the endpoint", async () => {
+      const onClick = vi.fn();
+      const apiFetcher = vi
+        .fn()
+        .mockResolvedValue(new Response("{}", { status: 200 }));
+      renderHarness({
+        schema: {
           ...requiredFieldSchema,
           actions: [
             {
@@ -98,25 +95,25 @@ describe("FormActions", () => {
               endpoint: { method: "POST", url: "/employees" },
             },
           ],
-        }}
-        actionHandlers={{ customSubmit: onClick }}
-        apiFetcher={apiFetcher}
-      />,
-    );
+        },
+        actionHandlers: { customSubmit: onClick },
+        apiFetcher,
+      });
 
-    // invalid (required email missing) -> handler must NOT fire
-    await userEvent.click(screen.getByRole("button", { name: "Save" }));
-    expect(onClick).not.toHaveBeenCalled();
-    expect(apiFetcher).not.toHaveBeenCalled();
+      // invalid (required email missing) -> handler must NOT fire
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+      expect(onClick).not.toHaveBeenCalled();
+      expect(apiFetcher).not.toHaveBeenCalled();
+    });
   });
 
-  it("a plain 'submit' action (no onClick) POSTs to endpoint via the apiFetcher", async () => {
-    const apiFetcher = vi
-      .fn()
-      .mockResolvedValue(new Response("{}", { status: 200 }));
-    render(
-      <Harness
-        schema={{
+  describe("a plain 'submit' action (no onClick)", () => {
+    it("POSTs to the endpoint via the apiFetcher", async () => {
+      const apiFetcher = vi
+        .fn()
+        .mockResolvedValue(new Response("{}", { status: 200 }));
+      renderHarness({
+        schema: {
           id: "test-form",
           fields: [
             {
@@ -133,26 +130,26 @@ describe("FormActions", () => {
               endpoint: { method: "POST", url: "/employees" },
             },
           ],
-        }}
-        actionHandlers={{}}
-        apiFetcher={apiFetcher}
-      />,
-    );
+        },
+        actionHandlers: {},
+        apiFetcher,
+      });
 
-    await userEvent.click(screen.getByRole("button", { name: "Save" }));
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
 
-    await waitFor(() =>
-      expect(apiFetcher).toHaveBeenCalledWith(
-        "/employees",
-        expect.objectContaining({ method: "POST" }),
-      ),
-    );
+      await waitFor(() =>
+        expect(apiFetcher).toHaveBeenCalledWith(
+          "/employees",
+          expect.objectContaining({ method: "POST" }),
+        ),
+      );
+    });
   });
 
-  it("hides an action whose permission the session lacks", () => {
-    render(
-      <Harness
-        schema={{
+  describe("permission-gated actions", () => {
+    it("hides an action whose permission the session lacks", () => {
+      renderHarness({
+        schema: {
           ...requiredFieldSchema,
           actions: [
             {
@@ -163,19 +160,17 @@ describe("FormActions", () => {
               permission: "employees.delete",
             },
           ],
-        }}
-        actionHandlers={{ del: vi.fn() }}
-      />,
-    );
-    expect(
-      screen.queryByRole("button", { name: "Delete" }),
-    ).not.toBeInTheDocument();
-  });
+        },
+        actionHandlers: { del: vi.fn() },
+      });
+      expect(
+        screen.queryByRole("button", { name: "Delete" }),
+      ).not.toBeInTheDocument();
+    });
 
-  it("shows an action whose permission the session has", () => {
-    render(
-      <Harness
-        schema={{
+    it("shows an action whose permission the session has", () => {
+      renderHarness({
+        schema: {
           ...requiredFieldSchema,
           actions: [
             {
@@ -186,18 +181,18 @@ describe("FormActions", () => {
               permission: "employees.write",
             },
           ],
-        }}
-        actionHandlers={{ save: vi.fn() }}
-      />,
-    );
-    expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
+        },
+        actionHandlers: { save: vi.fn() },
+      });
+      expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
+    });
   });
 
-  it("reset calls form.reset() and then the optional onClick", async () => {
-    const onClick = vi.fn();
-    render(
-      <Harness
-        schema={{
+  describe("a 'reset' action", () => {
+    it("calls form.reset() and then the optional onClick", async () => {
+      const onClick = vi.fn();
+      renderHarness({
+        schema: {
           ...requiredFieldSchema,
           actions: [
             {
@@ -207,19 +202,19 @@ describe("FormActions", () => {
               onClick: "afterReset",
             },
           ],
-        }}
-        actionHandlers={{ afterReset: onClick }}
-      />,
-    );
-    await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
-    expect(onClick).toHaveBeenCalledOnce();
+        },
+        actionHandlers: { afterReset: onClick },
+      });
+      await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+      expect(onClick).toHaveBeenCalledOnce();
+    });
   });
 
-  it("onSuccess.refetch calls the onRefetch prop -- e.g. a form in a dialog refreshing the table beside it", async () => {
-    const onRefetch = vi.fn();
-    render(
-      <Harness
-        schema={{
+  describe("onSuccess.refetch", () => {
+    it("calls the onRefetch prop -- e.g. a form in a dialog refreshing the table beside it", async () => {
+      const onRefetch = vi.fn();
+      renderHarness({
+        schema: {
           ...requiredFieldSchema,
           actions: [
             {
@@ -230,12 +225,12 @@ describe("FormActions", () => {
               onSuccess: { refetch: true },
             },
           ],
-        }}
-        actionHandlers={{ save: vi.fn() }}
-        onRefetch={onRefetch}
-      />,
-    );
-    await userEvent.click(screen.getByRole("button", { name: "Save" }));
-    expect(onRefetch).toHaveBeenCalledOnce();
+        },
+        actionHandlers: { save: vi.fn() },
+        onRefetch,
+      });
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+      expect(onRefetch).toHaveBeenCalledOnce();
+    });
   });
 });

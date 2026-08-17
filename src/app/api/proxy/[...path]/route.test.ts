@@ -32,77 +32,83 @@ describe("BFF proxy route", () => {
     vi.resetAllMocks();
   });
 
-  it("returns 401 and never calls the backend when there is no session", async () => {
-    authMock.mockResolvedValue(null);
-    cookiesMock.mockResolvedValue(makeCookieStore({}));
+  describe("with no session", () => {
+    it("returns 401 and never calls the backend", async () => {
+      authMock.mockResolvedValue(null);
+      cookiesMock.mockResolvedValue(makeCookieStore({}));
 
-    const response = await callRoute(["employees"]);
+      const response = await callRoute(["employees"]);
 
-    expect(response.status).toBe(401);
-    expect(callBackendMock).not.toHaveBeenCalled();
-  });
-
-  it("calls the backend with the session's access token and the cookie-resolved tenant/env", async () => {
-    authMock.mockResolvedValue({
-      accessToken: "session-token",
-      user: { tenants: [{ id: "acme", name: "Acme" }] },
+      expect(response.status).toBe(401);
+      expect(callBackendMock).not.toHaveBeenCalled();
     });
-    cookiesMock.mockResolvedValue(
-      makeCookieStore({
-        "admin-environment": "staging",
-        "admin-tenant": "acme",
-      }),
-    );
-    callBackendMock.mockResolvedValue(
-      new Response(JSON.stringify({ data: [] }), {
-        status: 200,
-        headers: { "content-type": "application/json" },
-      }),
-    );
-
-    const response = await callRoute(["employees"]);
-
-    expect(response.status).toBe(200);
-    expect(callBackendMock).toHaveBeenCalledWith(
-      "/employees",
-      expect.objectContaining({ method: "GET" }),
-      { accessToken: "session-token", envId: "staging", tenantId: "acme" },
-    );
   });
 
-  it("falls back to the session's first tenant when no tenant cookie is set", async () => {
-    authMock.mockResolvedValue({
-      accessToken: "session-token",
-      user: { tenants: [{ id: "globex", name: "Globex" }] },
+  describe("resolving tenant/environment for the backend call", () => {
+    it("uses the session's access token and the cookie-resolved tenant/env", async () => {
+      authMock.mockResolvedValue({
+        accessToken: "session-token",
+        user: { tenants: [{ id: "acme", name: "Acme" }] },
+      });
+      cookiesMock.mockResolvedValue(
+        makeCookieStore({
+          "admin-environment": "staging",
+          "admin-tenant": "acme",
+        }),
+      );
+      callBackendMock.mockResolvedValue(
+        new Response(JSON.stringify({ data: [] }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+      );
+
+      const response = await callRoute(["employees"]);
+
+      expect(response.status).toBe(200);
+      expect(callBackendMock).toHaveBeenCalledWith(
+        "/employees",
+        expect.objectContaining({ method: "GET" }),
+        { accessToken: "session-token", envId: "staging", tenantId: "acme" },
+      );
     });
-    cookiesMock.mockResolvedValue(makeCookieStore({}));
-    callBackendMock.mockResolvedValue(new Response("{}", { status: 200 }));
 
-    await callRoute(["employees"]);
+    it("falls back to the session's first tenant when no tenant cookie is set", async () => {
+      authMock.mockResolvedValue({
+        accessToken: "session-token",
+        user: { tenants: [{ id: "globex", name: "Globex" }] },
+      });
+      cookiesMock.mockResolvedValue(makeCookieStore({}));
+      callBackendMock.mockResolvedValue(new Response("{}", { status: 200 }));
 
-    expect(callBackendMock).toHaveBeenCalledWith(
-      "/employees",
-      expect.anything(),
-      expect.objectContaining({ envId: "production", tenantId: "globex" }),
-    );
+      await callRoute(["employees"]);
+
+      expect(callBackendMock).toHaveBeenCalledWith(
+        "/employees",
+        expect.anything(),
+        expect.objectContaining({ envId: "production", tenantId: "globex" }),
+      );
+    });
   });
 
-  it("never relays the backend's own auth/tenant request headers back to the client", async () => {
-    authMock.mockResolvedValue({ accessToken: "t", user: { tenants: [] } });
-    cookiesMock.mockResolvedValue(makeCookieStore({}));
-    callBackendMock.mockResolvedValue(
-      new Response("{}", {
-        status: 200,
-        headers: {
-          "content-type": "application/json",
-          "x-upstream-secret": "leak",
-        },
-      }),
-    );
+  describe("relaying the backend's response", () => {
+    it("never relays the backend's own auth/tenant request headers back to the client", async () => {
+      authMock.mockResolvedValue({ accessToken: "t", user: { tenants: [] } });
+      cookiesMock.mockResolvedValue(makeCookieStore({}));
+      callBackendMock.mockResolvedValue(
+        new Response("{}", {
+          status: 200,
+          headers: {
+            "content-type": "application/json",
+            "x-upstream-secret": "leak",
+          },
+        }),
+      );
 
-    const response = await callRoute(["employees"]);
+      const response = await callRoute(["employees"]);
 
-    expect(response.headers.get("x-upstream-secret")).toBeNull();
-    expect(response.headers.get("content-type")).toBe("application/json");
+      expect(response.headers.get("x-upstream-secret")).toBeNull();
+      expect(response.headers.get("content-type")).toBe("application/json");
+    });
   });
 });

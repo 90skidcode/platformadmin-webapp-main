@@ -9,116 +9,120 @@ const columns: TableSchema["columns"] = [
   { accessorKey: "email" },
 ];
 
-describe("useTableData -- client mode", () => {
-  it("uses the given static data without fetching", () => {
-    const apiFetcher = vi.fn();
-    const schema: TableSchema = {
-      id: "t",
-      mode: "client",
-      columns,
-      pageSize: 10,
-    };
-    const data = [{ name: "Kavya", email: "kavya@acme.example" }];
-
-    const { result } = renderHook(() => useTableData(schema, data, apiFetcher));
-
-    expect(result.current.rows).toEqual(data);
-    expect(apiFetcher).not.toHaveBeenCalled();
-    expect(result.current.loading).toBe(false);
-  });
-
-  it("filters rows across all columns by the search term", () => {
-    const schema: TableSchema = {
-      id: "t",
-      mode: "client",
-      columns,
-      pageSize: 10,
-    };
-    const data = [
-      { name: "Kavya Iyer", email: "kavya@acme.example" },
-      { name: "Rahul Verma", email: "rahul@acme.example" },
-    ];
-    const { result } = renderHook(() => useTableData(schema, data, vi.fn()));
-
-    act(() => result.current.setSearch("rahul"));
-
-    expect(result.current.rows).toEqual([
-      { name: "Rahul Verma", email: "rahul@acme.example" },
-    ]);
-    expect(result.current.total).toBe(1);
-  });
-
-  it("resets to page 0 when the search term changes", () => {
-    const schema: TableSchema = {
-      id: "t",
-      mode: "client",
-      columns,
-      pageSize: 10,
-    };
-    const { result } = renderHook(() => useTableData(schema, [], vi.fn()));
-
-    act(() => result.current.setPageIndex(2));
-    expect(result.current.pageIndex).toBe(2);
-    act(() => result.current.setSearch("x"));
-    expect(result.current.pageIndex).toBe(0);
-  });
-});
-
-const serverSchema: TableSchema = {
-  id: "t",
-  mode: "server",
-  endpoint: { url: "/employees" },
-  columns,
-  pageSize: 10,
-};
-
-describe("useTableData -- server mode", () => {
-  it("fetches from schema.endpoint with page/pageSize query params", async () => {
-    const apiFetcher = vi.fn().mockResolvedValue({
-      json: async () => ({
-        data: [{ name: "Kavya" }],
-        page: 1,
+describe("useTableData", () => {
+  describe("client mode", () => {
+    it("uses the given static data without fetching", () => {
+      const apiFetcher = vi.fn();
+      const schema: TableSchema = {
+        id: "t",
+        mode: "client",
+        columns,
         pageSize: 10,
-        total: 1,
-      }),
+      };
+      const data = [{ name: "Kavya", email: "kavya@acme.example" }];
+
+      const { result } = renderHook(() =>
+        useTableData(schema, data, apiFetcher),
+      );
+
+      expect(result.current.rows).toEqual(data);
+      expect(apiFetcher).not.toHaveBeenCalled();
+      expect(result.current.loading).toBe(false);
     });
 
-    const { result } = renderHook(() =>
-      useTableData(serverSchema, undefined, apiFetcher),
-    );
+    it("filters rows across all columns by the search term", () => {
+      const schema: TableSchema = {
+        id: "t",
+        mode: "client",
+        columns,
+        pageSize: 10,
+      };
+      const data = [
+        { name: "Kavya Iyer", email: "kavya@acme.example" },
+        { name: "Rahul Verma", email: "rahul@acme.example" },
+      ];
+      const { result } = renderHook(() => useTableData(schema, data, vi.fn()));
 
-    await waitFor(() => expect(result.current.loading).toBe(false));
-    expect(apiFetcher).toHaveBeenCalledWith(
-      expect.stringContaining("/employees?page=1&pageSize=10"),
-    );
-    expect(result.current.rows).toEqual([{ name: "Kavya" }]);
-    expect(result.current.total).toBe(1);
-  });
+      act(() => result.current.setSearch("rahul"));
 
-  it("refetches with sortBy/sortDir when sorting changes", async () => {
-    const apiFetcher = vi.fn().mockResolvedValue({
-      json: async () => ({ data: [], page: 1, pageSize: 10, total: 0 }),
+      expect(result.current.rows).toEqual([
+        { name: "Rahul Verma", email: "rahul@acme.example" },
+      ]);
+      expect(result.current.total).toBe(1);
     });
-    const { result } = renderHook(() =>
-      useTableData(serverSchema, undefined, apiFetcher),
-    );
-    await waitFor(() => expect(result.current.loading).toBe(false));
 
-    act(() => result.current.setSorting([{ id: "name", desc: true }]));
-    await waitFor(() =>
-      expect(apiFetcher).toHaveBeenLastCalledWith(
-        expect.stringContaining("sortBy=name&sortDir=desc"),
-      ),
-    );
+    it("resets to page 0 when the search term changes", () => {
+      const schema: TableSchema = {
+        id: "t",
+        mode: "client",
+        columns,
+        pageSize: 10,
+      };
+      const { result } = renderHook(() => useTableData(schema, [], vi.fn()));
+
+      act(() => result.current.setPageIndex(2));
+      expect(result.current.pageIndex).toBe(2);
+      act(() => result.current.setSearch("x"));
+      expect(result.current.pageIndex).toBe(0);
+    });
   });
 
-  it("sets error when the fetch fails, without throwing", async () => {
-    const apiFetcher = vi.fn().mockRejectedValue(new Error("network down"));
-    const { result } = renderHook(() =>
-      useTableData(serverSchema, undefined, apiFetcher),
-    );
+  describe("server mode", () => {
+    const serverSchema: TableSchema = {
+      id: "t",
+      mode: "server",
+      endpoint: { url: "/employees" },
+      columns,
+      pageSize: 10,
+    };
 
-    await waitFor(() => expect(result.current.error).toBe(true));
-    expect(result.current.loading).toBe(false);
+    it("fetches from schema.endpoint with page/pageSize query params", async () => {
+      const apiFetcher = vi.fn().mockResolvedValue({
+        json: async () => ({
+          data: [{ name: "Kavya" }],
+          page: 1,
+          pageSize: 10,
+          total: 1,
+        }),
+      });
+
+      const { result } = renderHook(() =>
+        useTableData(serverSchema, undefined, apiFetcher),
+      );
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(apiFetcher).toHaveBeenCalledWith(
+        expect.stringContaining("/employees?page=1&pageSize=10"),
+      );
+      expect(result.current.rows).toEqual([{ name: "Kavya" }]);
+      expect(result.current.total).toBe(1);
+    });
+
+    it("refetches with sortBy/sortDir when sorting changes", async () => {
+      const apiFetcher = vi.fn().mockResolvedValue({
+        json: async () => ({ data: [], page: 1, pageSize: 10, total: 0 }),
+      });
+      const { result } = renderHook(() =>
+        useTableData(serverSchema, undefined, apiFetcher),
+      );
+      await waitFor(() => expect(result.current.loading).toBe(false));
+
+      act(() => result.current.setSorting([{ id: "name", desc: true }]));
+      await waitFor(() =>
+        expect(apiFetcher).toHaveBeenLastCalledWith(
+          expect.stringContaining("sortBy=name&sortDir=desc"),
+        ),
+      );
+    });
+
+    it("sets error when the fetch fails, without throwing", async () => {
+      const apiFetcher = vi.fn().mockRejectedValue(new Error("network down"));
+      const { result } = renderHook(() =>
+        useTableData(serverSchema, undefined, apiFetcher),
+      );
+
+      await waitFor(() => expect(result.current.error).toBe(true));
+      expect(result.current.loading).toBe(false);
+    });
   });
 });

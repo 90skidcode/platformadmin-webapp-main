@@ -26,31 +26,37 @@ function renderTooltip() {
 }
 
 describe("Tooltip", () => {
-  it("is hidden until the trigger is hovered", () => {
-    renderTooltip();
-    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+  describe("before hovering the trigger", () => {
+    it("is hidden", () => {
+      renderTooltip();
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument();
+    });
   });
 
-  it("shows its content on hover", async () => {
-    renderTooltip();
-    await userEvent.hover(screen.getByText("Hover me"));
-    await waitFor(() =>
-      expect(screen.getByRole("tooltip")).toHaveTextContent(
-        "Environment: Staging",
-      ),
-    );
+  describe("hovering the trigger", () => {
+    it("shows its content", async () => {
+      renderTooltip();
+      await userEvent.hover(screen.getByText("Hover me"));
+      await waitFor(() =>
+        expect(screen.getByRole("tooltip")).toHaveTextContent(
+          "Environment: Staging",
+        ),
+      );
+    });
   });
 
-  it("hides again on unhover", async () => {
-    renderTooltip();
-    const trigger = screen.getByText("Hover me");
-    await userEvent.hover(trigger);
-    await waitFor(() =>
-      expect(screen.getByRole("tooltip")).toBeInTheDocument(),
-    );
-    await userEvent.unhover(trigger);
-    await waitFor(() =>
-      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument(),
-    );
+  describe("unhovering the trigger", () => {
+    it("hides the content again", async () => {
+      renderTooltip();
+      const trigger = screen.getByText("Hover me");
+      await userEvent.hover(trigger);
+      await waitFor(() =>
+        expect(screen.getByRole("tooltip")).toBeInTheDocument(),
+      );
+      await userEvent.unhover(trigger);
+      await waitFor(() =>
+        expect(screen.queryByRole("tooltip")).not.toBeInTheDocument(),
+      );
+    });
   });
 });

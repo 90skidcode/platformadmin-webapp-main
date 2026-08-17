@@ -1,47 +1,41 @@
 import { describe, expect, it } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { NextIntlClientProvider } from "next-intl";
-import { SessionProvider } from "next-auth/react";
-import type { Session } from "next-auth";
 
 import { TenantProvider } from "@/lib/tenant";
+import { renderWithProviders } from "@/test/test-utils";
+import { buildSession } from "@/test/session-factory";
 import { TenantSwitcher } from "./tenant-switcher";
 
 const messages = { common: { topbar: { tenant: "Tenant" } } };
 
 function renderSwitcher(tenants: { id: string; name: string }[]) {
-  const session = {
-    user: { id: "u1", roles: [], permissions: [], tenants },
-    accessToken: "t",
-    expires: "2099-01-01T00:00:00.000Z",
-  } as Session;
-  render(
-    <NextIntlClientProvider locale="en" messages={messages}>
-      <SessionProvider session={session}>
-        <TenantProvider>
-          <TenantSwitcher />
-        </TenantProvider>
-      </SessionProvider>
-    </NextIntlClientProvider>,
-  );
+  renderWithProviders(<TenantSwitcher />, {
+    messages,
+    session: buildSession({ tenants }),
+    wrap: (children) => <TenantProvider>{children}</TenantProvider>,
+  });
 }
 
 describe("TenantSwitcher", () => {
-  it("renders nothing for a single-tenant session", () => {
-    renderSwitcher([{ id: "acme", name: "Acme Corp" }]);
-    expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+  describe("with a single-tenant session", () => {
+    it("renders nothing", () => {
+      renderSwitcher([{ id: "acme", name: "Acme Corp" }]);
+      expect(screen.queryByRole("combobox")).not.toBeInTheDocument();
+    });
   });
 
-  it("lists every tenant for a multi-tenant session, sourced from the session", async () => {
-    renderSwitcher([
-      { id: "acme", name: "Acme Corp" },
-      { id: "globex", name: "Globex Inc" },
-    ]);
-    expect(await screen.findByText("Acme Corp")).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("combobox", { name: "Tenant" }));
-    expect(
-      screen.getByRole("option", { name: "Globex Inc" }),
-    ).toBeInTheDocument();
+  describe("with a multi-tenant session", () => {
+    it("lists every tenant, sourced from the session", async () => {
+      renderSwitcher([
+        { id: "acme", name: "Acme Corp" },
+        { id: "globex", name: "Globex Inc" },
+      ]);
+      expect(await screen.findByText("Acme Corp")).toBeInTheDocument();
+      await userEvent.click(screen.getByRole("combobox", { name: "Tenant" }));
+      expect(
+        screen.getByRole("option", { name: "Globex Inc" }),
+      ).toBeInTheDocument();
+    });
   });
 });

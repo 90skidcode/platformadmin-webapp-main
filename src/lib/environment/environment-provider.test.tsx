@@ -24,43 +24,49 @@ afterEach(() => {
 });
 
 describe("EnvironmentProvider", () => {
-  it("defaults to the first environment when no cookie is set", () => {
-    render(
-      <EnvironmentProvider>
-        <Consumer />
-      </EnvironmentProvider>,
-    );
-    expect(screen.getByTestId("active")).toHaveTextContent("dev");
+  describe("on first mount", () => {
+    it("defaults to the first environment when no cookie is set", () => {
+      render(
+        <EnvironmentProvider>
+          <Consumer />
+        </EnvironmentProvider>,
+      );
+      expect(screen.getByTestId("active")).toHaveTextContent("dev");
+    });
+
+    it("picks up a pre-existing cookie value", async () => {
+      document.cookie = "admin-environment=production; path=/";
+      render(
+        <EnvironmentProvider>
+          <Consumer />
+        </EnvironmentProvider>,
+      );
+      await waitFor(() =>
+        expect(screen.getByTestId("active")).toHaveTextContent("production"),
+      );
+    });
   });
 
-  it("switching updates what a consumer reads and persists it to a cookie", async () => {
-    render(
-      <EnvironmentProvider>
-        <Consumer />
-      </EnvironmentProvider>,
-    );
-    await userEvent.click(screen.getByRole("button", { name: "staging" }));
-    expect(screen.getByTestId("active")).toHaveTextContent("staging");
-    expect(document.cookie).toContain("admin-environment=staging");
+  describe("switching the active environment", () => {
+    it("updates what a consumer reads and persists it to a cookie", async () => {
+      render(
+        <EnvironmentProvider>
+          <Consumer />
+        </EnvironmentProvider>,
+      );
+      await userEvent.click(screen.getByRole("button", { name: "staging" }));
+      expect(screen.getByTestId("active")).toHaveTextContent("staging");
+      expect(document.cookie).toContain("admin-environment=staging");
+    });
   });
 
-  it("picks up a pre-existing cookie value on mount", async () => {
-    document.cookie = "admin-environment=production; path=/";
-    render(
-      <EnvironmentProvider>
-        <Consumer />
-      </EnvironmentProvider>,
-    );
-    await waitFor(() =>
-      expect(screen.getByTestId("active")).toHaveTextContent("production"),
-    );
-  });
-
-  it("throws when useEnvironment is used outside the provider", () => {
-    function Bare() {
-      useEnvironment();
-      return null;
-    }
-    expect(() => render(<Bare />)).toThrow(/EnvironmentProvider/);
+  describe("used outside the provider", () => {
+    it("throws", () => {
+      function Bare() {
+        useEnvironment();
+        return null;
+      }
+      expect(() => render(<Bare />)).toThrow(/EnvironmentProvider/);
+    });
   });
 });

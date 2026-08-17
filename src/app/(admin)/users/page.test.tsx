@@ -1,30 +1,24 @@
 import { describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { NextIntlClientProvider } from "next-intl";
-import { SessionProvider } from "next-auth/react";
 import type { Session } from "next-auth";
 
 import messages from "@/messages/en/common.json";
 import tablesMessages from "@/messages/en/tables.json";
+import { renderWithProviders } from "@/test/test-utils";
+import { buildSession } from "@/test/session-factory";
 import UsersPage from "./page";
 
-const session = {
-  user: {
-    id: "u1",
-    name: "Priya",
-    roles: ["platform-admin"],
-    permissions: [
-      "users.read",
-      "users.invite",
-      "users.write",
-      "users.deactivate",
-    ],
-    tenants: [],
-  },
-  accessToken: "t",
-  expires: "2099-01-01T00:00:00.000Z",
-} as Session;
+const session = buildSession({
+  name: "Priya",
+  roles: ["platform-admin"],
+  permissions: [
+    "users.read",
+    "users.invite",
+    "users.write",
+    "users.deactivate",
+  ],
+});
 
 // A `Response` body stream can only be read once -- a fresh Response per
 // call, not one shared instance, or the 2nd+ test to render the page (and
@@ -56,48 +50,46 @@ const fetchMock = vi
 
 function renderPage(sessionOverride: Session = session) {
   vi.stubGlobal("fetch", fetchMock);
-  render(
-    <NextIntlClientProvider
-      locale="en"
-      messages={{ common: messages, tables: tablesMessages }}
-    >
-      <SessionProvider session={sessionOverride}>
-        <UsersPage />
-      </SessionProvider>
-    </NextIntlClientProvider>,
-  );
+  renderWithProviders(<UsersPage />, {
+    messages: { common: messages, tables: tablesMessages },
+    session: sessionOverride,
+  });
 }
 
 describe("UsersPage", () => {
-  it("shows the Invite user button for a session with users.invite", async () => {
-    renderPage();
-    expect(
-      await screen.findByRole("button", { name: /Invite user/ }),
-    ).toBeInTheDocument();
+  describe("the Invite user button", () => {
+    it("shows for a session with users.invite", async () => {
+      renderPage();
+      expect(
+        await screen.findByRole("button", { name: /Invite user/ }),
+      ).toBeInTheDocument();
+    });
+
+    it("hides for a session lacking users.invite", async () => {
+      const noInvite = {
+        ...session,
+        user: { ...session.user, permissions: ["users.read"] },
+      } as Session;
+      renderPage(noInvite);
+      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+      expect(
+        screen.queryByRole("button", { name: /Invite user/ }),
+      ).not.toBeInTheDocument();
+    });
+
+    it("opens the invite dialog on click", async () => {
+      renderPage();
+      await userEvent.click(
+        await screen.findByRole("button", { name: /Invite user/ }),
+      );
+      expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
   });
 
-  it("hides the Invite user button for a session lacking users.invite", async () => {
-    const noInvite = {
-      ...session,
-      user: { ...session.user, permissions: ["users.read"] },
-    } as Session;
-    renderPage(noInvite);
-    await waitFor(() => expect(fetchMock).toHaveBeenCalled());
-    expect(
-      screen.queryByRole("button", { name: /Invite user/ }),
-    ).not.toBeInTheDocument();
-  });
-
-  it("opens the invite dialog on click", async () => {
-    renderPage();
-    await userEvent.click(
-      await screen.findByRole("button", { name: /Invite user/ }),
-    );
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
-  });
-
-  it("renders the fetched user row", async () => {
-    renderPage();
-    expect(await screen.findByText("Kavya Iyer")).toBeInTheDocument();
+  describe("the users table", () => {
+    it("renders the fetched user row", async () => {
+      renderPage();
+      expect(await screen.findByText("Kavya Iyer")).toBeInTheDocument();
+    });
   });
 });
