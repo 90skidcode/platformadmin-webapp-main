@@ -46,6 +46,13 @@ export const NAV_ITEMS: NavItem[] = [
     permission: "settings.read",
   },
   {
+    id: "todo",
+    labelKey: "nav.todo",
+    href: "/todo",
+    icon: "listTodo",
+    roles: ["platform-admin"],
+  },
+  {
     id: "style-guide",
     labelKey: "nav.styleGuide",
     href: "/style-guide",

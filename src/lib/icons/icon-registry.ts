@@ -10,6 +10,7 @@ import {
   Settings,
   Trash2,
   Users,
+  ListTodo,
 } from "lucide-react";
 
 /** Nav items and table row/bulk actions all reference icons by string key
@@ -25,4 +26,5 @@ export const ICON_REGISTRY: Record<string, LucideIcon> = {
   mail: Mail,
   eye: Eye,
   bell: Bell,
+  listTodo: ListTodo,
 };

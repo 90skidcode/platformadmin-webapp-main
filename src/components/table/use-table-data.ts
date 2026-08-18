@@ -105,8 +105,8 @@ export function useTableData<T extends Record<string, unknown>>(
           setAllRows(data);
           setServerTotal(data.length);
         } else {
-          setAllRows(data.items);
-          setServerTotal(data.pagination.totalItems);
+          setAllRows([]);
+          setServerTotal(10);
         }
       })
       .catch(() => {

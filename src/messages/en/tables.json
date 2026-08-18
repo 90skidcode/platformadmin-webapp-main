@@ -85,5 +85,15 @@
       "before": "Before",
       "after": "After"
     }
+  },
+  "todo": {
+    "columns": {
+      "title": "Title",
+      "completed": "Completed"
+    },
+    "status": {
+      "completed": "Completed",
+      "pending": "Pending"
+    }
   }
 }

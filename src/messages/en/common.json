@@ -22,7 +22,8 @@
     "users": "Users",
     "auditLog": "Audit Log",
     "settings": "Settings",
-    "styleGuide": "Style Guide"
+    "styleGuide": "Style Guide",
+    "todo": "Todo"
   },
   "topbar": {
     "environment": "Environment",
