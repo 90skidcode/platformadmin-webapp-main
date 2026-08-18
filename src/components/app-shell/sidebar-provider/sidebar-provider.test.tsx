@@ -4,6 +4,8 @@ import userEvent from "@testing-library/user-event";
 
 import { SidebarProvider, useSidebar } from "./sidebar-provider";
 
+const STORAGE_KEY = "admin-sidebar-collapsed";
+
 function Consumer() {
   const { collapsed, toggle } = useSidebar();
   return (
@@ -15,48 +17,47 @@ function Consumer() {
 }
 
 afterEach(() => {
-  document.cookie =
-    "admin-sidebar-collapsed=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  window.localStorage.removeItem(STORAGE_KEY);
 });
 
 describe("SidebarProvider", () => {
   describe("on first mount", () => {
-    it("defaults to expanded when no cookie is set", () => {
+    it("defaults to collapsed when no preference is stored", () => {
       render(
         <SidebarProvider>
           <Consumer />
         </SidebarProvider>,
       );
-      expect(screen.getByTestId("collapsed")).toHaveTextContent("false");
+      expect(screen.getByTestId("collapsed")).toHaveTextContent("true");
     });
 
-    it("picks up a pre-existing cookie value", async () => {
-      document.cookie = "admin-sidebar-collapsed=1; path=/";
+    it("picks up a pre-existing stored preference", async () => {
+      window.localStorage.setItem(STORAGE_KEY, "0");
       render(
         <SidebarProvider>
           <Consumer />
         </SidebarProvider>,
       );
       await waitFor(() =>
-        expect(screen.getByTestId("collapsed")).toHaveTextContent("true"),
+        expect(screen.getByTestId("collapsed")).toHaveTextContent("false"),
       );
     });
   });
 
   describe("toggling", () => {
-    it("flips what a consumer reads and persists the new state to a cookie", async () => {
+    it("flips what a consumer reads and persists the new state to localStorage", async () => {
       render(
         <SidebarProvider>
           <Consumer />
         </SidebarProvider>,
       );
       await userEvent.click(screen.getByRole("button", { name: "toggle" }));
-      expect(screen.getByTestId("collapsed")).toHaveTextContent("true");
-      expect(document.cookie).toContain("admin-sidebar-collapsed=1");
+      expect(screen.getByTestId("collapsed")).toHaveTextContent("false");
+      expect(window.localStorage.getItem(STORAGE_KEY)).toBe("0");
 
       await userEvent.click(screen.getByRole("button", { name: "toggle" }));
-      expect(screen.getByTestId("collapsed")).toHaveTextContent("false");
-      expect(document.cookie).toContain("admin-sidebar-collapsed=0");
+      expect(screen.getByTestId("collapsed")).toHaveTextContent("true");
+      expect(window.localStorage.getItem(STORAGE_KEY)).toBe("1");
     });
   });
 

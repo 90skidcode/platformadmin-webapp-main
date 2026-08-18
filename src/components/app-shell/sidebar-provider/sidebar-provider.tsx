@@ -9,9 +9,9 @@ import {
   type ReactNode,
 } from "react";
 
-import { getCookie, setCookie } from "@/lib/utils/cookies";
-
-const SIDEBAR_COOKIE = "admin-sidebar-collapsed";
+const SIDEBAR_STORAGE_KEY = "admin-sidebar-collapsed";
+// No stored preference yet (first-ever visit): sidebar starts shrunk.
+const DEFAULT_COLLAPSED = true;
 
 interface SidebarContextValue {
   /** Desktop Sidebar only -- BottomNav (mobile) ignores this entirely. */
@@ -21,18 +21,28 @@ interface SidebarContextValue {
 
 const SidebarContext = createContext<SidebarContextValue | null>(null);
 
-// `document.cookie` has no native change event, and we're the only writer
+function readStoredValue(): string | null {
+  try {
+    return window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+  } catch {
+    // Storage disabled/unavailable (e.g. private browsing) -- fall back to
+    // treating it as "no preference stored".
+    return null;
+  }
+}
+
+// `localStorage` has no native change event, and we're the only writer
 // (via toggle() below) -- there's nothing to subscribe to. Mirrors
 // EnvironmentProvider's cookie pattern (lib/environment/environment-provider.tsx).
 function subscribe() {
   return () => {};
 }
 function getSnapshot() {
-  return getCookie(SIDEBAR_COOKIE);
+  return readStoredValue();
 }
-// `document` doesn't exist during SSR; null here (matching the server
-// render's always-expanded state) is what lets React re-sync to the real
-// cookie value right after hydration without a mismatch warning.
+// `window` doesn't exist during SSR; null here (matching the server
+// render's default-collapsed state) is what lets React re-sync to the real
+// stored value right after hydration without a mismatch warning.
 function getServerSnapshot() {
   return null;
 }
@@ -40,18 +50,20 @@ function getServerSnapshot() {
 export function SidebarProvider({
   children,
 }: Readonly<{ children: ReactNode }>) {
-  const cookieValue = useSyncExternalStore(
+  const storedValue = useSyncExternalStore(
     subscribe,
     getSnapshot,
     getServerSnapshot,
   );
-  // Cookie alone can't drive same-session re-renders (no change event to
+  // Storage alone can't drive same-session re-renders (no change event to
   // subscribe to, see above) -- this local override is what makes toggle()
-  // update the UI immediately; the cookie exists purely so a reload/new tab
-  // starts from the last-chosen state instead of always expanded.
+  // update the UI immediately; localStorage exists purely so a reload/new
+  // tab starts from the last-chosen state instead of always resetting.
   const [manualCollapsed, setManualCollapsed] = useState<boolean | null>(null);
 
-  const collapsed = manualCollapsed ?? cookieValue === "1";
+  const collapsed =
+    manualCollapsed ??
+    (storedValue === null ? DEFAULT_COLLAPSED : storedValue === "1");
 
   const value = useMemo<SidebarContextValue>(
     () => ({
@@ -59,7 +71,12 @@ export function SidebarProvider({
       toggle: () => {
         const next = !collapsed;
         setManualCollapsed(next);
-        setCookie(SIDEBAR_COOKIE, next ? "1" : "0", { days: 365 });
+        try {
+          window.localStorage.setItem(SIDEBAR_STORAGE_KEY, next ? "1" : "0");
+        } catch {
+          // Storage disabled/unavailable -- the in-memory override above
+          // still keeps this tab/session in sync.
+        }
       },
     }),
     [collapsed],

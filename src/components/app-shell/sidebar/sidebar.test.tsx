@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Session } from "next-auth";
@@ -55,6 +55,10 @@ function renderSidebarWithToggle(session: Session | null) {
   );
 }
 
+afterEach(() => {
+  window.localStorage.removeItem("admin-sidebar-collapsed");
+});
+
 describe("Sidebar", () => {
   describe("role-gated items", () => {
     it("hides an item for a session lacking the required role", () => {
@@ -90,22 +94,22 @@ describe("Sidebar", () => {
     });
   });
 
-  describe("expanded state (default)", () => {
-    it("shows the wordmark logo and nav item labels", () => {
+  describe("collapsed state (default)", () => {
+    it("hides the wordmark but keeps every nav item reachable by its accessible name", () => {
       renderSidebar(makeSession());
-      expect(screen.getByText("Platform Admin")).toBeInTheDocument();
+      expect(screen.queryByText("Platform Admin")).not.toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: "Dashboard" }),
       ).toBeInTheDocument();
     });
   });
 
-  describe("collapsed state", () => {
-    it("hides the wordmark but keeps every nav item reachable by its accessible name", async () => {
+  describe("expanded state", () => {
+    it("shows the wordmark logo and nav item labels", async () => {
       renderSidebarWithToggle(makeSession());
       await userEvent.click(screen.getByRole("button", { name: "toggle" }));
 
-      expect(screen.queryByText("Platform Admin")).not.toBeInTheDocument();
+      expect(screen.getByText("Platform Admin")).toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: "Dashboard" }),
       ).toBeInTheDocument();
