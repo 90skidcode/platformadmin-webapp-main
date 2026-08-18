@@ -13,6 +13,30 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
+
+  /*
+   * Tailwind v4 Preflight sets `cursor: default` on <button> (matching
+   * native browser behavior, a deliberate change from v3.4 onward), which
+   * overrides the browser's own pointer cursor. That leaves every
+   * `<button>`-based control in the app -- Button, dialog
+   * triggers/close, AlertDialogAction/Cancel, etc. -- without a hand
+   * cursor unless a component opts back in itself. Restore the pointer
+   * cursor for anything actually clickable, app-wide, instead of patching
+   * `cursor-pointer` onto each component individually. `:disabled` and
+   * `[aria-disabled="true"]` are excluded so non-interactive controls keep
+   * showing `not-allowed` (set locally, e.g. Button/Input's
+   * `disabled:cursor-not-allowed`).
+   */
+  button:not(:disabled, [aria-disabled="true"]),
+  [type="button"]:not(:disabled, [aria-disabled="true"]),
+  [type="submit"]:not(:disabled, [aria-disabled="true"]),
+  [type="reset"]:not(:disabled, [aria-disabled="true"]),
+  a[href],
+  label[for],
+  select:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 @layer components {

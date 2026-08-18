@@ -27,6 +27,10 @@ const messages = {
       myAccount: "My Account",
       profile: "Profile",
     },
+    sidebar: {
+      collapse: "Collapse sidebar",
+      expand: "Expand sidebar",
+    },
   },
 };
 

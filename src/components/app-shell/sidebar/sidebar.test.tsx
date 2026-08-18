@@ -1,14 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { Session } from "next-auth";
 
 import { filterNavByAccess } from "@/lib/permissions";
 import { renderWithProviders } from "@/test/test-utils";
 import { NAV_FIXTURE } from "../nav-fixture.test-util";
+import { SidebarProvider, useSidebar } from "../sidebar-provider";
 import { Sidebar } from "./sidebar";
 
 const messages = {
   common: {
+    app: { name: "Platform Admin" },
     nav: { dashboard: "Dashboard", users: "Users", settings: "Settings" },
   },
 };
@@ -24,9 +27,30 @@ function makeSession(
   } as Session;
 }
 
+/** Sidebar reads `useSidebar()` -- every render needs a SidebarProvider
+ * ancestor, same as it needs an intl provider for its labels. */
 function renderSidebar(session: Session | null) {
   renderWithProviders(
-    <Sidebar nav={filterNavByAccess(NAV_FIXTURE, session)} />,
+    <SidebarProvider>
+      <Sidebar nav={filterNavByAccess(NAV_FIXTURE, session)} />
+    </SidebarProvider>,
+    { messages },
+  );
+}
+
+/** Same as `renderSidebar`, plus a button wired to SidebarProvider's
+ * `toggle` -- lets collapse behavior be exercised without going through
+ * Topbar (a separate component/test file). */
+function renderSidebarWithToggle(session: Session | null) {
+  function ToggleButton() {
+    const { toggle } = useSidebar();
+    return <button onClick={toggle}>toggle</button>;
+  }
+  renderWithProviders(
+    <SidebarProvider>
+      <ToggleButton />
+      <Sidebar nav={filterNavByAccess(NAV_FIXTURE, session)} />
+    </SidebarProvider>,
     { messages },
   );
 }
@@ -60,6 +84,28 @@ describe("Sidebar", () => {
   describe("ungated items", () => {
     it("always shows an item with neither roles nor permission set", () => {
       renderSidebar(makeSession());
+      expect(
+        screen.getByRole("link", { name: "Dashboard" }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe("expanded state (default)", () => {
+    it("shows the wordmark logo and nav item labels", () => {
+      renderSidebar(makeSession());
+      expect(screen.getByText("Platform Admin")).toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "Dashboard" }),
+      ).toBeInTheDocument();
+    });
+  });
+
+  describe("collapsed state", () => {
+    it("hides the wordmark but keeps every nav item reachable by its accessible name", async () => {
+      renderSidebarWithToggle(makeSession());
+      await userEvent.click(screen.getByRole("button", { name: "toggle" }));
+
+      expect(screen.queryByText("Platform Admin")).not.toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: "Dashboard" }),
       ).toBeInTheDocument();

@@ -2,12 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import { useSession } from "next-auth/react";
-import { LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, PanelLeft, User as UserIcon } from "lucide-react";
 
 import {
   Avatar,
   AvatarFallback,
   Badge,
+  Button,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -19,6 +20,7 @@ import { clearSessionCookiesAndSignOut } from "@/lib/auth/sign-out";
 import { triggerToastFromConfig } from "@/lib/action-handlers";
 import { EnvironmentSwitcher } from "../environment-switcher";
 import { TenantSwitcher } from "../tenant-switcher";
+import { useSidebar } from "../sidebar-provider";
 
 export interface TopbarProps {
   /** Shown as the page/section title -- the (admin) layout passes the signed-in user's name here (plan §4.4). */
@@ -28,6 +30,7 @@ export interface TopbarProps {
 export function Topbar({ title }: Readonly<TopbarProps>) {
   const { data: session } = useSession();
   const t = useTranslations("common");
+  const { collapsed, toggle } = useSidebar();
 
   function handleSignOut() {
     triggerToastFromConfig(
@@ -46,9 +49,22 @@ export function Topbar({ title }: Readonly<TopbarProps>) {
 
   return (
     <header className="sticky top-0 z-sticky flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-background px-4 shadow-sm">
-      <h1 className="truncate text-sm font-semibold">
-        {title ?? t("app.name")}
-      </h1>
+      <div className="flex min-w-0 items-center gap-2">
+        {/* Desktop only -- collapsing is a Sidebar (`hidden md:flex`)
+         * concept; mobile uses BottomNav and never shows a Sidebar to shrink. */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hidden shrink-0 md:inline-flex"
+          onClick={toggle}
+          aria-label={t(collapsed ? "sidebar.expand" : "sidebar.collapse")}
+        >
+          <PanelLeft aria-hidden="true" />
+        </Button>
+        <h1 className="truncate text-sm font-semibold">
+          {title ?? t("app.name")}
+        </h1>
+      </div>
       <div className="flex items-center gap-3">
         <EnvironmentSwitcher />
         <TenantSwitcher />

@@ -6,6 +6,7 @@ import { EnvironmentProvider } from "@/lib/environment";
 import { TenantProvider } from "@/lib/tenant";
 import { renderWithProviders } from "@/test/test-utils";
 import { buildSession } from "@/test/session-factory";
+import { SidebarProvider } from "../sidebar-provider";
 import { Topbar } from "./topbar";
 
 const signOutMock = vi.fn();
@@ -30,6 +31,10 @@ const messages = {
       myAccount: "My Account",
       profile: "Profile",
     },
+    sidebar: {
+      collapse: "Collapse sidebar",
+      expand: "Expand sidebar",
+    },
   },
 };
 
@@ -44,9 +49,11 @@ function renderTopbar(title?: string) {
     messages,
     session,
     wrap: (children) => (
-      <EnvironmentProvider>
-        <TenantProvider>{children}</TenantProvider>
-      </EnvironmentProvider>
+      <SidebarProvider>
+        <EnvironmentProvider>
+          <TenantProvider>{children}</TenantProvider>
+        </EnvironmentProvider>
+      </SidebarProvider>
     ),
   });
 }
@@ -67,7 +74,7 @@ describe("Topbar", () => {
   describe("the account menu", () => {
     it("opens and shows the session's role badges", async () => {
       renderTopbar();
-      await userEvent.click(screen.getByRole("button", { name: /PS/i }));
+      await userEvent.click(screen.getByRole("button", { name: "PS" }));
       expect(screen.getByText("platform-admin")).toBeInTheDocument();
     });
 
@@ -75,11 +82,22 @@ describe("Topbar", () => {
       document.cookie = "admin-environment=staging; path=/";
       document.cookie = "admin-tenant=globex; path=/";
       renderTopbar();
-      await userEvent.click(screen.getByRole("button", { name: /PS/i }));
+      await userEvent.click(screen.getByRole("button", { name: "PS" }));
       await userEvent.click(screen.getByRole("menuitem", { name: "Sign out" }));
       expect(signOutMock).toHaveBeenCalledWith({ callbackUrl: "/login" });
       expect(document.cookie).not.toContain("admin-environment=staging");
       expect(document.cookie).not.toContain("admin-tenant=globex");
+    });
+  });
+
+  describe("the sidebar toggle", () => {
+    it("labels the button 'Collapse sidebar' while expanded, then 'Expand sidebar' once clicked", async () => {
+      renderTopbar();
+      const toggle = screen.getByRole("button", { name: "Collapse sidebar" });
+      await userEvent.click(toggle);
+      expect(
+        screen.getByRole("button", { name: "Expand sidebar" }),
+      ).toBeInTheDocument();
     });
   });
 });

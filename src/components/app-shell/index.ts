@@ -1,7 +1,9 @@
 export { AppShell, type AppShellProps } from "./app-shell";
 export { Sidebar, type SidebarProps } from "./sidebar";
+export { SidebarProvider, useSidebar } from "./sidebar-provider";
 export { BottomNav, type BottomNavProps } from "./bottom-nav";
 export { Topbar, type TopbarProps } from "./topbar";
+export { Logo, type LogoProps } from "./logo";
 export { EnvironmentSwitcher } from "./environment-switcher";
 export { TenantSwitcher } from "./tenant-switcher";
 export { NAV_ITEMS, type NavItem } from "./nav-items";

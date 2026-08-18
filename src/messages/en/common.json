@@ -32,6 +32,10 @@
     "signedOutToast": "You've been signed out.",
     "sessionExpiredToast": "Your session has expired. Please sign in again."
   },
+  "sidebar": {
+    "collapse": "Collapse sidebar",
+    "expand": "Expand sidebar"
+  },
   "toast": {
     "genericError": "Something went wrong. Please try again.",
     "saved": "Saved successfully."
