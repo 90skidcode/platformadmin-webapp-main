@@ -2,7 +2,7 @@
   "id": "audit-log-table",
   "i18nNamespace": "tables.auditLog",
   "mode": "server",
-  "endpoint": { "url": "/audit-log" },
+  "endpoint": { "url": "/api/proxy/audit-log" },
   "search": { "enabled": true },
   "pageSize": 10,
   "columns": [

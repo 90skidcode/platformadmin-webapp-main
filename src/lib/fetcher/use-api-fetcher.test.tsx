@@ -47,12 +47,12 @@ afterEach(() => {
 
 describe("useApiFetcher", () => {
   describe("calling the returned fetcher", () => {
-    it("calls the same-origin /api/proxy path and nothing else", async () => {
+    it("calls the exact same-origin path it's given and nothing else", async () => {
       const fetchMock = stubFetch(new Response("{}"));
       const { useApiFetcher } = await import("./use-api-fetcher");
 
       const { result } = renderHook(() => useApiFetcher(), { wrapper });
-      await result.current("/employees");
+      await result.current("/api/proxy/employees");
 
       expect(fetchMock).toHaveBeenCalledOnce();
       const [url, options] = fetchMock.mock.calls[0];
@@ -67,7 +67,7 @@ describe("useApiFetcher", () => {
       const fetchMock = vi.mocked(fetch);
 
       const { result } = renderHook(() => useApiFetcher(), { wrapper });
-      await result.current("/employees", {
+      await result.current("/api/proxy/employees", {
         method: "POST",
         body: JSON.stringify({ name: "Kavya" }),
       });

@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
 import { FormRenderer, type FormSchema } from "@/components/form";
 import type { ApiEnvelope } from "@/lib/api-envelope";
+import { apiEndpoints } from "@/lib/api-endpoints";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import settingsFormSchema from "@/schemas/forms/settings-form.json";
 
@@ -26,7 +27,7 @@ export default function SettingsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    apiFetcher("/settings")
+    apiFetcher(apiEndpoints.settings)
       .then((res) => res.json())
       .then((body: ApiEnvelope<SettingsData>) => {
         if (!cancelled) setSettings(body.data);

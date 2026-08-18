@@ -7,6 +7,7 @@
 import "server-only";
 
 import type { ApiEnvelope } from "@/lib/api-envelope";
+import { apiEndpoints } from "@/lib/api-endpoints";
 
 export interface LoginResponse {
   user: { id: string; name: string; email: string };
@@ -39,7 +40,7 @@ export async function resolveAccess(
 
   // 2) Fall back to a separate endpoint.
   try {
-    const res = await fetch(`${process.env.API_URL}/me`, {
+    const res = await fetch(`${process.env.API_URL}${apiEndpoints.auth.me}`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (!res.ok) throw new Error(`GET /me failed with ${res.status}`);

@@ -2,7 +2,7 @@
   "id": "users-table",
   "i18nNamespace": "tables.users",
   "mode": "server",
-  "endpoint": { "url": "/users" },
+  "endpoint": { "url": "/api/proxy/users" },
   "search": { "enabled": true },
   "filters": [
     {
@@ -67,7 +67,7 @@
       "handler": "api",
       "endpoint": {
         "method": "PATCH",
-        "url": "/users/{id}",
+        "url": "/api/proxy/users/{id}",
         "body": { "status": "deactivated" }
       },
       "confirm": {

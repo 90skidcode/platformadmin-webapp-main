@@ -14,6 +14,7 @@ import {
 } from "@/components/ui";
 import { FormRenderer, type FormSchema } from "@/components/form";
 import { TableRenderer, type TableSchema } from "@/components/table";
+import { apiEndpoints } from "@/lib/api-endpoints";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { can } from "@/lib/permissions";
 import usersTableSchema from "@/schemas/tables/users-table.json";
@@ -57,7 +58,7 @@ export default function UsersPage() {
           resendInvite: async (row) => {
             const typedRow = row as UserRow;
             const res = await apiFetcher(
-              `/users/${typedRow.id}/resend-invite`,
+              apiEndpoints.users.resendInvite(typedRow.id),
               { method: "POST" },
             );
             if (!res.ok) throw new Error(`Request failed with ${res.status}`);
@@ -88,7 +89,7 @@ export default function UsersPage() {
                   name: string;
                   email: string;
                 };
-                const res = await apiFetcher("/users", {
+                const res = await apiFetcher(apiEndpoints.users.list, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ ...rest, roles: [role] }),
@@ -122,11 +123,14 @@ export default function UsersPage() {
               actionHandlers={{
                 saveRoles: async (values) => {
                   const { role } = values as { role: string };
-                  const res = await apiFetcher(`/users/${editingUser.id}`, {
-                    method: "PATCH",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ roles: [role] }),
-                  });
+                  const res = await apiFetcher(
+                    apiEndpoints.users.byId(editingUser.id),
+                    {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ roles: [role] }),
+                    },
+                  );
                   if (!res.ok)
                     throw new Error(`Request failed with ${res.status}`);
                   setEditingUser(null);

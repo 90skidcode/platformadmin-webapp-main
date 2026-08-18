@@ -2,6 +2,7 @@ import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
 
 import type { ApiEnvelope } from "@/lib/api-envelope";
+import { apiEndpoints } from "@/lib/api-endpoints";
 import { resolveAccess, type LoginResponse } from "./resolve-roles";
 import { refreshAccessToken } from "./refresh-token";
 
@@ -18,11 +19,14 @@ export const authConfig: NextAuthConfig = {
     Credentials({
       credentials: { email: {}, password: {} },
       authorize: async (credentials) => {
-        const res = await fetch(`${process.env.API_URL}/auth/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(credentials),
-        });
+        const res = await fetch(
+          `${process.env.API_URL}${apiEndpoints.auth.login}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(credentials),
+          },
+        );
         // Wrong password / unknown user -> NextAuth surfaces a generic auth error.
         if (!res.ok) return null;
 

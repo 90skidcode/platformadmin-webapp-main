@@ -46,7 +46,7 @@
       "type": "submit",
       "labelKey": "actions.submit",
       "variant": "primary",
-      "endpoint": { "method": "PUT", "url": "/settings" },
+      "endpoint": { "method": "PUT", "url": "/api/proxy/settings" },
       "onSuccess": {
         "toast": { "variant": "success", "messageKey": "toast.settingsSaved" }
       },
