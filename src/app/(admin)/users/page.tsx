@@ -13,11 +13,11 @@ import {
   SheetTitle,
 } from "@/components/ui";
 import { FormRenderer, type FormSchema } from "@/components/form";
-import { TableRenderer, type TableSchema } from "@/components/table";
+import { TableRenderer } from "@/components/table";
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { can } from "@/lib/permissions";
-import usersTableSchema from "@/schemas/tables/users-table.json";
+import { usersTableSchema } from "@/schemas/tables/users-table";
 import inviteUserFormSchema from "@/schemas/forms/invite-user-form.json";
 import editUserRolesFormSchema from "@/schemas/forms/edit-user-roles-form.json";
 
@@ -33,7 +33,7 @@ interface UserRow {
 // Edit convention: never a centered popup. invite-user-form.json (3 fields)
 // and edit-user-roles-form.json (1 field) both open in a Sheet (right-side
 // panel); a form with 5+ fields gets a full page instead -- see
-// settings-form.json / src/app/(admin)/settings/page.tsx for that case.
+// settings-form.ts / src/app/(admin)/settings/page.tsx for that case.
 export default function UsersPage() {
   const { data: session } = useSession();
   const apiFetcher = useApiFetcher();
@@ -52,7 +52,7 @@ export default function UsersPage() {
 
       <TableRenderer<UserRow>
         key={tableKey}
-        schema={usersTableSchema as unknown as TableSchema}
+        schema={usersTableSchema}
         actionHandlers={{
           editRoles: async (row) => setEditingUser(row as UserRow),
           resendInvite: async (row) => {

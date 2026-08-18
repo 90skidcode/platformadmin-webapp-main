@@ -1,0 +1,95 @@
+import { apiEndpoints } from "@/lib/api-endpoints";
+import type { TableSchema } from "@/components/table";
+
+// `.ts`, not `.json`, so `endpoint.url` can come from `apiEndpoints.ts`
+// instead of a hand-typed literal (§6.2). `deactivate`'s url keeps the
+// `{id}` placeholder -- `interpolateRow` substitutes it from the row at
+// click time -- which is why `apiEndpoints.users.byId` is called with the
+// literal string `"{id}"` rather than a real id.
+export const usersTableSchema: TableSchema = {
+  id: "users-table",
+  i18nNamespace: "tables.users",
+  mode: "server",
+  endpoint: { url: apiEndpoints.users.list },
+  search: { enabled: true },
+  filters: [
+    {
+      accessorKey: "status",
+      labelKey: "columns.status",
+      options: [
+        { value: "active", labelKey: "status.active" },
+        { value: "invited", labelKey: "status.invited" },
+        { value: "deactivated", labelKey: "status.deactivated" },
+      ],
+    },
+  ],
+  pageSize: 10,
+  columns: [
+    { accessorKey: "name", headerKey: "columns.name", sortable: true },
+    { accessorKey: "email", headerKey: "columns.email", cell: "email" },
+    { accessorKey: "roles", headerKey: "columns.roles" },
+    {
+      accessorKey: "status",
+      headerKey: "columns.status",
+      cell: "badge",
+      badgeVariants: {
+        active: "success",
+        invited: "warning",
+        deactivated: "destructive",
+      },
+    },
+    {
+      accessorKey: "lastLoginAt",
+      headerKey: "columns.lastLogin",
+      cell: "date",
+      sortable: true,
+    },
+  ],
+  rowActions: [
+    {
+      id: "edit-roles",
+      labelKey: "actions.editRoles",
+      icon: "pencil",
+      handler: "custom",
+      onClick: "editRoles",
+      permission: "users.write",
+    },
+    {
+      id: "resend-invite",
+      labelKey: "actions.resendInvite",
+      icon: "mail",
+      handler: "custom",
+      onClick: "resendInvite",
+      permission: "users.invite",
+      onSuccess: {
+        toast: { variant: "success", messageKey: "toast.inviteResent" },
+      },
+      onError: {
+        toast: { variant: "error", messageKey: "toast.genericError" },
+      },
+    },
+    {
+      id: "deactivate",
+      labelKey: "actions.deactivate",
+      icon: "trash",
+      handler: "api",
+      endpoint: {
+        method: "PATCH",
+        url: apiEndpoints.users.byId("{id}"),
+        body: { status: "deactivated" },
+      },
+      confirm: {
+        titleKey: "confirm.deactivate.title",
+        messageKey: "confirm.deactivate.message",
+      },
+      permission: "users.deactivate",
+      onSuccess: {
+        toast: { variant: "success", messageKey: "toast.deactivated" },
+        refetch: true,
+      },
+      onError: {
+        toast: { variant: "error", messageKey: "toast.genericError" },
+      },
+    },
+  ],
+};

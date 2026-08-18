@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui";
-import { TableRenderer, type TableSchema } from "@/components/table";
-import auditLogTableSchema from "@/schemas/tables/audit-log-table.json";
+import { TableRenderer } from "@/components/table";
+import { auditLogTableSchema } from "@/schemas/tables/audit-log-table";
 
 interface AuditLogRow {
   [key: string]: unknown;
@@ -38,7 +38,7 @@ export default function AuditLogPage() {
       </h2>
 
       <TableRenderer<AuditLogRow>
-        schema={auditLogTableSchema as unknown as TableSchema}
+        schema={auditLogTableSchema}
         actionHandlers={{
           viewEntry: async (row) => setViewing(row as AuditLogRow),
         }}

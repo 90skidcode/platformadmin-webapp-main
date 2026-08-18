@@ -11,7 +11,7 @@ import { createDialog } from "../primitives/dialog-base";
 // from the right edge instead of centering, nothing about the underlying
 // behavior differs. See AGENTS.md-adjacent convention: edit forms with
 // fewer than 5 fields open in a Sheet, not a centered popup; 5 or more
-// fields get a full page instead (settings-form.json is the existing
+// fields get a full page instead (settings-form.ts is the existing
 // example of the latter).
 const SheetPrimitive = createDialog("dialog");
 

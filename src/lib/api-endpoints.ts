@@ -10,13 +10,16 @@
  * `auth.*` entries are bare backend paths -- `auth.config.ts`,
  * `refresh-token.ts`, and `resolve-roles.ts` call the backend directly
  * (`${API_URL}${apiEndpoints.auth.login}`), never through the proxy.
- * `settings`/`users.*` carry the `PROXY_BASE_PATH` prefix baked in, since
+ * Everything else carries the `PROXY_BASE_PATH` prefix baked in, since
  * `useApiFetcher` does no prefixing of its own -- it just does
  * `fetch(path, options)`, so every caller must hand it a full path already.
  *
- * Table/form JSON schemas (`src/schemas/**\/*.json`) declare their own
- * `endpoint.url` values -- they can't import a TS constant, so `/api/proxy`
- * is typed directly into those JSON files instead of via `PROXY_BASE_PATH`.
+ * Table/form schemas that need an `endpoint.url` (`src/schemas/tables/*`,
+ * `src/schemas/forms/*`) are `.ts` modules, not `.json`, specifically so
+ * they can import this file instead of typing the path out again -- see
+ * `users-table.ts` / `audit-log-table.ts` / `settings-form.ts`. A schema
+ * with no endpoint (`login-form.json`, `invite-user-form.json`,
+ * `edit-user-roles-form.json`) has no reason to leave plain JSON.
  */
 
 /**
@@ -34,6 +37,7 @@ export const apiEndpoints = {
     me: "/me",
   },
   settings: `${PROXY_BASE_PATH}/settings`,
+  auditLog: `${PROXY_BASE_PATH}/audit-log`,
   users: {
     list: `${PROXY_BASE_PATH}/users`,
     byId: (userId: string) => `${PROXY_BASE_PATH}/users/${userId}`,

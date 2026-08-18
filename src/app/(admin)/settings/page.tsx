@@ -4,11 +4,11 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui";
-import { FormRenderer, type FormSchema } from "@/components/form";
+import { FormRenderer } from "@/components/form";
 import type { ApiEnvelope } from "@/lib/api-envelope";
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
-import settingsFormSchema from "@/schemas/forms/settings-form.json";
+import { settingsFormSchema } from "@/schemas/forms/settings-form";
 
 interface SettingsData {
   [key: string]: unknown;
@@ -51,7 +51,7 @@ export default function SettingsPage() {
         <CardContent>
           {settings ? (
             <FormRenderer
-              schema={settingsFormSchema as unknown as FormSchema}
+              schema={settingsFormSchema}
               defaultValues={settings}
               apiFetcher={apiFetcher}
             />
