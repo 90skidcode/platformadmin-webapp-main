@@ -98,9 +98,9 @@ export function useTableData<T extends Record<string, unknown>>(
 
     apiFetcher(url)
       .then((res) => res.json())
-      .then((body: ApiEnvelope<ApiListData<T> | T[]>) => {
+      .then((data: ApiEnvelope<ApiListData<T> | T[]>) => {
         if (cancelled) return;
-        const { data } = body;
+
         if (Array.isArray(data)) {
           setAllRows(data);
           setServerTotal(data.length);
