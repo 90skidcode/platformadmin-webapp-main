@@ -2,7 +2,7 @@
   "id": "tasks-table",
   "i18nNamespace": "tables.tasks",
   "mode": "client",
-  "endpoint": { "url": "https://jsonplaceholder.typicode.com/todos" },
+  "endpoint": { "url": "/api/proxy/todos" },
   "search": { "enabled": true },
   "pageSize": 10,
   "columns": [

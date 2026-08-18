@@ -15,6 +15,7 @@ import {
 import { FormRenderer, type FormSchema } from "@/components/form";
 import { TableRenderer, type TableSchema } from "@/components/table";
 import { toast } from "@/components/toast";
+import { apiEndpoints } from "@/lib/api-endpoints";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import tasksTableSchema from "@/schemas/tables/tasks-table.json";
 import createTaskFormSchema from "@/schemas/forms/create-task-form.json";
@@ -83,10 +84,9 @@ export default function TasksPage() {
           editTask: async (row) => setEditingTask(row as TaskRow),
           deleteTask: async (row) => {
             const task = row as TaskRow;
-            const res = await apiFetcher(
-              `https://jsonplaceholder.typicode.com/todos/${task.id}`,
-              { method: "DELETE" },
-            );
+            const res = await apiFetcher(apiEndpoints.tasks.byId(task.id), {
+              method: "DELETE",
+            });
             if (!res.ok) throw new Error(`Request failed with ${res.status}`);
             refreshTable();
             toast({
@@ -140,18 +140,15 @@ export default function TasksPage() {
                   userId?: string | number;
                   completed?: boolean;
                 };
-                const res = await apiFetcher(
-                  "https://jsonplaceholder.typicode.com/todos",
-                  {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      title: String(formValues.title || ""),
-                      userId: Number(formValues.userId) || 1,
-                      completed: Boolean(formValues.completed),
-                    }),
-                  },
-                );
+                const res = await apiFetcher(apiEndpoints.tasks.list, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    title: String(formValues.title || ""),
+                    userId: Number(formValues.userId) || 1,
+                    completed: Boolean(formValues.completed),
+                  }),
+                });
                 if (!res.ok)
                   throw new Error(`Request failed with ${res.status}`);
                 setCreateOpen(false);
@@ -192,7 +189,7 @@ export default function TasksPage() {
                     completed?: boolean;
                   };
                   const res = await apiFetcher(
-                    `https://jsonplaceholder.typicode.com/todos/${editingTask.id}`,
+                    apiEndpoints.tasks.byId(editingTask.id),
                     {
                       method: "PATCH",
                       headers: { "Content-Type": "application/json" },

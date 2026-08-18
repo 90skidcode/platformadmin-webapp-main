@@ -39,6 +39,13 @@ export interface MockEmployee {
   status: "active" | "onboarding" | "offboarded";
 }
 
+export interface MockTask {
+  id: number;
+  userId: number;
+  title: string;
+  completed: boolean;
+}
+
 export interface MockAuditLogEntry {
   id: string;
   actor: string;
@@ -182,6 +189,44 @@ export const employees: MockEmployee[] = [
     title: "Support Lead",
     startDate: "2023-11-20",
     status: "offboarded",
+  },
+];
+
+export const todos: MockTask[] = [
+  { id: 1, userId: 1, title: "delectus aut autem", completed: false },
+  {
+    id: 2,
+    userId: 1,
+    title: "quis ut nam facilis et officia qui",
+    completed: false,
+  },
+  { id: 3, userId: 1, title: "fugiat veniam minus", completed: false },
+  { id: 4, userId: 1, title: "et porro tempora", completed: true },
+  {
+    id: 5,
+    userId: 1,
+    title: "laboriosam mollitia et enim quasi adipisci quia provident illum",
+    completed: false,
+  },
+  {
+    id: 6,
+    userId: 1,
+    title: "qui ullam ratione quibusdam voluptatem quia omnis",
+    completed: false,
+  },
+  {
+    id: 7,
+    userId: 1,
+    title: "illo expedita consequatur quia in",
+    completed: false,
+  },
+  { id: 8, userId: 1, title: "quo adipisci enim quam ut ab", completed: true },
+  { id: 9, userId: 1, title: "molestiae perspiciatis ipsa", completed: false },
+  {
+    id: 10,
+    userId: 1,
+    title: "illo est ratione doloremque quia maiores aut",
+    completed: true,
   },
 ];
 
