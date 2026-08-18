@@ -85,5 +85,34 @@
       "before": "Before",
       "after": "After"
     }
+  },
+  "tasks": {
+    "columns": {
+      "id": "ID",
+      "userId": "User ID",
+      "title": "Title",
+      "status": "Status"
+    },
+    "actions": {
+      "newTask": "New Task",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "confirm": {
+      "delete": {
+        "title": "Delete this task?",
+        "message": "This action cannot be undone."
+      }
+    },
+    "toast": {
+      "created": "Task created.",
+      "updated": "Task updated.",
+      "deleted": "Task deleted.",
+      "genericError": "Could not complete the action. Please try again."
+    },
+    "dialog": {
+      "newTitle": "Create a new task",
+      "editTitle": "Edit task #{id}"
+    }
   }
 }

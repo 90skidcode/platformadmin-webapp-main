@@ -1,0 +1,33 @@
+{
+  "id": "create-task-form",
+  "i18nNamespace": "tables.tasks",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "name": "title",
+      "type": "text",
+      "labelKey": "columns.title",
+      "validation": { "required": true }
+    },
+    {
+      "name": "userId",
+      "type": "text",
+      "labelKey": "columns.userId",
+      "validation": { "required": true }
+    },
+    {
+      "name": "completed",
+      "type": "checkbox",
+      "labelKey": "columns.status"
+    }
+  ],
+  "actions": [
+    {
+      "id": "submit",
+      "type": "submit",
+      "labelKey": "actions.newTask",
+      "variant": "primary",
+      "onClick": "createTask"
+    }
+  ]
+}
