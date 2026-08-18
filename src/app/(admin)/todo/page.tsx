@@ -48,7 +48,7 @@ export default function Todo() {
         <div>
           <h2 className="text-lg font-semibold tracking-tight">
             Todo
-            <span className="text-muted-foreground">
+            <span className="pl-2 text-muted-foreground">
               {clientSideRender ? "Client" : "Server"}-side Rendering
             </span>
           </h2>
@@ -61,6 +61,12 @@ export default function Todo() {
           Switch to {clientSideRender ? "Server" : "Client"}
         </Button>
       </div>
+      {!clientSideRender && (
+        <span className="pl-2 text-muted-foreground">
+          Pagination parameters may differ from the external API, so pagination
+          might not display correctly.
+        </span>
+      )}
       <TableRenderer<TodoRow> schema={schema as unknown as TableSchema} />
     </div>
   );
