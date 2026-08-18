@@ -19,7 +19,7 @@
   "actions": [
     {
       "id": "submit",
-      "type": "button",
+      "type": "submit",
       "labelKey": "actions.signIn",
       "variant": "primary",
       "onClick": "signInWithCredentials"

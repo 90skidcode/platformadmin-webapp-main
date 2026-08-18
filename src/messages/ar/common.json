@@ -20,6 +20,7 @@
   "nav": {
     "dashboard": "لوحة التحكم",
     "users": "المستخدمون",
+    "tasks": "المهام",
     "auditLog": "سجل التدقيق",
     "settings": "الإعدادات",
     "styleGuide": "دليل التصميم"
@@ -85,10 +86,17 @@
     "SETTINGS_UPDATED": "تم تحديث الإعدادات بنجاح",
     "AUDIT_LIST_OK": "تم جلب سجل التدقيق بنجاح",
     "ME_FETCH_OK": "تم جلب الملف الشخصي بنجاح",
+    "TODO_LIST_OK": "تم جلب المهام بنجاح",
+    "TODO_CREATED": "تم إنشاء المهمة بنجاح",
+    "TODO_FETCH_OK": "تم جلب المهمة بنجاح",
+    "TODO_UPDATED": "تم تحديث المهمة بنجاح",
+    "TODO_DELETED": "تم حذف المهمة بنجاح",
+    "TODO_NOT_FOUND": "المهمة غير موجودة",
     "VALIDATION_FAILED": "فشل التحقق من الصحة"
   },
   "apiFieldErrors": {
     "nameRequired": "الاسم مطلوب",
-    "emailRequired": "البريد الإلكتروني مطلوب"
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "titleRequired": "العنوان مطلوب"
   }
 }

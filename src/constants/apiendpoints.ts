@@ -81,6 +81,16 @@ export const API_ENDPOINTS = {
   ME: {
     GET: '/me',
   },
+
+  /**
+   * Tasks endpoints
+   * Manages task data and operations
+   */
+  TASKS: {
+    LIST: '/todos',
+    BY_ID: (taskId: string | number) => `/todos/${taskId}`,
+    DETAIL: '/todos',
+  },
 } as const;
 
 /**

@@ -72,7 +72,14 @@ export function useTableData<T extends Record<string, unknown>>(
     schema.mode === "server" ? JSON.stringify(filters) : "";
 
   useEffect(() => {
-    if (schema.mode === "client" && staticData) return; // static data, nothing to fetch
+    if (staticData !== undefined) {
+      setAllRows(staticData);
+      setLoading(false);
+    }
+  }, [staticData]);
+
+  useEffect(() => {
+    if (schema.mode === "client" && staticData !== undefined) return; // static data, nothing to fetch
     if (!schema.endpoint) return;
 
     let cancelled = false;
@@ -98,15 +105,27 @@ export function useTableData<T extends Record<string, unknown>>(
 
     apiFetcher(url)
       .then((res) => res.json())
-      .then((body: ApiEnvelope<ApiListData<T> | T[]>) => {
+      .then((body: unknown) => {
         if (cancelled) return;
-        const { data } = body;
-        if (Array.isArray(data)) {
-          setAllRows(data);
-          setServerTotal(data.length);
-        } else {
-          setAllRows(data.items);
-          setServerTotal(data.pagination.totalItems);
+        const envelope = body as ApiEnvelope<ApiListData<T> | T[]>;
+        if (envelope && envelope.data !== undefined) {
+          const { data } = envelope;
+          if (Array.isArray(data)) {
+            setAllRows(data);
+            setServerTotal(data.length);
+          } else if (data && typeof data === "object" && "items" in data) {
+            setAllRows((data as ApiListData<T>).items);
+            setServerTotal((data as ApiListData<T>).pagination.totalItems);
+          } else if (data && typeof data === "object") {
+            setAllRows([data as T]);
+            setServerTotal(1);
+          }
+        } else if (Array.isArray(body)) {
+          setAllRows(body);
+          setServerTotal(body.length);
+        } else if (body && typeof body === "object") {
+          setAllRows([body as T]);
+          setServerTotal(1);
         }
       })
       .catch(() => {

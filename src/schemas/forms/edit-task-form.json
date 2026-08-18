@@ -1,0 +1,27 @@
+{
+  "id": "edit-task-form",
+  "i18nNamespace": "tables.tasks",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "name": "title",
+      "type": "text",
+      "labelKey": "columns.title",
+      "validation": { "required": true }
+    },
+    {
+      "name": "completed",
+      "type": "switch",
+      "labelKey": "columns.completed"
+    }
+  ],
+  "actions": [
+    {
+      "id": "submit",
+      "type": "submit",
+      "labelKey": "actions.save",
+      "variant": "primary",
+      "onClick": "updateTask"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "id": "tasks-table",
+  "i18nNamespace": "tables.tasks",
+  "mode": "client",
+  "endpoint": { "url": "/todos" },
+  "search": { "enabled": true },
+  "pageSize": 10,
+  "columns": [
+    {
+      "accessorKey": "id",
+      "headerKey": "columns.id",
+      "sortable": true,
+      "width": 80
+    },
+    {
+      "accessorKey": "userId",
+      "headerKey": "columns.userId",
+      "sortable": true,
+      "width": 100
+    },
+    {
+      "accessorKey": "title",
+      "headerKey": "columns.title",
+      "sortable": true
+    },
+    {
+      "accessorKey": "completed",
+      "headerKey": "columns.status",
+      "cell": "badge",
+      "badgeVariants": {
+        "Completed": "success",
+        "Pending": "warning",
+        "true": "success",
+        "false": "warning"
+      }
+    }
+  ],
+  "rowActions": [
+    {
+      "id": "edit-task",
+      "labelKey": "actions.edit",
+      "icon": "pencil",
+      "handler": "custom",
+      "onClick": "editTask"
+    },
+    {
+      "id": "delete-task",
+      "labelKey": "actions.delete",
+      "icon": "trash",
+      "handler": "custom",
+      "onClick": "deleteTask",
+      "confirm": {
+        "titleKey": "confirm.delete.title",
+        "messageKey": "confirm.delete.message"
+      }
+    }
+  ]
+}

@@ -85,5 +85,40 @@
       "before": "Before",
       "after": "After"
     }
+  },
+  "tasks": {
+    "columns": {
+      "id": "ID",
+      "userId": "User ID",
+      "title": "Title",
+      "status": "Status",
+      "completed": "Completed"
+    },
+    "status": {
+      "completed": "Completed",
+      "pending": "Pending"
+    },
+    "actions": {
+      "newTask": "New task",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save"
+    },
+    "dialog": {
+      "newTitle": "Create a new task",
+      "editTitle": "Edit task #{id}"
+    },
+    "confirm": {
+      "delete": {
+        "title": "Delete this task?",
+        "message": "This task will be permanently removed."
+      }
+    },
+    "toast": {
+      "created": "Task created successfully.",
+      "updated": "Task updated successfully.",
+      "deleted": "Task deleted successfully.",
+      "genericError": "Could not complete task action. Please try again."
+    }
   }
 }
