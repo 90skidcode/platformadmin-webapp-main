@@ -1,7 +1,7 @@
 import { rotateTokens } from "@/mocks/db";
 import { failure, success } from "@/mocks/http";
 
-/** Stands in for `${AUTH_API_URL}/auth/refresh` (plan §4.3). */
+/** Stands in for `${API_URL}/auth/refresh` (plan §4.3). */
 export async function POST(request: Request) {
   const body = await request.json().catch(() => null);
   const refreshToken =

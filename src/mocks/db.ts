@@ -7,7 +7,7 @@
  * so every layer above it -- NextAuth's `authorize()`, the BFF proxy, the
  * form/table engines, the Platform Admin screens -- is built and tested
  * against the exact shapes the plan specifies. Swapping in a real backend
- * later means changing `AUTH_API_URL`/`API_URL_*` env vars, nothing else.
+ * later means changing the `API_URL` env var, nothing else.
  *
  * MOCK ONLY: plaintext password comparison, tokens are random UUIDs kept in
  * memory (reset on server restart / dev-server module reload). None of this

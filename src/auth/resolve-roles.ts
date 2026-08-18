@@ -39,7 +39,7 @@ export async function resolveAccess(
 
   // 2) Fall back to a separate endpoint.
   try {
-    const res = await fetch(`${process.env.AUTH_API_URL}/me`, {
+    const res = await fetch(`${process.env.API_URL}/me`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     if (!res.ok) throw new Error(`GET /me failed with ${res.status}`);

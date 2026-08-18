@@ -1,14 +1,13 @@
-// §6.1: the only place the real per-environment backend URLs live. `server-only`
-// fails the build if any client component ever imports this file, rather than
-// relying on everyone remembering not to add a NEXT_PUBLIC_ prefix.
+// §6.1: the only place the real backend URL lives. `server-only` fails the
+// build if any client component ever imports this file, rather than relying
+// on everyone remembering not to add a NEXT_PUBLIC_ prefix.
+//
+// One `API_URL` per deployment (.env.local / .env.staging / .env.production)
+// -- `_envId` is accepted for call-site compatibility with the in-app
+// environment switcher (§ admin-environment cookie) but no longer selects
+// between multiple backend URLs.
 import "server-only";
 
-export const ENVIRONMENT_BASE_URLS: Record<string, string> = {
-  dev: process.env.API_URL_DEV ?? "",
-  staging: process.env.API_URL_STAGING ?? "",
-  production: process.env.API_URL_PROD ?? "",
-};
-
-export function resolveBaseUrl(envId: string): string {
-  return ENVIRONMENT_BASE_URLS[envId] || ENVIRONMENT_BASE_URLS.production;
+export function resolveBaseUrl(_envId: string): string {
+  return process.env.API_URL ?? "";
 }

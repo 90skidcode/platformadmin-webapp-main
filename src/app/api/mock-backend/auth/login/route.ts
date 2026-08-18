@@ -2,7 +2,7 @@ import { findUserByEmail, issueTokenPair, touchLastLogin } from "@/mocks/db";
 import { failure, success } from "@/mocks/http";
 
 /**
- * Stands in for `${AUTH_API_URL}/auth/login` (plan §4.1). Real shape:
+ * Stands in for `${API_URL}/auth/login` (plan §4.1). Real shape:
  * { user, accessToken, refreshToken, accessTokenExpires, roles, permissions, tenants }.
  */
 export async function POST(request: Request) {
