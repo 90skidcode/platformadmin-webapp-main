@@ -20,6 +20,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "users": "Users",
+    "tasks": "Tasks",
     "auditLog": "Audit Log",
     "settings": "Settings",
     "styleGuide": "Style Guide"
@@ -85,10 +86,17 @@
     "SETTINGS_UPDATED": "Settings updated successfully",
     "AUDIT_LIST_OK": "Audit log fetched successfully",
     "ME_FETCH_OK": "Profile fetched successfully",
+    "TODO_LIST_OK": "Tasks fetched successfully",
+    "TODO_CREATED": "Task created successfully",
+    "TODO_FETCH_OK": "Task fetched successfully",
+    "TODO_UPDATED": "Task updated successfully",
+    "TODO_DELETED": "Task deleted successfully",
+    "TODO_NOT_FOUND": "Task not found",
     "VALIDATION_FAILED": "Validation failed"
   },
   "apiFieldErrors": {
     "nameRequired": "Name is required",
-    "emailRequired": "Email is required"
+    "emailRequired": "Email is required",
+    "titleRequired": "Title is required"
   }
 }

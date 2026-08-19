@@ -20,6 +20,7 @@
   "nav": {
     "dashboard": "لوحة التحكم",
     "users": "المستخدمون",
+    "tasks": "المهام",
     "auditLog": "سجل التدقيق",
     "settings": "الإعدادات",
     "styleGuide": "دليل التصميم"
@@ -43,24 +44,24 @@
   "table": {
     "search": "بحث...",
     "noResults": "لا توجد نتائج.",
-    "rowsPerPage": "صفوف لكل صفحة",
+    "rowsPerPage": "عدد الصفوف في الصفحة",
     "page": "صفحة {page} من {totalPages}",
     "pagination": "التنقل بين الصفحات",
     "previousPage": "السابق",
     "nextPage": "التالي",
-    "goToPage": "الذهاب إلى الصفحة {page}",
+    "goToPage": "الانتقال إلى صفحة {page}",
     "morePages": "المزيد من الصفحات",
     "selectedCount": "تم تحديد {count}",
-    "allFilterOption": "الكل - {label}",
-    "filters": "الفلاتر",
-    "filtersDescription": "قم بتضييق الجدول باستخدام الحقول أدناه.",
+    "allFilterOption": "الكل ({label})",
+    "filters": "عوامل التصفية",
+    "filtersDescription": "تضييق نطاق الجدول باستخدام الحقول أدناه.",
     "clearFilters": "مسح",
     "applyFilters": "تطبيق"
   },
   "loading": "جارٍ التحميل...",
   "dashboard": {
     "welcome": "مرحبًا بعودتك، {name}",
-    "subtitle": "هذا ما هو متاح لدورك في {tenant}.",
+    "subtitle": "إليك ما هو متاح لدورك في {tenant}.",
     "quickLinks": "روابط سريعة"
   },
   "apiMessages": {
@@ -85,10 +86,17 @@
     "SETTINGS_UPDATED": "تم تحديث الإعدادات بنجاح",
     "AUDIT_LIST_OK": "تم جلب سجل التدقيق بنجاح",
     "ME_FETCH_OK": "تم جلب الملف الشخصي بنجاح",
+    "TODO_LIST_OK": "تم جلب المهام بنجاح",
+    "TODO_CREATED": "تم إنشاء المهمة بنجاح",
+    "TODO_FETCH_OK": "تم جلب المهمة بنجاح",
+    "TODO_UPDATED": "تم تحديث المهمة بنجاح",
+    "TODO_DELETED": "تم حذف المهمة بنجاح",
+    "TODO_NOT_FOUND": "المهمة غير موجودة",
     "VALIDATION_FAILED": "فشل التحقق من الصحة"
   },
   "apiFieldErrors": {
     "nameRequired": "الاسم مطلوب",
-    "emailRequired": "البريد الإلكتروني مطلوب"
+    "emailRequired": "البريد الإلكتروني مطلوب",
+    "titleRequired": "العنوان مطلوب"
   }
 }

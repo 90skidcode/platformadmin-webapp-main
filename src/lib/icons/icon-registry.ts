@@ -1,8 +1,10 @@
 import {
   Bell,
+  CheckSquare,
   Eye,
   History,
   LayoutDashboard,
+  ListTodo,
   type LucideIcon,
   Mail,
   Palette,
@@ -17,6 +19,9 @@ import {
 export const ICON_REGISTRY: Record<string, LucideIcon> = {
   layoutDashboard: LayoutDashboard,
   users: Users,
+  tasks: ListTodo,
+  listTodo: ListTodo,
+  checkSquare: CheckSquare,
   history: History,
   settings: Settings,
   palette: Palette,
