@@ -20,6 +20,7 @@ export interface TableColumn {
   >;
   sortable?: boolean;
   width?: string;
+  badgeLabel?: Record<string, string>;
 }
 
 export interface TableFilterOption {

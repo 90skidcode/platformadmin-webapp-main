@@ -89,7 +89,7 @@
   "todo": {
     "columns": {
       "title": "Title",
-      "completed": "Completed"
+      "status": "Status"
     },
     "status": {
       "completed": "Completed",

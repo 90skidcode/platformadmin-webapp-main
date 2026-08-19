@@ -28,9 +28,15 @@ export function renderCell(
         </a>
       ) : null;
     case "badge": {
-      const variant = (column.badgeVariants?.[String(value)] ??
+      const key = String(value);
+      const variant = (column.badgeVariants?.[key] ??
         "default") as BadgeProps["variant"];
-      return value ? <Badge variant={variant}>{String(value)}</Badge> : null;
+
+      const label = column.badgeLabel?.[key] ?? key;
+
+      return value !== null && value !== undefined ? (
+        <Badge variant={variant}>{label}</Badge>
+      ) : null;
     }
     default:
       return value == null ? "" : String(value);

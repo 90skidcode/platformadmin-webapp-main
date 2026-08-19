@@ -7,7 +7,7 @@ interface TodoRow {
   [key: string]: unknown;
   id: string;
   title: string;
-  completed: string;
+  status: string;
 }
 export default function Todo() {
   const [schema, setSchema] = useState({
@@ -19,12 +19,24 @@ export default function Todo() {
     pageSize: 10,
     columns: [
       { accessorKey: "title", headerKey: "columns.title", sortable: true },
-      { accessorKey: "completed", headerKey: "columns.completed" },
+      {
+        accessorKey: "completed",
+        headerKey: "columns.status",
+        cell: "badge",
+        badgeVariants: {
+          true: "success",
+          false: "warning",
+        },
+        badgeLabel: {
+          true: "Completed",
+          false: "Pending",
+        },
+      },
     ],
     filters: [
       {
         accessorKey: "completed",
-        labelKey: "columns.completed",
+        labelKey: "columns.status",
         options: [
           { value: "true", labelKey: "status.completed" },
           { value: "false", labelKey: "status.pending" },
