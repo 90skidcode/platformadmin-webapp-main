@@ -62,14 +62,16 @@ export function useTableData<T extends Record<string, unknown>>(
 
   const sortBy = sorting[0]?.id;
   const sortDir = sorting[0]?.desc ? "desc" : "asc";
-  // Only server mode's page/search/filters should trigger a refetch --
-  // client mode handles all three in the browser (see `clientFiltered`
+  // Only server mode's page/search/filters/sorting should trigger a refetch --
+  // client mode handles all four in the browser (see `clientFiltered`
   // below). Named here, not inlined in the deps array, so the dependency
   // list stays staticly checkable.
   const serverPageIndex = schema.mode === "server" ? pageIndex : 0;
   const serverSearch = schema.mode === "server" ? search : "";
   const serverFiltersKey =
     schema.mode === "server" ? JSON.stringify(filters) : "";
+  const serverSortBy = schema.mode === "server" ? sortBy : "";
+  const serverSortDir = schema.mode === "server" ? sortDir : "";
 
   useEffect(() => {
     if (schema.mode === "client" && staticData) return; // static data, nothing to fetch
@@ -126,8 +128,8 @@ export function useTableData<T extends Record<string, unknown>>(
     serverPageIndex,
     serverSearch,
     serverFiltersKey,
-    sortBy,
-    sortDir,
+    serverSortBy,
+    serverSortDir,
     refetchToken,
   ]);
 

@@ -65,6 +65,37 @@ describe("useTableData", () => {
       act(() => result.current.setSearch("x"));
       expect(result.current.pageIndex).toBe(0);
     });
+
+    it("Fetches data once on initial load and sorts it without additional API calls", async () => {
+      const apiFetcher = vi.fn().mockResolvedValue({
+        json: async () => ({
+          code: "S_200_EMP_LIST_OK",
+          message: "Employees fetched successfully",
+          data: [
+            { name: "Kavya Iyer", email: "kavya@acme.example" },
+            { name: "Rahul Verma", email: "rahul@acme.example" },
+          ],
+        }),
+      });
+      const schema: TableSchema = {
+        id: "t",
+        mode: "client",
+        endpoint: { url: "/employees" },
+        columns,
+        pageSize: 10,
+      };
+
+      const { result } = renderHook(() =>
+        useTableData(schema, undefined, apiFetcher),
+      );
+
+      await waitFor(() => expect(result.current.loading).toBe(false));
+      expect(apiFetcher).toHaveBeenCalledTimes(1);
+
+      act(() => result.current.setSorting([{ id: "name", desc: true }]));
+
+      expect(apiFetcher).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe("server mode", () => {
