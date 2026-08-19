@@ -34,6 +34,7 @@ import {
   SheetFooter,
   SheetHeader,
   SheetTitle,
+  Skeleton,
 } from "@/components/ui";
 import { useApiFetcher, type ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { resolveText } from "../form/fields/field-label";
@@ -43,6 +44,19 @@ import { RowActionsCell } from "./row-actions-cell";
 import { TablePagination } from "./table-pagination";
 import { useTableData } from "./use-table-data";
 import type { ActionHandlers, TableSchema } from "./types";
+
+/** Rows shown while a fetch (initial load, page/sort/filter change) is in
+ * flight -- a fixed count rather than `pageSize` so a table configured for
+ * a small page size doesn't look sparse mid-load. */
+const SKELETON_ROW_COUNT = 10;
+
+/** `__select`/`__actions` get a control-sized placeholder; every real data
+ * column gets a text-sized bar. */
+function renderSkeletonCell(columnId: string) {
+  if (columnId === "__select") return <Skeleton className="size-4" />;
+  if (columnId === "__actions") return <Skeleton className="ml-auto size-4" />;
+  return <Skeleton className="h-4 w-3/4" />;
+}
 
 export interface TableRendererProps<T extends Record<string, unknown>> {
   schema: TableSchema;
@@ -236,16 +250,18 @@ export function TableRenderer<T extends Record<string, unknown>>({
 
   function renderTableBody() {
     if (loading) {
-      return (
-        <tr>
-          <td
-            colSpan={columns.length}
-            className="px-3 py-6 text-center text-muted-foreground"
-          >
-            ...
-          </td>
+      return Array.from({ length: SKELETON_ROW_COUNT }).map((_, rowIndex) => (
+        <tr
+          key={`skeleton-row-${rowIndex}`}
+          className="border-b border-border last:border-0"
+        >
+          {columns.map((column) => (
+            <td key={column.id} className="px-3 py-2">
+              {renderSkeletonCell(column.id ?? "")}
+            </td>
+          ))}
         </tr>
-      );
+      ));
     }
     if (table.getRowModel().rows.length === 0) {
       return (
@@ -417,7 +433,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
         <div
           className={`overflow-x-auto rounded-lg border border-border ${mobileCards ? "hidden md:block" : ""}`}
         >
-          <table className="w-full text-sm">
+          <table className="w-full text-sm" aria-busy={loading || undefined}>
             <thead className="border-b border-border bg-muted/50">
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>

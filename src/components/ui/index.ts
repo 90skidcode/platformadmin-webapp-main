@@ -11,6 +11,7 @@ export * from "./input";
 export * from "./label";
 export * from "./select";
 export * from "./sheet";
+export * from "./skeleton";
 export * from "./spinner";
 export * from "./switch";
 export * from "./textarea";

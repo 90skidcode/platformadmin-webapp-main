@@ -59,11 +59,11 @@ function renderPage(sessionOverride: Session = session) {
 }
 
 describe("UsersPage", () => {
-  describe("the Invite user button", () => {
+  describe("the Add User button", () => {
     it("shows for a session with users.invite", async () => {
       renderPage();
       expect(
-        await screen.findByRole("button", { name: /Invite user/ }),
+        await screen.findByRole("button", { name: /Add User/ }),
       ).toBeInTheDocument();
     });
 
@@ -78,14 +78,14 @@ describe("UsersPage", () => {
       renderPage(noInvite);
       await waitFor(() => expect(fetchMock).toHaveBeenCalled());
       expect(
-        screen.queryByRole("button", { name: /Invite user/ }),
+        screen.queryByRole("button", { name: /Add User/ }),
       ).not.toBeInTheDocument();
     });
 
     it("opens the invite dialog on click", async () => {
       renderPage();
       await userEvent.click(
-        await screen.findByRole("button", { name: /Invite user/ }),
+        await screen.findByRole("button", { name: /Add User/ }),
       );
       expect(screen.getByRole("dialog")).toBeInTheDocument();
     });
