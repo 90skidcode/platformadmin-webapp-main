@@ -85,5 +85,13 @@
       "before": "Before",
       "after": "After"
     }
+  },
+  "todos": {
+    "columns": {
+      "id": "ID",
+      "userId": "User ID",
+      "title": "Title",
+      "completed": "Completed"
+    }
   }
 }

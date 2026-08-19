@@ -131,9 +131,11 @@ export function useTableData<T extends Record<string, unknown>>(
     refetchToken,
   ]);
 
+  const effectiveRows = staticData ?? allRows;
+
   const clientFiltered = useMemo(() => {
-    if (schema.mode !== "client") return allRows;
-    let result = allRows;
+    if (schema.mode !== "client") return effectiveRows;
+    let result = effectiveRows;
     if (search) {
       const needle = search.toLowerCase();
       result = result.filter((row) =>
@@ -149,9 +151,9 @@ export function useTableData<T extends Record<string, unknown>>(
       result = result.filter((row) => String(row[key] ?? "") === value);
     }
     return result;
-  }, [schema.mode, schema.columns, allRows, search, filters]);
+  }, [schema.mode, schema.columns, effectiveRows, search, filters]);
 
-  const rows = schema.mode === "server" ? allRows : clientFiltered;
+  const rows = schema.mode === "server" ? effectiveRows : clientFiltered;
   const total = schema.mode === "server" ? serverTotal : clientFiltered.length;
 
   return {

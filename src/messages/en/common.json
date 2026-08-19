@@ -20,6 +20,7 @@
   "nav": {
     "dashboard": "Dashboard",
     "users": "Users",
+    "todos": "JSONPlaceholder Todos",
     "auditLog": "Audit Log",
     "settings": "Settings",
     "styleGuide": "Style Guide"
@@ -84,6 +85,7 @@
     "SETTINGS_FETCH_OK": "Settings fetched successfully",
     "SETTINGS_UPDATED": "Settings updated successfully",
     "AUDIT_LIST_OK": "Audit log fetched successfully",
+    "TODOS_LIST_OK": "Todos fetched successfully",
     "ME_FETCH_OK": "Profile fetched successfully",
     "VALIDATION_FAILED": "Validation failed"
   },

@@ -1,0 +1,28 @@
+{
+  "id": "todos-table",
+  "i18nNamespace": "tables.todos",
+  "mode": "client",
+  "endpoint": { "url": "/todos" },
+  "search": { "enabled": true },
+  "pageSize": 10,
+  "columns": [
+    {
+      "accessorKey": "id",
+      "headerKey": "columns.id",
+      "sortable": true,
+      "width": "80"
+    },
+    {
+      "accessorKey": "userId",
+      "headerKey": "columns.userId",
+      "sortable": true,
+      "width": "100"
+    },
+    { "accessorKey": "title", "headerKey": "columns.title", "sortable": true },
+    {
+      "accessorKey": "completed",
+      "headerKey": "columns.completed",
+      "sortable": true
+    }
+  ]
+}
