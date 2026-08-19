@@ -18,6 +18,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     css: true,
+    reporters: ["verbose"],
+    printConsoleTrace: true,
     exclude: ["node_modules/**"],
     coverage: {
       provider: "v8",
