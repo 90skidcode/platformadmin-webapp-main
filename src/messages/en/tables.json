@@ -27,10 +27,8 @@
     "columns": {
       "name": "Name",
       "email": "Email",
-      "roles": "Roles",
-      "tenant": "Tenant",
-      "lastLogin": "Last login",
-      "status": "Status"
+      "status": "Status",
+      "createdAt": "Created"
     },
     "actions": {
       "editRoles": "Edit roles",
@@ -70,22 +68,6 @@
       "active": "Active",
       "invited": "Invited",
       "deactivated": "Deactivated"
-    }
-  },
-  "auditLog": {
-    "columns": {
-      "actor": "Actor",
-      "action": "Action",
-      "entity": "Entity",
-      "timestamp": "Timestamp"
-    },
-    "actions": {
-      "view": "View"
-    },
-    "dialog": {
-      "title": "Audit entry",
-      "before": "Before",
-      "after": "After"
     }
   }
 }

@@ -17,22 +17,5 @@
       "employeeCreated": "تم إنشاء الموظف.",
       "genericError": "تعذر إنشاء الموظف. يرجى المحاولة مرة أخرى."
     }
-  },
-  "settings": {
-    "sectionTitle": "المؤسسة",
-    "fields": {
-      "orgName": { "label": "اسم المؤسسة" },
-      "defaultEnvironment": { "label": "البيئة الافتراضية" },
-      "sessionTimeoutMinutes": { "label": "مهلة الجلسة (دقائق)" },
-      "notifyOnLogin": { "label": "إشعار عند تسجيل دخول جديد" },
-      "notifyOnRoleChange": { "label": "إشعار عند تغيير الدور" }
-    },
-    "actions": {
-      "submit": "حفظ الإعدادات"
-    },
-    "toast": {
-      "settingsSaved": "تم حفظ الإعدادات.",
-      "genericError": "تعذر حفظ الإعدادات. يرجى المحاولة مرة أخرى."
-    }
   }
 }

@@ -16,7 +16,6 @@ import { FormRenderer, type FormSchema } from "@/components/form";
 import { TableRenderer } from "@/components/table";
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
-import { can } from "@/lib/permissions";
 import { usersTableSchema } from "@/schemas/tables/users-table";
 import inviteUserFormSchema from "@/schemas/forms/invite-user-form.json";
 import editUserRolesFormSchema from "@/schemas/forms/edit-user-roles-form.json";
@@ -26,14 +25,15 @@ interface UserRow {
   id: string;
   name: string;
   email: string;
-  roles: string[];
+  // Real `/users` records carry no `roles` at all (see users-table.ts) --
+  // optional so the edit-roles dialog below doesn't crash reading it.
+  roles?: string[];
   status: string;
 }
 
 // Edit convention: never a centered popup. invite-user-form.json (3 fields)
 // and edit-user-roles-form.json (1 field) both open in a Sheet (right-side
-// panel); a form with 5+ fields gets a full page instead -- see
-// settings-form.ts / src/app/(admin)/settings/page.tsx for that case.
+// panel); a form with 5+ fields gets a full page instead.
 export default function UsersPage() {
   const { data: session } = useSession();
   const apiFetcher = useApiFetcher();
@@ -65,7 +65,9 @@ export default function UsersPage() {
           },
         }}
         toolbarEnd={
-          can("users.invite", session) && (
+          // `permission: "users.invite"` temporarily stripped, same reason
+          // as users-table.ts -- still gated on having a session at all.
+          !!session && (
             <Button onClick={() => setInviteOpen(true)}>
               <UserPlus />
               {t("actions.newUser")}
@@ -121,7 +123,7 @@ export default function UsersPage() {
               defaultValues={{
                 name: editingUser.name,
                 email: editingUser.email,
-                role: editingUser.roles[0],
+                role: editingUser.roles?.[0],
               }}
               onRefetch={refreshTable}
               actionHandlers={{

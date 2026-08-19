@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 
 import { auth } from "@/auth/auth";
 import { callBackend } from "@/lib/backend-client/backend-client.server";
+import { normalizeListBody, translateListSearchParams } from "./normalize-list";
 
 /**
  * §6.2: the only place the real backend URL and the real access token meet.
@@ -24,7 +25,7 @@ async function handler(
     cookieStore.get("admin-tenant")?.value ?? session.user.tenants[0]?.id ?? "";
 
   const upstream = await callBackend(
-    `/${path.join("/")}${request.nextUrl.search}`,
+    `/${path.join("/")}${translateListSearchParams(request.nextUrl.search)}`,
     {
       method: request.method,
       headers: {
@@ -38,7 +39,13 @@ async function handler(
     { accessToken: session.accessToken, envId, tenantId },
   );
 
-  const body = await upstream.text();
+  const rawBody = await upstream.text();
+  // Only 2xx bodies get shape-normalized -- an error body passes through as
+  // whatever the backend actually sent (see the KNOWN GAP note below).
+  const body =
+    upstream.status >= 200 && upstream.status < 300
+      ? normalizeListBody(rawBody)
+      : rawBody;
 
   // KNOWN GAP, tracked in §6.4: non-2xx backend errors should map to a
   // generic shape before returning them. Fine for this repo's own mock

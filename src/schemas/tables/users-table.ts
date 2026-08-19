@@ -24,10 +24,12 @@ export const usersTableSchema: TableSchema = {
     },
   ],
   pageSize: 10,
+  // Real `/users` records are `{ id, name, email, status, created_at,
+  // updated_at }` -- no `roles` (see nav-items.ts's note on RBAC being
+  // stripped for now), hence no roles column here either.
   columns: [
     { accessorKey: "name", headerKey: "columns.name", sortable: true },
     { accessorKey: "email", headerKey: "columns.email", cell: "email" },
-    { accessorKey: "roles", headerKey: "columns.roles" },
     {
       accessorKey: "status",
       headerKey: "columns.status",
@@ -39,8 +41,8 @@ export const usersTableSchema: TableSchema = {
       },
     },
     {
-      accessorKey: "lastLoginAt",
-      headerKey: "columns.lastLogin",
+      accessorKey: "created_at",
+      headerKey: "columns.createdAt",
       cell: "date",
       sortable: true,
     },

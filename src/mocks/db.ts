@@ -39,24 +39,6 @@ export interface MockEmployee {
   status: "active" | "onboarding" | "offboarded";
 }
 
-export interface MockAuditLogEntry {
-  id: string;
-  actor: string;
-  action: string;
-  entity: string;
-  timestamp: string;
-  before?: Record<string, unknown>;
-  after?: Record<string, unknown>;
-}
-
-export interface MockSettings {
-  orgName: string;
-  defaultEnvironment: "dev" | "staging" | "production";
-  sessionTimeoutMinutes: number;
-  notifyOnLogin: boolean;
-  notifyOnRoleChange: boolean;
-}
-
 const ACCESS_TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes -- short enough to exercise rotation in a dev session
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -184,51 +166,6 @@ export const employees: MockEmployee[] = [
     status: "offboarded",
   },
 ];
-
-export const auditLog: MockAuditLogEntry[] = [
-  {
-    id: "audit-1",
-    actor: "admin@platform.local",
-    action: "user.invite",
-    entity: "user-4",
-    timestamp: "2026-08-12T10:02:00.000Z",
-    after: { email: "sam.new@platform.local", roles: ["viewer"] },
-  },
-  {
-    id: "audit-2",
-    actor: "manager@platform.local",
-    action: "employee.create",
-    entity: "emp-3",
-    timestamp: "2026-08-13T08:41:00.000Z",
-    after: { name: "Meera Krishnan", status: "onboarding" },
-  },
-  {
-    id: "audit-3",
-    actor: "admin@platform.local",
-    action: "employee.update",
-    entity: "emp-5",
-    timestamp: "2026-08-13T17:15:00.000Z",
-    before: { status: "active" },
-    after: { status: "offboarded" },
-  },
-  {
-    id: "audit-4",
-    actor: "admin@platform.local",
-    action: "settings.update",
-    entity: "settings",
-    timestamp: "2026-08-14T09:30:00.000Z",
-    before: { sessionTimeoutMinutes: 30 },
-    after: { sessionTimeoutMinutes: 60 },
-  },
-];
-
-export const settings: MockSettings = {
-  orgName: "Acme Corp",
-  defaultEnvironment: "staging",
-  sessionTimeoutMinutes: 60,
-  notifyOnLogin: true,
-  notifyOnRoleChange: true,
-};
 
 interface TokenRecord {
   userId: string;

@@ -17,9 +17,9 @@
  * Table/form schemas that need an `endpoint.url` (`src/schemas/tables/*`,
  * `src/schemas/forms/*`) are `.ts` modules, not `.json`, specifically so
  * they can import this file instead of typing the path out again -- see
- * `users-table.ts` / `audit-log-table.ts` / `settings-form.ts`. A schema
- * with no endpoint (`login-form.json`, `invite-user-form.json`,
- * `edit-user-roles-form.json`) has no reason to leave plain JSON.
+ * `users-table.ts`. A schema with no endpoint (`login-form.json`,
+ * `invite-user-form.json`, `edit-user-roles-form.json`) has no reason to
+ * leave plain JSON.
  */
 
 /**
@@ -36,8 +36,6 @@ export const apiEndpoints = {
     refresh: "/auth/refresh",
     me: "/me",
   },
-  settings: `${PROXY_BASE_PATH}/settings`,
-  auditLog: `${PROXY_BASE_PATH}/audit-log`,
   users: {
     list: `${PROXY_BASE_PATH}/users`,
     byId: (userId: string) => `${PROXY_BASE_PATH}/users/${userId}`,

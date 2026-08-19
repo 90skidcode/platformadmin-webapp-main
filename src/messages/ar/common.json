@@ -19,10 +19,7 @@
   },
   "nav": {
     "dashboard": "لوحة التحكم",
-    "users": "المستخدمون",
-    "auditLog": "سجل التدقيق",
-    "settings": "الإعدادات",
-    "styleGuide": "دليل التصميم"
+    "users": "المستخدمون"
   },
   "topbar": {
     "environment": "البيئة",

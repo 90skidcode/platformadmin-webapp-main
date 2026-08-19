@@ -17,22 +17,5 @@
       "employeeCreated": "Employee created.",
       "genericError": "Could not create the employee. Please try again."
     }
-  },
-  "settings": {
-    "sectionTitle": "Organization",
-    "fields": {
-      "orgName": { "label": "Organization name" },
-      "defaultEnvironment": { "label": "Default environment" },
-      "sessionTimeoutMinutes": { "label": "Session timeout (minutes)" },
-      "notifyOnLogin": { "label": "Notify on new sign-in" },
-      "notifyOnRoleChange": { "label": "Notify on role change" }
-    },
-    "actions": {
-      "submit": "Save settings"
-    },
-    "toast": {
-      "settingsSaved": "Settings saved.",
-      "genericError": "Could not save settings. Please try again."
-    }
   }
 }

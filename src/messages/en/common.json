@@ -19,10 +19,7 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "users": "Users",
-    "auditLog": "Audit Log",
-    "settings": "Settings",
-    "styleGuide": "Style Guide"
+    "users": "Users"
   },
   "topbar": {
     "environment": "Environment",

@@ -27,10 +27,8 @@
     "columns": {
       "name": "الاسم",
       "email": "البريد الإلكتروني",
-      "roles": "الأدوار",
-      "tenant": "المستأجر",
-      "lastLogin": "آخر تسجيل دخول",
-      "status": "الحالة"
+      "status": "الحالة",
+      "createdAt": "تاريخ الإنشاء"
     },
     "actions": {
       "editRoles": "تعديل الأدوار",
@@ -68,22 +66,6 @@
       "active": "نشط",
       "invited": "مدعو",
       "deactivated": "معطل"
-    }
-  },
-  "auditLog": {
-    "columns": {
-      "actor": "المستخدم",
-      "action": "الإجراء",
-      "entity": "الكيان",
-      "timestamp": "التاريخ والوقت"
-    },
-    "actions": {
-      "view": "عرض"
-    },
-    "dialog": {
-      "title": "إدخال التدقيق",
-      "before": "قبل",
-      "after": "بعد"
     }
   }
 }

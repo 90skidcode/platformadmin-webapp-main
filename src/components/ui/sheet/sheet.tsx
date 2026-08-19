@@ -9,10 +9,8 @@ import { createDialog } from "../primitives/dialog-base";
 // Same engine Dialog uses (portal, focus trap, ESC/outside-click dismiss,
 // body scroll lock, role="dialog") -- a Sheet is a Dialog that slides in
 // from the right edge instead of centering, nothing about the underlying
-// behavior differs. See AGENTS.md-adjacent convention: edit forms with
-// fewer than 5 fields open in a Sheet, not a centered popup; 5 or more
-// fields get a full page instead (settings-form.ts is the existing
-// example of the latter).
+// behavior differs. Convention: edit forms with fewer than 5 fields open
+// in a Sheet, not a centered popup; 5 or more fields get a full page instead.
 const SheetPrimitive = createDialog("dialog");
 
 export const Sheet = SheetPrimitive.Root;
