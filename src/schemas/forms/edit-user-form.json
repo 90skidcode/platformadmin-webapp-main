@@ -1,48 +1,31 @@
 {
-  "id": "edit-user-roles-form",
+  "id": "edit-user-form",
   "i18nNamespace": "tables.users",
-  "layout": {
-    "columns": 1
-  },
+  "layout": { "columns": 1 },
   "fields": [
     {
       "name": "name",
       "type": "text",
       "labelKey": "editRolesDialog.name",
-      "validation": {
-        "required": true
-      }
+      "validation": { "required": true }
     },
     {
       "name": "email",
       "type": "email",
       "labelKey": "editRolesDialog.email",
-      "validation": {
-        "required": true
-      }
+      "validation": { "required": true }
     },
     {
-      "name": "role",
+      "name": "status",
       "type": "select",
-      "labelKey": "editRolesDialog.roleLabel",
-      "validation": {
-        "required": true
-      },
+      "labelKey": "editRolesDialog.statusLabel",
+      "validation": { "required": true },
       "optionsSource": {
         "type": "static",
         "options": [
-          {
-            "value": "viewer",
-            "labelKey": "roles.viewer"
-          },
-          {
-            "value": "manager",
-            "labelKey": "roles.manager"
-          },
-          {
-            "value": "platform-admin",
-            "labelKey": "roles.platform-admin"
-          }
+          { "value": "active", "labelKey": "status.active" },
+          { "value": "invited", "labelKey": "status.invited" },
+          { "value": "deactivated", "labelKey": "status.deactivated" }
         ]
       }
     }
@@ -53,19 +36,13 @@
       "type": "submit",
       "labelKey": "actions.save",
       "variant": "primary",
-      "onClick": "saveRoles",
+      "onClick": "saveUser",
       "onSuccess": {
-        "toast": {
-          "variant": "success",
-          "messageKey": "toast.rolesUpdated"
-        },
+        "toast": { "variant": "success", "messageKey": "toast.userUpdated" },
         "refetch": true
       },
       "onError": {
-        "toast": {
-          "variant": "error",
-          "messageKey": "toast.genericError"
-        }
+        "toast": { "variant": "error", "messageKey": "toast.genericError" }
       }
     }
   ]

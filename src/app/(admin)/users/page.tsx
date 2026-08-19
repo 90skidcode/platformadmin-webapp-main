@@ -18,21 +18,18 @@ import { apiEndpoints } from "@/lib/api-endpoints";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { usersTableSchema } from "@/schemas/tables/users-table";
 import inviteUserFormSchema from "@/schemas/forms/invite-user-form.json";
-import editUserRolesFormSchema from "@/schemas/forms/edit-user-roles-form.json";
+import editUserFormSchema from "@/schemas/forms/edit-user-form.json";
 
 interface UserRow {
   [key: string]: unknown;
   id: string;
   name: string;
   email: string;
-  // Real `/users` records carry no `roles` at all (see users-table.ts) --
-  // optional so the edit-roles dialog below doesn't crash reading it.
-  roles?: string[];
   status: string;
 }
 
 // Edit convention: never a centered popup. invite-user-form.json (3 fields)
-// and edit-user-roles-form.json (1 field) both open in a Sheet (right-side
+// and edit-user-form.json (3 fields) both open in a Sheet (right-side
 // panel); a form with 5+ fields gets a full page instead.
 export default function UsersPage() {
   const { data: session } = useSession();
@@ -54,7 +51,7 @@ export default function UsersPage() {
         key={tableKey}
         schema={usersTableSchema}
         actionHandlers={{
-          editRoles: async (row) => setEditingUser(row as UserRow),
+          editUser: async (row) => setEditingUser(row as UserRow),
           resendInvite: async (row) => {
             const typedRow = row as UserRow;
             const res = await apiFetcher(
@@ -119,26 +116,23 @@ export default function UsersPage() {
           </SheetHeader>
           {editingUser && (
             <FormRenderer
-              schema={editUserRolesFormSchema as unknown as FormSchema}
+              schema={editUserFormSchema as unknown as FormSchema}
               defaultValues={{
                 name: editingUser.name,
                 email: editingUser.email,
-                role: editingUser.roles?.[0],
+                status: editingUser.status,
               }}
               onRefetch={refreshTable}
               actionHandlers={{
-                saveRoles: async (values) => {
-                  const { role, ...rest } = values as {
-                    role: string;
-                    name: string;
-                    email: string;
-                  };
+                // Matches the real `PATCH /users/{id}` contract exactly --
+                // `{ name, email, status }` in, the updated record back out.
+                saveUser: async (values) => {
                   const res = await apiFetcher(
                     apiEndpoints.users.byId(editingUser.id),
                     {
                       method: "PATCH",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ ...rest, roles: [role] }),
+                      body: JSON.stringify(values),
                     },
                   );
                   if (!res.ok)

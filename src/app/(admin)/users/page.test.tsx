@@ -58,6 +58,15 @@ function renderPage(sessionOverride: Session = session) {
   });
 }
 
+/** Finds the fetch call made with the given HTTP method -- the initial
+ * table load is always a GET, so this is how a test picks out the PATCH/
+ * DELETE a row action triggers, out of every call `fetchMock` recorded. */
+function findCallByMethod(method: string) {
+  return fetchMock.mock.calls.find(
+    ([, init]) => (init as RequestInit | undefined)?.method === method,
+  );
+}
+
 describe("UsersPage", () => {
   describe("the Add User button", () => {
     it("shows for a session with users.invite", async () => {
@@ -95,6 +104,50 @@ describe("UsersPage", () => {
     it("renders the fetched user row", async () => {
       renderPage();
       expect(await screen.findByText("Kavya Iyer")).toBeInTheDocument();
+    });
+  });
+
+  describe("editing a user", () => {
+    it("opens pre-filled with the row's data and PATCHes { name, email, status } on save", async () => {
+      renderPage();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Edit" }),
+      );
+
+      // Required fields render a trailing "*" as part of the label's
+      // accessible text (see Label's required indicator), hence the regex.
+      const nameField = screen.getByLabelText(/^Name/);
+      expect(nameField).toHaveValue("Kavya Iyer");
+      expect(screen.getByLabelText(/^Email/)).toHaveValue("kavya@acme.example");
+
+      await userEvent.clear(nameField);
+      await userEvent.type(nameField, "Kavya I.");
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      await waitFor(() => expect(findCallByMethod("PATCH")).toBeDefined());
+      const [url, init] = findCallByMethod("PATCH")!;
+      expect(url).toBe("/api/proxy/users/user-1");
+      expect(JSON.parse((init as RequestInit).body as string)).toEqual({
+        name: "Kavya I.",
+        email: "kavya@acme.example",
+        status: "active",
+      });
+    });
+  });
+
+  describe("deleting a user", () => {
+    it("confirms, then DELETEs the row", async () => {
+      renderPage();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Delete" }),
+      );
+      expect(screen.getByText("Delete this user?")).toBeInTheDocument();
+
+      await userEvent.click(screen.getByRole("button", { name: "Confirm" }));
+
+      await waitFor(() => expect(findCallByMethod("DELETE")).toBeDefined());
+      const [url] = findCallByMethod("DELETE")!;
+      expect(url).toBe("/api/proxy/users/user-1");
     });
   });
 });

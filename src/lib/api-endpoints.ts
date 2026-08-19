@@ -18,8 +18,8 @@
  * `src/schemas/forms/*`) are `.ts` modules, not `.json`, specifically so
  * they can import this file instead of typing the path out again -- see
  * `users-table.ts`. A schema with no endpoint (`login-form.json`,
- * `invite-user-form.json`, `edit-user-roles-form.json`) has no reason to
- * leave plain JSON.
+ * `invite-user-form.json`, `edit-user-form.json`) has no reason to leave
+ * plain JSON.
  */
 
 /**

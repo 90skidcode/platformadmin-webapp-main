@@ -2,9 +2,9 @@ import { apiEndpoints } from "@/lib/api-endpoints";
 import type { TableSchema } from "@/components/table";
 
 // `.ts`, not `.json`, so `endpoint.url` can come from `apiEndpoints.ts`
-// instead of a hand-typed literal (§6.2). `deactivate`'s url keeps the
-// `{id}` placeholder -- `interpolateRow` substitutes it from the row at
-// click time -- which is why `apiEndpoints.users.byId` is called with the
+// instead of a hand-typed literal (§6.2). `delete`'s url keeps the `{id}`
+// placeholder -- `interpolateRow` substitutes it from the row at click
+// time -- which is why `apiEndpoints.users.byId` is called with the
 // literal string `"{id}"` rather than a real id.
 export const usersTableSchema: TableSchema = {
   id: "users-table",
@@ -51,11 +51,11 @@ export const usersTableSchema: TableSchema = {
   // nav-items.ts -- restore once the backend has real roles/permissions.
   rowActions: [
     {
-      id: "edit-roles",
-      labelKey: "actions.editRoles",
+      id: "edit",
+      labelKey: "actions.edit",
       icon: "pencil",
       handler: "custom",
-      onClick: "editRoles",
+      onClick: "editUser",
       // permission: "users.write",
     },
     {
@@ -73,22 +73,25 @@ export const usersTableSchema: TableSchema = {
       },
     },
     {
-      id: "deactivate",
-      labelKey: "actions.deactivate",
+      // Real `DELETE /users/{id}` (confirmed against a live response) --
+      // hard delete, no body, 200 with `data: null`. Replaces the old
+      // PATCH-status-to-"deactivated" placeholder now that a real endpoint
+      // exists for it.
+      id: "delete",
+      labelKey: "actions.delete",
       icon: "trash",
       handler: "api",
       endpoint: {
-        method: "PATCH",
+        method: "DELETE",
         url: apiEndpoints.users.byId("{id}"),
-        body: { status: "deactivated" },
       },
       confirm: {
-        titleKey: "confirm.deactivate.title",
-        messageKey: "confirm.deactivate.message",
+        titleKey: "confirm.delete.title",
+        messageKey: "confirm.delete.message",
       },
-      // permission: "users.deactivate",
+      // permission: "users.delete",
       onSuccess: {
-        toast: { variant: "success", messageKey: "toast.deactivated" },
+        toast: { variant: "success", messageKey: "toast.deleted" },
         refetch: true,
       },
       onError: {

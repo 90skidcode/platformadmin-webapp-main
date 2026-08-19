@@ -31,28 +31,31 @@
       "createdAt": "تاريخ الإنشاء"
     },
     "actions": {
-      "editRoles": "تعديل الأدوار",
-      "deactivate": "إلغاء التفعيل",
+      "edit": "تعديل",
+      "delete": "حذف",
       "resendInvite": "إعادة إرسال الدعوة",
       "newUser": "دعوة مستخدم",
       "save": "حفظ"
     },
     "confirm": {
-      "deactivate": {
-        "title": "إلغاء تفعيل هذا المستخدم؟",
-        "message": "سيفقد الوصول إلى إدارة المنصة فورًا."
+      "delete": {
+        "title": "حذف هذا المستخدم؟",
+        "message": "لا يمكن التراجع عن هذا الإجراء."
       }
     },
     "toast": {
-      "deactivated": "تم إلغاء تفعيل المستخدم.",
+      "deleted": "تم حذف المستخدم.",
       "inviteResent": "تم إعادة إرسال الدعوة.",
-      "rolesUpdated": "تم تحديث الأدوار.",
+      "userUpdated": "تم تحديث المستخدم.",
       "userInvited": "تم إرسال الدعوة.",
       "genericError": "تعذر إتمام هذا الإجراء. يرجى المحاولة مرة أخرى."
     },
     "editRolesDialog": {
-      "title": "تعديل أدوار {name}",
-      "roleLabel": "الدور"
+      "title": "تعديل {name}",
+      "roleLabel": "الدور",
+      "statusLabel": "الحالة",
+      "name": "الاسم",
+      "email": "البريد الإلكتروني"
     },
     "inviteDialog": {
       "title": "دعوة مستخدم جديد"

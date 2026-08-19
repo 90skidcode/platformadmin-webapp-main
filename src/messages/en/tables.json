@@ -31,30 +31,31 @@
       "createdAt": "Created"
     },
     "actions": {
-      "editRoles": "Edit roles",
-      "deactivate": "Deactivate",
+      "edit": "Edit",
+      "delete": "Delete",
       "resendInvite": "Resend invite",
       "newUser": "Add User",
       "save": "Save"
     },
     "confirm": {
-      "deactivate": {
-        "title": "Deactivate this user?",
-        "message": "They will immediately lose access to Platform Admin."
+      "delete": {
+        "title": "Delete this user?",
+        "message": "This action cannot be undone."
       }
     },
     "toast": {
-      "deactivated": "User deactivated.",
+      "deleted": "User deleted.",
       "inviteResent": "Invite resent.",
-      "rolesUpdated": "Roles updated.",
+      "userUpdated": "User updated.",
       "userInvited": "Invite sent.",
       "genericError": "That action could not be completed. Please try again."
     },
     "editRolesDialog": {
-      "title": "Edit roles for {name}",
+      "title": "Edit {name}",
       "roleLabel": "Role",
-      "name":"Name",
-      "email":"Email"
+      "statusLabel": "Status",
+      "name": "Name",
+      "email": "Email"
     },
     "inviteDialog": {
       "title": "Invite a new user"
