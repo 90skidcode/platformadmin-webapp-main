@@ -24,9 +24,9 @@ describe("refreshAccessToken", () => {
             code: "S_200_AUTH_REFRESH_OK",
             message: "Token refreshed successfully",
             data: {
-              accessToken: "new-access-token",
-              accessTokenExpires: Date.now() + 300_000,
-              refreshToken: "new-refresh-token",
+              access_token: "new-access-token",
+              refresh_token: "new-refresh-token",
+              token_type: "bearer",
             },
           }),
         }),
@@ -48,8 +48,8 @@ describe("refreshAccessToken", () => {
             code: "S_200_AUTH_REFRESH_OK",
             message: "Token refreshed successfully",
             data: {
-              accessToken: "new-access-token",
-              accessTokenExpires: Date.now() + 300_000,
+              access_token: "new-access-token",
+              token_type: "bearer",
             },
           }),
         }),

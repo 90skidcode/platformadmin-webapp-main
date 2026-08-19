@@ -1,19 +1,48 @@
 {
   "id": "edit-user-roles-form",
   "i18nNamespace": "tables.users",
-  "layout": { "columns": 1 },
+  "layout": {
+    "columns": 1
+  },
   "fields": [
+    {
+      "name": "name",
+      "type": "text",
+      "labelKey": "editRolesDialog.name",
+      "validation": {
+        "required": true
+      }
+    },
+    {
+      "name": "email",
+      "type": "email",
+      "labelKey": "editRolesDialog.email",
+      "validation": {
+        "required": true
+      }
+    },
     {
       "name": "role",
       "type": "select",
       "labelKey": "editRolesDialog.roleLabel",
-      "validation": { "required": true },
+      "validation": {
+        "required": true
+      },
       "optionsSource": {
         "type": "static",
         "options": [
-          { "value": "viewer", "labelKey": "roles.viewer" },
-          { "value": "manager", "labelKey": "roles.manager" },
-          { "value": "platform-admin", "labelKey": "roles.platform-admin" }
+          {
+            "value": "viewer",
+            "labelKey": "roles.viewer"
+          },
+          {
+            "value": "manager",
+            "labelKey": "roles.manager"
+          },
+          {
+            "value": "platform-admin",
+            "labelKey": "roles.platform-admin"
+          }
         ]
       }
     }
@@ -26,11 +55,17 @@
       "variant": "primary",
       "onClick": "saveRoles",
       "onSuccess": {
-        "toast": { "variant": "success", "messageKey": "toast.rolesUpdated" },
+        "toast": {
+          "variant": "success",
+          "messageKey": "toast.rolesUpdated"
+        },
         "refetch": true
       },
       "onError": {
-        "toast": { "variant": "error", "messageKey": "toast.genericError" }
+        "toast": {
+          "variant": "error",
+          "messageKey": "toast.genericError"
+        }
       }
     }
   ]

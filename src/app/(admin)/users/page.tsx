@@ -118,17 +118,25 @@ export default function UsersPage() {
           {editingUser && (
             <FormRenderer
               schema={editUserRolesFormSchema as unknown as FormSchema}
-              defaultValues={{ role: editingUser.roles[0] }}
+              defaultValues={{
+                name: editingUser.name,
+                email: editingUser.email,
+                role: editingUser.roles[0],
+              }}
               onRefetch={refreshTable}
               actionHandlers={{
                 saveRoles: async (values) => {
-                  const { role } = values as { role: string };
+                  const { role, ...rest } = values as {
+                    role: string;
+                    name: string;
+                    email: string;
+                  };
                   const res = await apiFetcher(
                     apiEndpoints.users.byId(editingUser.id),
                     {
                       method: "PATCH",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ roles: [role] }),
+                      body: JSON.stringify({ ...rest, roles: [role] }),
                     },
                   );
                   if (!res.ok)

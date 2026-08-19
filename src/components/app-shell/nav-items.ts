@@ -20,19 +20,24 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/",
     icon: "layoutDashboard",
   },
+  // `roles`/`permission` gates below are temporarily stripped -- the real
+  // backend's `/auth/login` has no roles/permissions source yet (no `/me`
+  // either, see resolve-roles.ts), so every session's roles/permissions are
+  // empty and gating on them would hide these items for everyone. Restore
+  // the gates (kept in comments) once the backend has real data to check.
   {
     id: "users",
     labelKey: "nav.users",
     href: "/users",
     icon: "users",
-    permission: "users.read",
+    // permission: "users.read",
   },
   {
     id: "audit-log",
     labelKey: "nav.auditLog",
     href: "/audit-log",
     icon: "history",
-    permission: "audit.read",
+    // permission: "audit.read",
   },
   {
     id: "settings",
@@ -42,14 +47,14 @@ export const NAV_ITEMS: NavItem[] = [
     // Layered gate, deliberately: viewer has `settings.read` but not the role,
     // so this stays hidden for them -- demonstrates roles AND permission
     // combining, not just permission alone (plan §5).
-    roles: ["platform-admin", "manager"],
-    permission: "settings.read",
+    // roles: ["platform-admin", "manager"],
+    // permission: "settings.read",
   },
   {
     id: "style-guide",
     labelKey: "nav.styleGuide",
     href: "/style-guide",
     icon: "palette",
-    roles: ["platform-admin"],
+    // roles: ["platform-admin"],
   },
 ];

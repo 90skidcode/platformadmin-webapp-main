@@ -45,6 +45,8 @@ export const usersTableSchema: TableSchema = {
       sortable: true,
     },
   ],
+  // `permission` gates below are temporarily stripped, same reason as
+  // nav-items.ts -- restore once the backend has real roles/permissions.
   rowActions: [
     {
       id: "edit-roles",
@@ -52,7 +54,7 @@ export const usersTableSchema: TableSchema = {
       icon: "pencil",
       handler: "custom",
       onClick: "editRoles",
-      permission: "users.write",
+      // permission: "users.write",
     },
     {
       id: "resend-invite",
@@ -60,7 +62,7 @@ export const usersTableSchema: TableSchema = {
       icon: "mail",
       handler: "custom",
       onClick: "resendInvite",
-      permission: "users.invite",
+      // permission: "users.invite",
       onSuccess: {
         toast: { variant: "success", messageKey: "toast.inviteResent" },
       },
@@ -82,7 +84,7 @@ export const usersTableSchema: TableSchema = {
         titleKey: "confirm.deactivate.title",
         messageKey: "confirm.deactivate.message",
       },
-      permission: "users.deactivate",
+      // permission: "users.deactivate",
       onSuccess: {
         toast: { variant: "success", messageKey: "toast.deactivated" },
         refetch: true,

@@ -4,9 +4,9 @@
   "layout": { "columns": 1 },
   "fields": [
     {
-      "name": "email",
-      "type": "email",
-      "labelKey": "fields.email.label",
+      "name": "username",
+      "type": "text",
+      "labelKey": "fields.username.label",
       "validation": { "required": true }
     },
     {

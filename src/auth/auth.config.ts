@@ -5,6 +5,19 @@ import type { ApiEnvelope } from "@/lib/api-envelope";
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { resolveAccess, type LoginResponse } from "./resolve-roles";
 import { refreshAccessToken } from "./refresh-token";
+import { decodeJwtPayload } from "./decode-jwt";
+
+/** Real backend's actual `/auth/login` shape (confirmed against a live
+ * response) -- `username`/`password` in, a bare token pair out. No `user`,
+ * no `roles`/`permissions`, no `accessTokenExpires`: none of the plan's
+ * assumed extras (see mocks/db.ts's "swapping in a real backend means
+ * changing API_URL, nothing else" comment) actually held, hence the
+ * translation below instead of a straight passthrough. */
+interface RealLoginData {
+  access_token: string;
+  refresh_token: string;
+  token_type: string;
+}
 
 export const authConfig: NextAuthConfig = {
   session: { strategy: "jwt" },
@@ -17,7 +30,7 @@ export const authConfig: NextAuthConfig = {
   trustHost: true,
   providers: [
     Credentials({
-      credentials: { email: {}, password: {} },
+      credentials: { username: {}, password: {} },
       authorize: async (credentials) => {
         const res = await fetch(
           `${process.env.API_URL}${apiEndpoints.auth.login}`,
@@ -30,18 +43,42 @@ export const authConfig: NextAuthConfig = {
         // Wrong password / unknown user -> NextAuth surfaces a generic auth error.
         if (!res.ok) return null;
 
-        const body = (await res.json()) as ApiEnvelope<LoginResponse>;
-        const data = body.data;
-        const access = await resolveAccess(data, data.accessToken);
+        const body = (await res.json()) as ApiEnvelope<RealLoginData>;
+        const accessToken = body.data.access_token;
+        const refreshToken = body.data.refresh_token;
+
+        // No `exp` on the envelope itself -- it's inside the access token's
+        // own JWT payload. `sub` doubles as the only identity the backend
+        // gives us, since there's no `user` object either.
+        const payload = decodeJwtPayload(accessToken);
+        const username =
+          (payload?.sub as string | undefined) ??
+          (credentials?.username as string | undefined) ??
+          "unknown";
+        const accessTokenExpires =
+          typeof payload?.exp === "number"
+            ? payload.exp * 1000
+            : Date.now() + 15 * 60_000; // fallback if the token has no exp claim
+
+        const loginResponse: LoginResponse = {
+          user: { id: username, name: username, email: username },
+          accessToken,
+          refreshToken,
+          accessTokenExpires,
+        };
+        // Backend has no roles/permissions/tenants source yet (no `/me`
+        // either) -- resolveAccess falls back to empty arrays, which is
+        // fine: RBAC gating itself is disabled for now (permissions.ts).
+        const access = await resolveAccess(loginResponse, accessToken);
 
         return {
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
+          id: loginResponse.user.id,
+          name: loginResponse.user.name,
+          email: loginResponse.user.email,
           ...access,
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          accessTokenExpires: data.accessTokenExpires,
+          accessToken,
+          refreshToken,
+          accessTokenExpires,
         };
       },
     }),

@@ -58,7 +58,7 @@ export const settingsFormSchema: FormSchema = {
       onError: {
         toast: { variant: "error", messageKey: "toast.genericError" },
       },
-      permission: "settings.write",
+      // permission: "settings.write", -- temporarily stripped, see nav-items.ts
     },
   ],
 };

@@ -54,7 +54,9 @@
     },
     "editRolesDialog": {
       "title": "Edit roles for {name}",
-      "roleLabel": "Role"
+      "roleLabel": "Role",
+      "name":"Name",
+      "email":"Email"
     },
     "inviteDialog": {
       "title": "Invite a new user"
