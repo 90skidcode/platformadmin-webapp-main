@@ -25,7 +25,9 @@ export function useRemoteOptions(
       .then((res) => res.json())
       .then((body: ApiEnvelope<ApiListData<unknown> | unknown[]>) => {
         if (cancelled) return;
-        const items = Array.isArray(body.data) ? body.data : body.data.items;
+        const items = Array.isArray(body.data)
+          ? body.data
+          : (body.data?.items ?? body.data?.data ?? []);
         const valueKey = source.valueKey ?? "value";
         const labelKey = source.labelKey ?? "label";
         setOptions(

@@ -41,7 +41,6 @@ export const apiEndpoints = {
   users: {
     list: `${PROXY_BASE_PATH}/users`,
     byId: (userId: string) => `${PROXY_BASE_PATH}/users/${userId}`,
-    resendInvite: (userId: string) =>
-      `${PROXY_BASE_PATH}/users/${userId}/resend-invite`,
+    newUser: () => `${PROXY_BASE_PATH}/users`,
   },
 } as const;

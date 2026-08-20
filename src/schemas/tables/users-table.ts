@@ -18,16 +18,19 @@ export const usersTableSchema: TableSchema = {
       labelKey: "columns.status",
       options: [
         { value: "active", labelKey: "status.active" },
-        { value: "invited", labelKey: "status.invited" },
-        { value: "deactivated", labelKey: "status.deactivated" },
+        { value: "inactive", labelKey: "status.inactive" },
       ],
     },
   ],
   pageSize: 10,
   columns: [
     { accessorKey: "name", headerKey: "columns.name", sortable: true },
-    { accessorKey: "email", headerKey: "columns.email", cell: "email" },
-    { accessorKey: "roles", headerKey: "columns.roles" },
+    {
+      accessorKey: "email",
+      headerKey: "columns.email",
+      cell: "email",
+      sortable: true,
+    },
     {
       accessorKey: "status",
       headerKey: "columns.status",
@@ -39,8 +42,14 @@ export const usersTableSchema: TableSchema = {
       },
     },
     {
-      accessorKey: "lastLoginAt",
-      headerKey: "columns.lastLogin",
+      accessorKey: "created_at",
+      headerKey: "columns.created_at",
+      cell: "date",
+      sortable: true,
+    },
+    {
+      accessorKey: "updated_at",
+      headerKey: "columns.updated_at",
       cell: "date",
       sortable: true,
     },
@@ -55,28 +64,13 @@ export const usersTableSchema: TableSchema = {
       permission: "users.write",
     },
     {
-      id: "resend-invite",
-      labelKey: "actions.resendInvite",
-      icon: "mail",
-      handler: "custom",
-      onClick: "resendInvite",
-      permission: "users.invite",
-      onSuccess: {
-        toast: { variant: "success", messageKey: "toast.inviteResent" },
-      },
-      onError: {
-        toast: { variant: "error", messageKey: "toast.genericError" },
-      },
-    },
-    {
-      id: "deactivate",
+      id: "remove-user",
       labelKey: "actions.deactivate",
       icon: "trash",
       handler: "api",
       endpoint: {
-        method: "PATCH",
+        method: "DELETE",
         url: apiEndpoints.users.byId("{id}"),
-        body: { status: "deactivated" },
       },
       confirm: {
         titleKey: "confirm.deactivate.title",

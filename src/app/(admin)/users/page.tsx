@@ -12,34 +12,29 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui";
-import { FormRenderer, type FormSchema } from "@/components/form";
+import { FormRenderer } from "@/components/form";
 import { TableRenderer } from "@/components/table";
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { can } from "@/lib/permissions";
 import { usersTableSchema } from "@/schemas/tables/users-table";
-import inviteUserFormSchema from "@/schemas/forms/invite-user-form.json";
-import editUserRolesFormSchema from "@/schemas/forms/edit-user-roles-form.json";
+import { addUserFormSchema } from "@/schemas/forms/add-user-form";
+import { toast } from "@/components/toast";
+import { editUserFormSchema } from "@/schemas/forms/edit-user-form";
 
 interface UserRow {
   [key: string]: unknown;
   id: string;
   name: string;
-  email: string;
-  roles: string[];
   status: string;
 }
 
-// Edit convention: never a centered popup. invite-user-form.json (3 fields)
-// and edit-user-roles-form.json (1 field) both open in a Sheet (right-side
-// panel); a form with 5+ fields gets a full page instead -- see
-// settings-form.ts / src/app/(admin)/settings/page.tsx for that case.
 export default function UsersPage() {
   const { data: session } = useSession();
   const apiFetcher = useApiFetcher();
   const t = useTranslations("tables.users");
   const commonT = useTranslations("common");
-  const [inviteOpen, setInviteOpen] = useState(false);
+  const [showUserModal, setShowUserModal] = useState<boolean>(false);
   const [editingUser, setEditingUser] = useState<UserRow | null>(null);
   const [tableKey, setTableKey] = useState(0);
   const refreshTable = () => setTableKey((k) => k + 1);
@@ -55,18 +50,10 @@ export default function UsersPage() {
         schema={usersTableSchema}
         actionHandlers={{
           editRoles: async (row) => setEditingUser(row as UserRow),
-          resendInvite: async (row) => {
-            const typedRow = row as UserRow;
-            const res = await apiFetcher(
-              apiEndpoints.users.resendInvite(typedRow.id),
-              { method: "POST" },
-            );
-            if (!res.ok) throw new Error(`Request failed with ${res.status}`);
-          },
         }}
         toolbarEnd={
           can("users.invite", session) && (
-            <Button onClick={() => setInviteOpen(true)}>
+            <Button onClick={() => setShowUserModal(true)}>
               <UserPlus />
               {t("actions.newUser")}
             </Button>
@@ -74,29 +61,47 @@ export default function UsersPage() {
         }
       />
 
-      <Sheet open={inviteOpen} onOpenChange={setInviteOpen}>
+      <Sheet
+        open={!!showUserModal}
+        onOpenChange={(open) => !open && setShowUserModal(false)}
+      >
         <SheetContent>
           <SheetHeader>
-            <SheetTitle>{t("inviteDialog.title")}</SheetTitle>
+            <SheetTitle>{t("newUsereDialog.title")}</SheetTitle>
           </SheetHeader>
+
           <FormRenderer
-            schema={inviteUserFormSchema as unknown as FormSchema}
+            schema={addUserFormSchema}
+            defaultValues={{ name: "", email: "", password: "" }}
             onRefetch={refreshTable}
             actionHandlers={{
-              inviteUser: async (values) => {
-                const { role, ...rest } = values as {
-                  role: string;
+              addUser: async (values) => {
+                const { name, email, password } = values as {
                   name: string;
                   email: string;
+                  password: string;
                 };
-                const res = await apiFetcher(apiEndpoints.users.list, {
+                const res = await apiFetcher(apiEndpoints.users.newUser(), {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ ...rest, roles: [role] }),
+                  body: JSON.stringify({ name, email, password }),
                 });
-                if (!res.ok)
-                  throw new Error(`Request failed with ${res.status}`);
-                setInviteOpen(false);
+                if (!res.ok) {
+                  // 1. Read custom message from API response
+                  const errorData = await res.json().catch(() => null);
+                  const errorMessage =
+                    errorData?.message ||
+                    `Request failed with status ${res.status}`;
+                  // 2. Show the custom error toast
+                  toast({
+                    variant: "error",
+                    title: "Error",
+                    description: errorMessage,
+                  });
+                  // 3. Throw to prevent onSuccess from running
+                  throw new Error(errorMessage);
+                }
+                setShowUserModal(false);
               },
             }}
           />
@@ -111,24 +116,32 @@ export default function UsersPage() {
           <SheetHeader>
             <SheetTitle>
               {editingUser
-                ? t("editRolesDialog.title", { name: editingUser.name })
+                ? t("editUserDialog.title", { name: editingUser.name })
                 : ""}
             </SheetTitle>
           </SheetHeader>
           {editingUser && (
             <FormRenderer
-              schema={editUserRolesFormSchema as unknown as FormSchema}
-              defaultValues={{ role: editingUser.roles[0] }}
+              schema={editUserFormSchema}
+              defaultValues={{
+                name: editingUser.name,
+                email: editingUser.email,
+                status: editingUser.status,
+              }}
               onRefetch={refreshTable}
               actionHandlers={{
-                saveRoles: async (values) => {
-                  const { role } = values as { role: string };
+                updateUser: async (values) => {
+                  const { name, status, email } = values as {
+                    name: string;
+                    status: string;
+                    email: string;
+                  };
                   const res = await apiFetcher(
                     apiEndpoints.users.byId(editingUser.id),
                     {
                       method: "PATCH",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ roles: [role] }),
+                      body: JSON.stringify({ name, status, email }),
                     },
                   );
                   if (!res.ok)

@@ -27,17 +27,21 @@
     "columns": {
       "name": "Name",
       "email": "Email",
-      "roles": "Roles",
-      "tenant": "Tenant",
-      "lastLogin": "Last login",
-      "status": "Status"
+      "status": "Status",
+      "created_at": "Created At",
+      "updated_at": "Updated At"
+    },
+    "addUserForm": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password"
     },
     "actions": {
       "editRoles": "Edit roles",
+      "save": "Save",
+      "newUser": "Add User",
       "deactivate": "Deactivate",
-      "resendInvite": "Resend invite",
-      "newUser": "Invite user",
-      "save": "Save"
+      "submit": "Submit"
     },
     "confirm": {
       "deactivate": {
@@ -49,15 +53,17 @@
       "deactivated": "User deactivated.",
       "inviteResent": "Invite resent.",
       "rolesUpdated": "Roles updated.",
-      "userInvited": "Invite sent.",
+      "addUser": "Added User",
       "genericError": "That action could not be completed. Please try again."
     },
-    "editRolesDialog": {
-      "title": "Edit roles for {name}",
-      "roleLabel": "Role"
+    "editUserDialog": {
+      "title": "Edit name for {name}",
+      "name": "Name",
+      "statusLabel": "Status",
+      "email": "Email"
     },
-    "inviteDialog": {
-      "title": "Invite a new user"
+    "newUsereDialog": {
+      "title": "Add a User"
     },
     "roles": {
       "platform-admin": "Platform Admin",
@@ -66,8 +72,7 @@
     },
     "status": {
       "active": "Active",
-      "invited": "Invited",
-      "deactivated": "Deactivated"
+      "inactive": "Inactive"
     }
   },
   "auditLog": {

@@ -40,6 +40,7 @@ export function TextField({
         invalid={!!error}
         aria-describedby={error ? errorId : undefined}
         {...form.register(field.name)}
+        autoComplete={field.autoComplete}
       />
       <FieldError id={errorId} message={error} />
     </div>

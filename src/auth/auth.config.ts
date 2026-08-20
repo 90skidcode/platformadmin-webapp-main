@@ -5,6 +5,7 @@ import type { ApiEnvelope } from "@/lib/api-envelope";
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { resolveAccess, type LoginResponse } from "./resolve-roles";
 import { refreshAccessToken } from "./refresh-token";
+import { decodeJwtPayload } from "./decodeJwt";
 
 export const authConfig: NextAuthConfig = {
   session: { strategy: "jwt" },
@@ -17,31 +18,58 @@ export const authConfig: NextAuthConfig = {
   trustHost: true,
   providers: [
     Credentials({
-      credentials: { email: {}, password: {} },
+      credentials: { username: {}, password: {} },
       authorize: async (credentials) => {
         const res = await fetch(
           `${process.env.API_URL}${apiEndpoints.auth.login}`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(credentials),
+            body: JSON.stringify({
+              username: credentials?.username,
+              password: credentials?.password,
+            }),
           },
         );
+
         // Wrong password / unknown user -> NextAuth surfaces a generic auth error.
         if (!res.ok) return null;
 
         const body = (await res.json()) as ApiEnvelope<LoginResponse>;
         const data = body.data;
-        const access = await resolveAccess(data, data.accessToken);
+
+        const accessToken = data.access_token ?? data.accessToken ?? "";
+        const refreshToken = data.refresh_token ?? data.refreshToken ?? "";
+        const claims = decodeJwtPayload(accessToken);
+
+        const username =
+          data.user?.username ??
+          claims?.sub ??
+          (typeof credentials?.username === "string"
+            ? credentials.username
+            : "admin");
+
+        const id = data.user?.id ?? claims?.sub ?? username;
+        const name = data.user?.name ?? username;
+        const email = data.user?.email;
+
+        // Expiration in ms (from JWT exp in seconds, or response, or default 15m)
+        const accessTokenExpires =
+          data.accessTokenExpires ??
+          (claims?.exp ? claims.exp * 1000 : Date.now() + 15 * 60 * 1000);
+
+        // Optional role/tenant resolution (safely returns empty arrays if not present)
+        const access = await resolveAccess(data, accessToken);
 
         return {
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
+          id,
+          name,
+          username,
+          email,
           ...access,
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          accessTokenExpires: data.accessTokenExpires,
+          accessToken,
+          refreshToken,
+          accessTokenExpires,
         };
       },
     }),
@@ -54,6 +82,7 @@ export const authConfig: NextAuthConfig = {
     },
     async session({ session, token }) {
       session.user.id = token.id as string;
+      session.user.username = (token.username as string) ?? token.id;
       session.user.roles = (token.roles as string[]) ?? [];
       session.user.permissions = (token.permissions as string[]) ?? [];
       session.user.tenants =

@@ -21,10 +21,13 @@ export async function POST(request: Request) {
   touchLastLogin(user.id);
 
   return success(200, "AUTH_LOGIN_OK", {
-    user: { id: user.id, name: user.name, email: user.email },
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    token_type: "bearer",
     accessToken,
     refreshToken,
     accessTokenExpires,
+    user: { id: user.id, name: user.name, email: user.email },
     roles: user.roles,
     permissions: user.permissions,
     tenants: user.tenants,

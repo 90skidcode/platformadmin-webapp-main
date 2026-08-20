@@ -27,12 +27,15 @@ export interface ApiFieldError {
 export interface ApiPagination {
   page: number;
   limit: number;
-  totalItems: number;
-  totalPages: number;
+  totalItems?: number;
+  total_items?: number;
+  totalPages?: number;
+  total_pages?: number;
 }
 
 export interface ApiListData<T> {
-  items: T[];
+  items?: T[];
+  data?: T[];
   pagination: ApiPagination;
 }
 

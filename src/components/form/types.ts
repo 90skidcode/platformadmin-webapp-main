@@ -72,6 +72,7 @@ export interface FormField {
   validation?: FieldValidation;
   /** `select` only. */
   optionsSource?: OptionsSource;
+  autoComplete?: string;
 }
 
 export type ButtonVariant =

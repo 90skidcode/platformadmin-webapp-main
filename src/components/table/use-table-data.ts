@@ -104,9 +104,23 @@ export function useTableData<T extends Record<string, unknown>>(
         if (Array.isArray(data)) {
           setAllRows(data);
           setServerTotal(data.length);
-        } else {
-          setAllRows(data.items);
-          setServerTotal(data.pagination.totalItems);
+        } else if (data) {
+          const rawData = data as unknown as Record<string, unknown>;
+          let items: T[] = [];
+          if (Array.isArray(rawData.items)) {
+            items = rawData.items as T[];
+          } else if (Array.isArray(rawData.data)) {
+            items = rawData.data as T[];
+          }
+          const pagination = (rawData.pagination ?? {}) as Record<
+            string,
+            unknown
+          >;
+          const rawTotal =
+            pagination.totalItems ?? pagination.total_items ?? items.length;
+          const total = Number(rawTotal);
+          setAllRows(items);
+          setServerTotal(Number.isNaN(total) ? items.length : total);
         }
       })
       .catch(() => {

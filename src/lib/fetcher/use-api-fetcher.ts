@@ -38,7 +38,6 @@ export function useApiFetcher() {
   return useCallback(
     async (path: string, options: RequestInit = {}) => {
       const res = await fetch(path, options);
-
       if (res.status === 401 && !sessionExpiredHandled) {
         sessionExpiredHandled = true;
         toast({
