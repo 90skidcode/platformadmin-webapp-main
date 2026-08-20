@@ -111,24 +111,27 @@ export default function UsersPage() {
           <SheetHeader>
             <SheetTitle>
               {editingUser
-                ? t("editRolesDialog.title", { name: editingUser.name })
+                ? t("editEmailDialog.title", { name: editingUser.name })
                 : ""}
             </SheetTitle>
           </SheetHeader>
           {editingUser && (
             <FormRenderer
               schema={editUserRolesFormSchema as unknown as FormSchema}
-              defaultValues={{ role: editingUser.roles[0] }}
+              defaultValues={{ email: editingUser.email }}
               onRefetch={refreshTable}
               actionHandlers={{
-                saveRoles: async (values) => {
-                  const { role } = values as { role: string };
+                saveEmail: async (values) => {
+                  const { email } = values as { email: string };
+                  const id =
+                    editingUser.id ||
+                    ((editingUser as Record<string, unknown>)._id as string);
                   const res = await apiFetcher(
-                    apiEndpoints.users.byId(editingUser.id),
+                    apiEndpoints.users.byId(String(id)),
                     {
                       method: "PATCH",
                       headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ roles: [role] }),
+                      body: JSON.stringify({ email }),
                     },
                   );
                   if (!res.ok)

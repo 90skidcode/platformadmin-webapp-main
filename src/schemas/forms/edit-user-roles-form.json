@@ -4,18 +4,10 @@
   "layout": { "columns": 1 },
   "fields": [
     {
-      "name": "role",
-      "type": "select",
-      "labelKey": "editRolesDialog.roleLabel",
-      "validation": { "required": true },
-      "optionsSource": {
-        "type": "static",
-        "options": [
-          { "value": "viewer", "labelKey": "roles.viewer" },
-          { "value": "manager", "labelKey": "roles.manager" },
-          { "value": "platform-admin", "labelKey": "roles.platform-admin" }
-        ]
-      }
+      "name": "email",
+      "type": "email",
+      "labelKey": "columns.email",
+      "validation": { "required": true }
     }
   ],
   "actions": [
@@ -24,9 +16,9 @@
       "type": "submit",
       "labelKey": "actions.save",
       "variant": "primary",
-      "onClick": "saveRoles",
+      "onClick": "saveEmail",
       "onSuccess": {
-        "toast": { "variant": "success", "messageKey": "toast.rolesUpdated" },
+        "toast": { "variant": "success", "messageKey": "toast.emailUpdated" },
         "refetch": true
       },
       "onError": {

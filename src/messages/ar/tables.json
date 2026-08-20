@@ -49,12 +49,22 @@
       "deactivated": "تم إلغاء تفعيل المستخدم.",
       "inviteResent": "تم إعادة إرسال الدعوة.",
       "rolesUpdated": "تم تحديث الأدوار.",
+      "statusUpdated": "تم تحديث الحالة.",
+      "emailUpdated": "تم تحديث البريد الإلكتروني.",
       "userInvited": "تم إرسال الدعوة.",
       "genericError": "تعذر إتمام هذا الإجراء. يرجى المحاولة مرة أخرى."
     },
     "editRolesDialog": {
       "title": "تعديل أدوار {name}",
       "roleLabel": "الدور"
+    },
+    "editStatusDialog": {
+      "title": "تعديل حالة {name}",
+      "statusLabel": "الحالة"
+    },
+    "editEmailDialog": {
+      "title": "تعديل البريد الإلكتروني لـ {name}",
+      "emailLabel": "البريد الإلكتروني"
     },
     "inviteDialog": {
       "title": "دعوة مستخدم جديد"

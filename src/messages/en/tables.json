@@ -29,7 +29,8 @@
       "email": "Email",
       "roles": "Roles",
       "tenant": "Tenant",
-      "lastLogin": "Last login",
+      "createdAt": "Created at",
+      "upatedAt": "Updated at",
       "status": "Status"
     },
     "actions": {
@@ -49,12 +50,22 @@
       "deactivated": "User deactivated.",
       "inviteResent": "Invite resent.",
       "rolesUpdated": "Roles updated.",
+      "statusUpdated": "Status updated.",
+      "emailUpdated": "Email updated.",
       "userInvited": "Invite sent.",
       "genericError": "That action could not be completed. Please try again."
     },
     "editRolesDialog": {
       "title": "Edit roles for {name}",
       "roleLabel": "Role"
+    },
+    "editStatusDialog": {
+      "title": "Edit status for {name}",
+      "statusLabel": "Status"
+    },
+    "editEmailDialog": {
+      "title": "Edit email for {name}",
+      "emailLabel": "Email"
     },
     "inviteDialog": {
       "title": "Invite a new user"

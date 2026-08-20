@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { SortingState } from "@tanstack/react-table";
 
-import type { ApiEnvelope, ApiListData } from "@/lib/api-envelope";
 import type { ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import type { TableSchema } from "./types";
 
@@ -83,6 +82,7 @@ export function useTableData<T extends Record<string, unknown>>(
     if (schema.mode === "server") {
       params.set("page", String(pageIndex + 1));
       params.set("pageSize", String(pageSize));
+      params.set("limit", String(pageSize));
       if (search) params.set("search", search);
       if (sortBy) {
         params.set("sortBy", sortBy);
@@ -98,15 +98,57 @@ export function useTableData<T extends Record<string, unknown>>(
 
     apiFetcher(url)
       .then((res) => res.json())
-      .then((body: ApiEnvelope<ApiListData<T> | T[]>) => {
+      .then((body: unknown) => {
         if (cancelled) return;
-        const { data } = body;
-        if (Array.isArray(data)) {
-          setAllRows(data);
-          setServerTotal(data.length);
-        } else {
-          setAllRows(data.items);
-          setServerTotal(data.pagination.totalItems);
+
+        const responseData =
+          body && typeof body === "object" && "data" in body
+            ? (body as { data: unknown }).data
+            : body;
+
+        if (Array.isArray(responseData)) {
+          setAllRows(responseData as T[]);
+          setServerTotal(responseData.length);
+          return;
+        }
+
+        if (responseData && typeof responseData === "object") {
+          const listObj = responseData as {
+            data?: T[];
+            items?: T[];
+            users?: T[];
+            pagination?: {
+              totalItems?: number;
+              total_items?: number;
+              total?: number;
+            };
+            total?: number;
+            totalItems?: number;
+            total_items?: number;
+            count?: number;
+          };
+
+          let items: T[] = [];
+          if (Array.isArray(listObj.data)) {
+            items = listObj.data;
+          } else if (Array.isArray(listObj.items)) {
+            items = listObj.items;
+          } else if (Array.isArray(listObj.users)) {
+            items = listObj.users;
+          }
+
+          const total: number =
+            listObj.pagination?.totalItems ??
+            listObj.pagination?.total_items ??
+            listObj.pagination?.total ??
+            listObj.total ??
+            listObj.totalItems ??
+            listObj.total_items ??
+            listObj.count ??
+            items.length;
+
+          setAllRows(items);
+          setServerTotal(total);
         }
       })
       .catch(() => {

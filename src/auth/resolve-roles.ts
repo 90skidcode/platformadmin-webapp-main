@@ -10,13 +10,14 @@ import type { ApiEnvelope } from "@/lib/api-envelope";
 import { apiEndpoints } from "@/lib/api-endpoints";
 
 export interface LoginResponse {
-  user: { id: string; name: string; email: string };
-  accessToken: string;
-  refreshToken: string;
-  accessTokenExpires: number;
+  user?: { id?: string; name?: string; email?: string; username?: string };
+  accessToken?: string;
+  refreshToken?: string;
+  accessTokenExpires?: number;
   roles?: string[];
   permissions?: string[];
   tenants?: { id: string; name: string }[];
+  [key: string]: unknown;
 }
 
 export interface ResolvedAccess {
@@ -39,25 +40,37 @@ export async function resolveAccess(
   }
 
   // 2) Fall back to a separate endpoint.
-  try {
-    const res = await fetch(`${process.env.API_URL}${apiEndpoints.auth.me}`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    if (!res.ok) throw new Error(`GET /me failed with ${res.status}`);
-    const body = (await res.json()) as ApiEnvelope<{
-      roles?: string[];
-      permissions?: string[];
-      tenants?: { id: string; name: string }[];
-    }>;
-    return {
-      roles: body.data.roles ?? [],
-      permissions: body.data.permissions ?? [],
-      tenants: body.data.tenants ?? [],
-    };
-  } catch {
-    console.warn(
-      "[auth] Could not resolve roles/permissions -- defaulting to no access. Check the /me endpoint or the login response shape.",
-    );
-    return { roles: [], permissions: [], tenants: [] };
+  if (accessToken) {
+    try {
+      const res = await fetch(`${process.env.API_URL}${apiEndpoints.auth.me}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) throw new Error(`GET /me failed with ${res.status}`);
+      const body = (await res.json()) as ApiEnvelope<{
+        roles?: string[];
+        permissions?: string[];
+        tenants?: { id: string; name: string }[];
+      }>;
+      const data =
+        body && typeof body === "object" && "data" in body && body.data
+          ? body.data
+          : (body as {
+              roles?: string[];
+              permissions?: string[];
+              tenants?: { id: string; name: string }[];
+            });
+      return {
+        roles: data.roles ?? [],
+        permissions: data.permissions ?? [],
+        tenants: data.tenants ?? [],
+      };
+    } catch {
+      console.warn(
+        "[auth] Could not resolve roles/permissions -- defaulting to no access. Check the /me endpoint or the login response shape.",
+      );
+      return { roles: [], permissions: [], tenants: [] };
+    }
   }
+
+  return { roles: [], permissions: [], tenants: [] };
 }

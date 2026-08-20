@@ -39,8 +39,14 @@ export const usersTableSchema: TableSchema = {
       },
     },
     {
-      accessorKey: "lastLoginAt",
-      headerKey: "columns.lastLogin",
+      accessorKey: "created_at",
+      headerKey: "columns.createdAt",
+      cell: "date",
+      sortable: true,
+    },
+    {
+      accessorKey: "updated_at",
+      headerKey: "columns.upatedAt",
       cell: "date",
       sortable: true,
     },
@@ -52,7 +58,7 @@ export const usersTableSchema: TableSchema = {
       icon: "pencil",
       handler: "custom",
       onClick: "editRoles",
-      permission: "users.write",
+      // permission: "users.write",
     },
     {
       id: "resend-invite",
@@ -60,7 +66,7 @@ export const usersTableSchema: TableSchema = {
       icon: "mail",
       handler: "custom",
       onClick: "resendInvite",
-      permission: "users.invite",
+      // permission: "users.invite",
       onSuccess: {
         toast: { variant: "success", messageKey: "toast.inviteResent" },
       },
@@ -69,20 +75,19 @@ export const usersTableSchema: TableSchema = {
       },
     },
     {
-      id: "deactivate",
+      id: "delete",
       labelKey: "actions.deactivate",
       icon: "trash",
       handler: "api",
       endpoint: {
-        method: "PATCH",
+        method: "DELETE",
         url: apiEndpoints.users.byId("{id}"),
-        body: { status: "deactivated" },
       },
       confirm: {
         titleKey: "confirm.deactivate.title",
         messageKey: "confirm.deactivate.message",
       },
-      permission: "users.deactivate",
+      // permission: "users.delete"
       onSuccess: {
         toast: { variant: "success", messageKey: "toast.deactivated" },
         refetch: true,

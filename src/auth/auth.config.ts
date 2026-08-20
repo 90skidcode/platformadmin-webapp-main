@@ -17,7 +17,7 @@ export const authConfig: NextAuthConfig = {
   trustHost: true,
   providers: [
     Credentials({
-      credentials: { email: {}, password: {} },
+      credentials: { username: {}, email: {}, password: {} },
       authorize: async (credentials) => {
         const res = await fetch(
           `${process.env.API_URL}${apiEndpoints.auth.login}`,
@@ -30,18 +30,54 @@ export const authConfig: NextAuthConfig = {
         // Wrong password / unknown user -> NextAuth surfaces a generic auth error.
         if (!res.ok) return null;
 
-        const body = (await res.json()) as ApiEnvelope<LoginResponse>;
-        const data = body.data;
-        const access = await resolveAccess(data, data.accessToken);
+        const body = (await res.json()) as
+          | ApiEnvelope<LoginResponse>
+          | LoginResponse
+          | Record<string, unknown>;
+        const data: LoginResponse =
+          body && typeof body === "object" && "data" in body && body.data
+            ? (body.data as LoginResponse)
+            : (body as LoginResponse);
+
+        const accessToken =
+          data.accessToken ??
+          ((data as Record<string, unknown>).token as string) ??
+          ((data as Record<string, unknown>).access_token as string) ??
+          "";
+        const access = await resolveAccess(data, accessToken);
+
+        const userObj =
+          data.user ??
+          (data as unknown as {
+            id?: string;
+            name?: string;
+            email?: string;
+            username?: string;
+          });
+        let credUsername = "";
+        if (typeof credentials?.username === "string") {
+          credUsername = credentials.username;
+        } else if (typeof credentials?.email === "string") {
+          credUsername = credentials.email;
+        }
+
+        let fallbackEmail = credUsername;
+        if (userObj?.username) {
+          fallbackEmail = `${userObj.username}@platform.local`;
+        }
 
         return {
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
+          id: userObj?.id ?? userObj?.username ?? credUsername ?? "user-1",
+          name: userObj?.name ?? userObj?.username ?? credUsername ?? "User",
+          email: userObj?.email ?? fallbackEmail,
           ...access,
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          accessTokenExpires: data.accessTokenExpires,
+          accessToken,
+          refreshToken:
+            data.refreshToken ??
+            ((data as Record<string, unknown>).refresh_token as string) ??
+            "",
+          accessTokenExpires:
+            data.accessTokenExpires ?? Date.now() + 24 * 60 * 60 * 1000,
         };
       },
     }),

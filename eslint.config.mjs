@@ -35,7 +35,7 @@ const eslintConfig = defineConfig([
   {
     // Applies everywhere -- prettier formatting isn't Tailwind-specific.
     plugins: { prettier: prettierPlugin },
-    rules: { "prettier/prettier": "error" },
+    rules: { "prettier/prettier": ["error", { endOfLine: "auto" }] },
   },
   prettierConfig,
   // Override default ignores of eslint-config-next.
