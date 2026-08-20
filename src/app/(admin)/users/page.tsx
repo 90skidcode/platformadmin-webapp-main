@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useSession } from "next-auth/react";
 import { UserPlus } from "lucide-react";
 
 import {
@@ -16,7 +15,6 @@ import { FormRenderer } from "@/components/form";
 import { TableRenderer } from "@/components/table";
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
-import { can } from "@/lib/permissions";
 import { usersTableSchema } from "@/schemas/tables/users-table";
 import { addUserFormSchema } from "@/schemas/forms/add-user-form";
 import { toast } from "@/components/toast";
@@ -30,7 +28,6 @@ interface UserRow {
 }
 
 export default function UsersPage() {
-  const { data: session } = useSession();
   const apiFetcher = useApiFetcher();
   const t = useTranslations("tables.users");
   const commonT = useTranslations("common");
@@ -52,12 +49,10 @@ export default function UsersPage() {
           editRoles: async (row) => setEditingUser(row as UserRow),
         }}
         toolbarEnd={
-          can("users.invite", session) && (
-            <Button onClick={() => setShowUserModal(true)}>
-              <UserPlus />
-              {t("actions.newUser")}
-            </Button>
-          )
+          <Button onClick={() => setShowUserModal(true)}>
+            <UserPlus />
+            {t("actions.newUser")}
+          </Button>
         }
       />
 
