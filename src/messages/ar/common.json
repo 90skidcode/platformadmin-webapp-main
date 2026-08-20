@@ -20,6 +20,8 @@
   "nav": {
     "dashboard": "لوحة التحكم",
     "users": "المستخدمون",
+    "backendUsers": "مستخدمو الخادم",
+    "todos": "مهام JSONPlaceholder",
     "auditLog": "سجل التدقيق",
     "settings": "الإعدادات",
     "styleGuide": "دليل التصميم"
@@ -72,6 +74,7 @@
     "USR_LIST_OK": "تم جلب المستخدمين بنجاح",
     "USR_CREATED": "تم إنشاء المستخدم بنجاح",
     "USR_UPDATED": "تم تحديث المستخدم بنجاح",
+    "USR_DELETED": "تم حذف المستخدم بنجاح",
     "USR_NOT_FOUND": "المستخدم غير موجود",
     "USR_ALREADY_ACTIVE": "قبل هذا المستخدم دعوته بالفعل",
     "USR_INVITE_RESENT": "تم إعادة إرسال الدعوة بنجاح",

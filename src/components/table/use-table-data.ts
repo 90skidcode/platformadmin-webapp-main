@@ -100,13 +100,29 @@ export function useTableData<T extends Record<string, unknown>>(
       .then((res) => res.json())
       .then((body: ApiEnvelope<ApiListData<T> | T[]>) => {
         if (cancelled) return;
-        const { data } = body;
+        const data = body?.data ?? body;
         if (Array.isArray(data)) {
-          setAllRows(data);
+          setAllRows(data as T[]);
           setServerTotal(data.length);
-        } else {
-          setAllRows(data.items);
-          setServerTotal(data.pagination.totalItems);
+        } else if (
+          data &&
+          typeof data === "object" &&
+          "items" in data &&
+          Array.isArray((data as ApiListData<T>).items)
+        ) {
+          const list = data as ApiListData<T>;
+          setAllRows(list.items);
+          setServerTotal(list.pagination?.totalItems ?? list.items.length);
+        } else if (data && typeof data === "object") {
+          for (const val of Object.values(data)) {
+            if (Array.isArray(val)) {
+              setAllRows(val as T[]);
+              setServerTotal(val.length);
+              return;
+            }
+          }
+          setAllRows([]);
+          setServerTotal(0);
         }
       })
       .catch(() => {

@@ -93,5 +93,38 @@
       "title": "Title",
       "completed": "Completed"
     }
+  },
+  "backendUsers": {
+    "columns": {
+      "id": "ID",
+      "name": "Name",
+      "email": "Email",
+      "status": "Status",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At"
+    },
+    "actions": {
+      "edit": "Edit user",
+      "delete": "Delete user",
+      "save": "Save changes"
+    },
+    "confirm": {
+      "delete": {
+        "title": "Delete this user?",
+        "message": "This action cannot be undone and will permanently remove the user from the backend."
+      }
+    },
+    "toast": {
+      "deleted": "User deleted successfully.",
+      "updated": "User updated successfully.",
+      "genericError": "Could not complete the action. Please try again."
+    },
+    "editDialog": {
+      "title": "Edit user: {name}"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    }
   }
 }

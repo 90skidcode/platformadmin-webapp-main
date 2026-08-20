@@ -28,6 +28,12 @@ export const NAV_ITEMS: NavItem[] = [
     permission: "users.read",
   },
   {
+    id: "backend-users",
+    labelKey: "nav.backendUsers",
+    href: "/backend-users",
+    icon: "users",
+  },
+  {
     id: "todos",
     labelKey: "nav.todos",
     href: "/todos",

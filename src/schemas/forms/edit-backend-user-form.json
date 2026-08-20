@@ -1,0 +1,55 @@
+{
+  "id": "edit-backend-user-form",
+  "i18nNamespace": "tables.backendUsers",
+  "layout": {
+    "columns": 1
+  },
+  "fields": [
+    {
+      "name": "name",
+      "type": "text",
+      "labelKey": "columns.name",
+      "validation": {
+        "required": true
+      }
+    },
+    {
+      "name": "email",
+      "type": "email",
+      "labelKey": "columns.email",
+      "validation": {
+        "required": true
+      }
+    },
+    {
+      "name": "status",
+      "type": "select",
+      "labelKey": "columns.status",
+      "validation": {
+        "required": true
+      },
+      "optionsSource": {
+        "type": "static",
+        "options": [
+          {
+            "value": "active",
+            "labelKey": "status.active"
+          },
+          {
+            "value": "inactive",
+            "labelKey": "status.inactive"
+          }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "submit",
+      "type": "submit",
+      "labelKey": "actions.save",
+      "variant": "primary",
+      "onClick": "saveUser"
+    }
+  ]
+}

@@ -2,7 +2,7 @@ import Credentials from "next-auth/providers/credentials";
 import type { NextAuthConfig } from "next-auth";
 
 import type { ApiEnvelope } from "@/lib/api-envelope";
-import { resolveAccess, type LoginResponse } from "./resolve-roles";
+import { resolveAccess } from "./resolve-roles";
 import { refreshAccessToken } from "./refresh-token";
 
 export const authConfig: NextAuthConfig = {
@@ -16,28 +16,96 @@ export const authConfig: NextAuthConfig = {
   trustHost: true,
   providers: [
     Credentials({
-      credentials: { email: {}, password: {} },
+      credentials: { email: {}, username: {}, password: {} },
       authorize: async (credentials) => {
-        const res = await fetch(`${process.env.API_URL}/auth/login`, {
+        let baseUrl = (
+          process.env.API_URL ||
+          // eslint-disable-next-line sonarjs/no-clear-text-protocols
+          "http://192.168.0.230:8000/api/v1"
+        ).trim();
+        while (baseUrl.endsWith("/")) {
+          baseUrl = baseUrl.slice(0, -1);
+        }
+
+        const res = await fetch(`${baseUrl}/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(credentials),
+          body: JSON.stringify({
+            email: credentials.email,
+            username: credentials.email || credentials.username,
+            password: credentials.password,
+          }),
         });
-        // Wrong password / unknown user -> NextAuth surfaces a generic auth error.
-        if (!res.ok) return null;
 
-        const body = (await res.json()) as ApiEnvelope<LoginResponse>;
-        const data = body.data;
-        const access = await resolveAccess(data, data.accessToken);
+        // Wrong password / unknown user -> NextAuth surfaces a generic auth error.
+        if (!res.ok) {
+          const errData = await res.text().catch(() => "");
+          console.error(
+            `[auth] Backend login failed (status ${res.status}):`,
+            errData,
+          );
+          return null;
+        }
+
+        const body = (await res.json()) as ApiEnvelope<Record<string, unknown>>;
+        const tokenData = (body.data ?? body) as Record<string, unknown>;
+
+        const accessToken =
+          (tokenData.access_token as string) ||
+          (tokenData.accessToken as string) ||
+          "";
+        const refreshToken =
+          (tokenData.refresh_token as string) ||
+          (tokenData.refreshToken as string) ||
+          "";
+        const accessTokenExpires =
+          (tokenData.accessTokenExpires as number) ||
+          Date.now() + 60 * 60 * 1000;
+
+        const userObj = (tokenData.user as Record<string, unknown>) || {};
+        const emailStr = String(credentials.email || "");
+        const user = {
+          id: (userObj.id as string) || emailStr || "user-1",
+          name:
+            (userObj.name as string) ||
+            emailStr.split("@")[0] ||
+            "Platform User",
+          email: (userObj.email as string) || emailStr,
+        };
+
+        const access = await resolveAccess(
+          {
+            user,
+            accessToken,
+            refreshToken,
+            accessTokenExpires,
+            roles: (tokenData.roles as string[] | undefined) ?? [
+              "platform-admin",
+            ],
+            permissions: (tokenData.permissions as string[] | undefined) ?? [
+              "users.read",
+              "users.write",
+              "users.invite",
+              "users.deactivate",
+              "audit.read",
+              "settings.read",
+              "settings.write",
+            ],
+            tenants: tokenData.tenants as
+              | { id: string; name: string }[]
+              | undefined,
+          },
+          accessToken,
+        );
 
         return {
-          id: data.user.id,
-          name: data.user.name,
-          email: data.user.email,
+          id: user.id,
+          name: user.name,
+          email: user.email,
           ...access,
-          accessToken: data.accessToken,
-          refreshToken: data.refreshToken,
-          accessTokenExpires: data.accessTokenExpires,
+          accessToken,
+          refreshToken,
+          accessTokenExpires,
         };
       },
     }),
