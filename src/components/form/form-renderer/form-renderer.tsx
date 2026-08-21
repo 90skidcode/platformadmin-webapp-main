@@ -1,28 +1,17 @@
 "use client";
 
+import { useMemo } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
 import { useApiFetcher, type ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
-import { FIELD_REGISTRY } from "../field-registry";
 import { FormActions } from "../form-actions/form-actions";
 import { schemaToZod } from "../schema-to-zod";
 import type { ActionHandlers, FormSchema } from "../types";
-
-type ColumnCount = 1 | 2 | 3;
-
-const COLUMNS_CLASS: Record<ColumnCount, string> = {
-  1: "sm:grid-cols-1",
-  2: "sm:grid-cols-2",
-  3: "sm:grid-cols-3",
-};
-
-const COL_SPAN_CLASS: Record<ColumnCount, string> = {
-  1: "",
-  2: "sm:col-span-2",
-  3: "sm:col-span-3",
-};
+import { ConditionalFormFieldItem } from "./conditional-form-field-item";
+import { COLUMNS_CLASS, COL_SPAN_CLASS } from "./field-layout";
+import { StaticFormFieldItem } from "./static-form-field-item";
 
 export interface FormRendererProps {
   schema: FormSchema;
@@ -52,8 +41,10 @@ export function FormRenderer({
     schema.fields.map((field) => [field.name, field.defaultValue ?? ""]),
   );
 
+  const zodSchema = useMemo(() => schemaToZod(schema.fields), [schema.fields]);
+
   const form = useForm({
-    resolver: zodResolver(schemaToZod(schema.fields)),
+    resolver: zodResolver(zodSchema),
     defaultValues: { ...schemaDefaults, ...defaultValues },
   });
 
@@ -66,20 +57,31 @@ export function FormRenderer({
       className={`grid gap-4 ${COLUMNS_CLASS[columns]}`}
     >
       {schema.fields.map((field) => {
-        const Field = FIELD_REGISTRY[field.type];
-        const span = field.colSpan ?? (field.type === "textarea" ? columns : 1);
-        return (
-          <div
-            key={field.name}
-            className={COL_SPAN_CLASS[Math.min(span, columns) as ColumnCount]}
-          >
-            <Field
+        const isConditional = Boolean(field.showIf || field.disabledIf);
+
+        if (isConditional) {
+          return (
+            <ConditionalFormFieldItem
+              key={field.name}
               field={field}
               form={form}
               translate={translate}
               apiFetcher={fetcher}
+              zodShape={zodSchema.shape}
+              columns={columns}
             />
-          </div>
+          );
+        }
+
+        return (
+          <StaticFormFieldItem
+            key={field.name}
+            field={field}
+            form={form}
+            translate={translate}
+            apiFetcher={fetcher}
+            columns={columns}
+          />
         );
       })}
       <div className={COL_SPAN_CLASS[columns]}>

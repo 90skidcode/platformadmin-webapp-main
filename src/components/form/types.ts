@@ -56,6 +56,11 @@ export type OptionsSource =
       labelKey?: string;
     };
 
+export type FieldCondition = {
+  field: string;
+  condition: "valid" | "invalid";
+};
+
 export interface FormField {
   name: string;
   type: FormFieldType;
@@ -72,6 +77,8 @@ export interface FormField {
   validation?: FieldValidation;
   /** `select` only. */
   optionsSource?: OptionsSource;
+  showIf?: FieldCondition;
+  disabledIf?: FieldCondition;
 }
 
 export type ButtonVariant =
