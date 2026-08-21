@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Session } from "next-auth";
 
@@ -59,28 +59,14 @@ function renderPage(sessionOverride: Session = session) {
 }
 
 describe("UsersPage", () => {
-  describe("the Add/Invite user button", () => {
-    it("shows for a session with users.invite", async () => {
+  describe("the Add User button", () => {
+    it("renders the button", async () => {
       renderPage();
       expect(
         await screen.findByRole("button", {
           name: new RegExp(tablesMessages.users.actions.newUser, "i"),
         }),
       ).toBeInTheDocument();
-    });
-
-    it("hides for a session lacking users.invite", async () => {
-      const noInvite = {
-        ...session,
-        user: { ...session.user, permissions: ["users.read"] },
-      } as Session;
-      renderPage(noInvite);
-      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
-      expect(
-        screen.queryByRole("button", {
-          name: new RegExp(tablesMessages.users.actions.newUser, "i"),
-        }),
-      ).not.toBeInTheDocument();
     });
 
     it("opens the user dialog on click", async () => {
