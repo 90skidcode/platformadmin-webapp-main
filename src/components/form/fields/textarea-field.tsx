@@ -25,6 +25,7 @@ export function TextareaField({
         id={field.name}
         placeholder={placeholder}
         disabled={field.disabled}
+        rows={field.rows}
         invalid={!!error}
         aria-describedby={error ? errorId : undefined}
         {...form.register(field.name)}

@@ -72,6 +72,8 @@ export interface FormField {
   validation?: FieldValidation;
   /** `select` only. */
   optionsSource?: OptionsSource;
+  /** textarea only */
+  rows?: number;
 }
 
 export type ButtonVariant =

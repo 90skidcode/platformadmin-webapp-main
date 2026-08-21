@@ -78,6 +78,23 @@ describe("FormRenderer", () => {
       );
       expect(screen.getByLabelText("Full name")).toHaveValue("Kavya Iyer");
     });
+
+    it("renders textarea fields with the configured rows attribute", () => {
+      renderForm({
+        ...employeeSchema,
+        fields: [
+          {
+            name: "bio",
+            type: "textarea",
+            label: "Bio",
+            rows: 6,
+          },
+        ],
+      });
+      const textarea = screen.getByLabelText("Bio");
+      expect(textarea).toBeInTheDocument();
+      expect(textarea).toHaveAttribute("rows", "6");
+    });
   });
 
   describe("submitting", () => {

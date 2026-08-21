@@ -27,5 +27,10 @@ describe("Textarea", () => {
       render(<Textarea aria-label="notes" disabled />);
       expect(screen.getByLabelText("notes")).toBeDisabled();
     });
+
+    it("respects the rows prop", () => {
+      render(<Textarea aria-label="notes" rows={5} />);
+      expect(screen.getByLabelText("notes")).toHaveAttribute("rows", "5");
+    });
   });
 });
