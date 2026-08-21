@@ -37,6 +37,7 @@ import {
   Skeleton,
 } from "@/components/ui";
 import { useApiFetcher, type ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
+import { cn } from "@/lib/utils/cn";
 import { resolveText } from "../form/fields/field-label";
 import { BulkActionsBar } from "./bulk-actions-bar";
 import { renderCell } from "./cell-renderers";
@@ -249,8 +250,10 @@ export function TableRenderer<T extends Record<string, unknown>>({
   });
 
   function renderTableBody() {
-    if (loading) {
-      return Array.from({ length: SKELETON_ROW_COUNT }).map((_, rowIndex) => (
+    if (loading && rows.length === 0) {
+      return Array.from({
+        length: Math.min(pageSize, SKELETON_ROW_COUNT),
+      }).map((_, rowIndex) => (
         <tr
           key={`skeleton-row-${rowIndex}`}
           className="border-b border-border last:border-0"
@@ -428,11 +431,20 @@ export function TableRenderer<T extends Record<string, unknown>>({
           virtualizer={rowVirtualizer}
           hiddenOnMobile={mobileCards}
           schema={schema}
+          loading={loading}
         />
       ) : (
         <div
-          className={`overflow-x-auto rounded-lg border border-border ${mobileCards ? "hidden md:block" : ""}`}
+          className={cn(
+            "relative overflow-x-auto rounded-lg border border-border",
+            mobileCards ? "hidden md:block" : "",
+          )}
         >
+          {loading && rows.length > 0 && (
+            <div className="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden bg-primary/10">
+              <div className="h-full w-1/3 animate-pulse rounded-full bg-primary" />
+            </div>
+          )}
           <table className="w-full text-sm" aria-busy={loading || undefined}>
             <thead className="border-b border-border bg-muted/50">
               {table.getHeaderGroups().map((headerGroup) => (
@@ -448,14 +460,30 @@ export function TableRenderer<T extends Record<string, unknown>>({
                 </tr>
               ))}
             </thead>
-            <tbody>{renderTableBody()}</tbody>
+            <tbody
+              className={cn(
+                "transition-opacity duration-200",
+                loading &&
+                  rows.length > 0 &&
+                  "pointer-events-none opacity-50 select-none",
+              )}
+            >
+              {renderTableBody()}
+            </tbody>
           </table>
         </div>
       )}
 
       {/* `display.mobile: "cards"` -- a stacked card list, no horizontal scroll at all. CSS-toggled (`md:hidden`), not JS viewport detection, so it's correct on first paint. */}
       {mobileCards && (
-        <div className="flex flex-col gap-3 md:hidden">
+        <div
+          className={cn(
+            "flex flex-col gap-3 transition-opacity duration-200 md:hidden",
+            loading &&
+              rows.length > 0 &&
+              "pointer-events-none opacity-50 select-none",
+          )}
+        >
           {table.getRowModel().rows.map((row) => (
             <div key={row.id} className="rounded-lg border border-border p-3">
               {row.getVisibleCells().map((cell) => {
@@ -508,6 +536,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
           pageIndex={pageIndex}
           pageSize={pageSize}
           total={total}
+          disabled={loading}
           onPageChange={setPageIndex}
         />
       )}
@@ -560,6 +589,7 @@ interface VirtualizedTableProps<T extends Record<string, unknown>> {
   virtualizer: Virtualizer<HTMLDivElement, Element>;
   hiddenOnMobile: boolean;
   schema: TableSchema;
+  loading?: boolean;
 }
 
 /**
@@ -578,14 +608,23 @@ function VirtualizedTable<T extends Record<string, unknown>>({
   virtualizer,
   hiddenOnMobile,
   schema,
+  loading = false,
 }: Readonly<VirtualizedTableProps<T>>) {
   const virtualItems = virtualizer.getVirtualItems();
 
   return (
     <div
       role="table"
-      className={`overflow-hidden rounded-lg border border-border ${hiddenOnMobile ? "hidden md:block" : ""}`}
+      className={cn(
+        "relative overflow-hidden rounded-lg border border-border",
+        hiddenOnMobile ? "hidden md:block" : "",
+      )}
     >
+      {loading && rows.length > 0 && (
+        <div className="absolute inset-x-0 top-0 z-10 h-0.5 overflow-hidden bg-primary/10">
+          <div className="h-full w-1/3 animate-pulse rounded-full bg-primary" />
+        </div>
+      )}
       <div role="rowgroup">
         {table.getHeaderGroups().map((headerGroup) => (
           <div
@@ -610,7 +649,14 @@ function VirtualizedTable<T extends Record<string, unknown>>({
           </div>
         ))}
       </div>
-      <div ref={scrollRef} className="overflow-auto" style={{ height: 480 }}>
+      <div
+        ref={scrollRef}
+        className={cn(
+          "overflow-auto transition-opacity duration-200",
+          loading && rows.length > 0 && "pointer-events-none opacity-50",
+        )}
+        style={{ height: 480 }}
+      >
         <div
           role="rowgroup"
           style={{ height: virtualizer.getTotalSize(), position: "relative" }}

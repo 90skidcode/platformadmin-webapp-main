@@ -10,6 +10,7 @@ export interface TablePaginationProps {
   pageIndex: number;
   pageSize: number;
   total: number;
+  disabled?: boolean;
   onPageChange: (index: number) => void;
 }
 
@@ -17,6 +18,7 @@ export function TablePagination({
   pageIndex,
   pageSize,
   total,
+  disabled = false,
   onPageChange,
 }: Readonly<TablePaginationProps>) {
   const t = useTranslations("common");
@@ -37,7 +39,7 @@ export function TablePagination({
           type="button"
           variant="outline"
           size="sm"
-          disabled={pageIndex === 0}
+          disabled={disabled || pageIndex === 0}
           onClick={() => onPageChange(pageIndex - 1)}
         >
           {t("table.previousPage")}
@@ -59,6 +61,7 @@ export function TablePagination({
               type="button"
               variant={page === currentPage ? "primary" : "outline"}
               size="sm"
+              disabled={disabled}
               className={cn(
                 "min-w-8 px-2",
                 page === currentPage && "pointer-events-none",
@@ -75,7 +78,7 @@ export function TablePagination({
           type="button"
           variant="outline"
           size="sm"
-          disabled={pageIndex + 1 >= totalPages}
+          disabled={disabled || pageIndex + 1 >= totalPages}
           onClick={() => onPageChange(pageIndex + 1)}
         >
           {t("table.nextPage")}
