@@ -102,11 +102,12 @@ export interface TableSchema {
   search?: { enabled?: boolean; placeholderKey?: string };
   /** One dropdown per entry, rendered beside the search box. */
   filters?: TableFilter[];
+  limit?: number;
   pageSize?: number;
   /** Row-virtualizes the desktop table body (plan §10's perf pass), worth
    * it once a dataset is large enough that rendering every row's DOM node
    * becomes the bottleneck. `mode: "client"` only: replaces pagination
-   * entirely (scroll through everything instead of paging -- `pageSize`
+   * entirely (scroll through everything instead of paging -- `limit`/`pageSize`
    * and the pagination controls are ignored when this is on), since
    * virtualizing a single already-small page defeats the point. */
   virtualize?: boolean;

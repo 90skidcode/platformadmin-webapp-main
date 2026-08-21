@@ -99,7 +99,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
     total,
     loading,
     pageIndex,
-    pageSize,
+    limit,
     setPageIndex,
     sorting,
     setSorting,
@@ -207,17 +207,20 @@ export function TableRenderer<T extends Record<string, unknown>>({
   const table = useReactTable({
     data: rows,
     columns,
-    state: { sorting, pagination: { pageIndex, pageSize }, rowSelection },
+    state: {
+      sorting,
+      pagination: { pageIndex, pageSize: limit },
+      rowSelection,
+    },
     manualPagination: schema.mode === "server",
     manualSorting: schema.mode === "server",
-    pageCount:
-      schema.mode === "server" ? Math.ceil(total / pageSize) : undefined,
+    pageCount: schema.mode === "server" ? Math.ceil(total / limit) : undefined,
     onSortingChange: (updater) => {
       const next = typeof updater === "function" ? updater(sorting) : updater;
       setSorting(next);
     },
     onPaginationChange: (updater) => {
-      const current = { pageIndex, pageSize };
+      const current = { pageIndex, pageSize: limit };
       const next = typeof updater === "function" ? updater(current) : updater;
       setPageIndex(next.pageIndex);
     },
@@ -506,7 +509,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
       {!clientVirtualize && (
         <TablePagination
           pageIndex={pageIndex}
-          pageSize={pageSize}
+          pageSize={limit}
           total={total}
           onPageChange={setPageIndex}
         />

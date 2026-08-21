@@ -17,7 +17,7 @@ describe("useTableData", () => {
         id: "t",
         mode: "client",
         columns,
-        pageSize: 10,
+        limit: 10,
       };
       const data = [{ name: "Kavya", email: "kavya@acme.example" }];
 
@@ -26,6 +26,7 @@ describe("useTableData", () => {
       );
 
       expect(result.current.rows).toEqual(data);
+      expect(result.current.limit).toBe(10);
       expect(apiFetcher).not.toHaveBeenCalled();
       expect(result.current.loading).toBe(false);
     });
@@ -76,7 +77,7 @@ describe("useTableData", () => {
       pageSize: 10,
     };
 
-    it("fetches from schema.endpoint with page/pageSize query params", async () => {
+    it("fetches from schema.endpoint with page/limit query params", async () => {
       const apiFetcher = vi.fn().mockResolvedValue({
         json: async () => ({
           code: "S_200_EMP_LIST_OK",
@@ -94,7 +95,7 @@ describe("useTableData", () => {
 
       await waitFor(() => expect(result.current.loading).toBe(false));
       expect(apiFetcher).toHaveBeenCalledWith(
-        expect.stringContaining("/employees?page=1&pageSize=10"),
+        expect.stringContaining("/employees?page=1&limit=10"),
       );
       expect(result.current.rows).toEqual([{ name: "Kavya" }]);
       expect(result.current.total).toBe(1);

@@ -375,7 +375,7 @@ describe("TableRenderer", () => {
         expect(screen.getByText("Kavya Iyer")).toBeInTheDocument(),
       );
       expect(apiFetcher).toHaveBeenCalledWith(
-        expect.stringContaining("/employees?page=1&pageSize=10"),
+        expect.stringContaining("/employees?page=1&limit=10"),
       );
     });
   });

@@ -16,7 +16,7 @@ export interface UseTableDataResult<T> {
   loading: boolean;
   error: boolean;
   pageIndex: number;
-  pageSize: number;
+  limit: number;
   setPageIndex: (index: number) => void;
   sorting: SortingState;
   setSorting: (sorting: SortingState) => void;
@@ -44,7 +44,7 @@ export function useTableData<T extends Record<string, unknown>>(
   staticData: T[] | undefined,
   apiFetcher: ApiFetcher,
 ): UseTableDataResult<T> {
-  const pageSize = schema.pageSize ?? 10;
+  const limit = schema.limit ?? schema.pageSize ?? 10;
 
   const [allRows, setAllRows] = useState<T[]>(
     staticData ?? (EMPTY_ROWS as T[]),
@@ -82,7 +82,7 @@ export function useTableData<T extends Record<string, unknown>>(
     const params = new URLSearchParams();
     if (schema.mode === "server") {
       params.set("page", String(pageIndex + 1));
-      params.set("pageSize", String(pageSize));
+      params.set("limit", String(limit));
       if (search) params.set("search", search);
       if (sortBy) {
         params.set("sortBy", sortBy);
@@ -160,7 +160,7 @@ export function useTableData<T extends Record<string, unknown>>(
     loading,
     error,
     pageIndex,
-    pageSize,
+    limit,
     setPageIndex: (index) => setPageIndex(Math.max(0, index)),
     sorting,
     setSorting: (next) => {
