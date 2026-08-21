@@ -72,6 +72,8 @@ export interface FormField {
   validation?: FieldValidation;
   /** `select` only. */
   optionsSource?: OptionsSource;
+  /** When true, prevents entering 'e' and 'E' characters */
+  blockE?: boolean;
 }
 
 export type ButtonVariant =

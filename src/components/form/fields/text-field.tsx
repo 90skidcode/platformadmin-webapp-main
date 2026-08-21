@@ -38,6 +38,7 @@ export function TextField({
         placeholder={placeholder}
         disabled={field.disabled}
         invalid={!!error}
+        blockE={field.blockE}
         aria-describedby={error ? errorId : undefined}
         {...form.register(field.name)}
       />

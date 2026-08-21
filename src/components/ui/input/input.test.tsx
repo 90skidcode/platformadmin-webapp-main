@@ -34,5 +34,33 @@ describe("Input", () => {
       render(<Input aria-label="email" disabled />);
       expect(screen.getByLabelText("email")).toBeDisabled();
     });
+
+    it("blocks e and E when blockE is true", async () => {
+      render(<Input aria-label="username" blockE />);
+      const input = screen.getByLabelText("username");
+      await userEvent.type(input, "tEst");
+      expect(input).toHaveValue("tst");
+    });
+
+    it("toggles password visibility when clicking eye button", async () => {
+      render(<Input aria-label="password" type="password" />);
+      const input = screen.getByLabelText("password");
+      expect(input).toHaveAttribute("type", "password");
+
+      const toggleButton = screen.getByRole("button", {
+        name: "Show password",
+      });
+      await userEvent.click(toggleButton);
+
+      expect(input).toHaveAttribute("type", "text");
+      expect(
+        screen.getByRole("button", { name: "Hide password" }),
+      ).toBeInTheDocument();
+
+      await userEvent.click(
+        screen.getByRole("button", { name: "Hide password" }),
+      );
+      expect(input).toHaveAttribute("type", "password");
+    });
   });
 });
