@@ -17,5 +17,57 @@
       "employeeCreated": "Employee created.",
       "genericError": "Could not create the employee. Please try again."
     }
+  },
+  "onboarding": {
+    "title": "User Onboarding",
+    "description": "Register and onboard a new member to the platform with customized role and preferences.",
+    "fields": {
+      "country": {
+        "label": "Country",
+        "placeholder": "Select country..."
+      },
+      "state": {
+        "label": "State / Region",
+        "placeholder": "Select country first..."
+      },
+      "city": {
+        "label": "City / Municipality",
+        "placeholder": "Select state first..."
+      }
+    },
+    "countries": {
+      "US": "United States",
+      "IN": "India",
+      "UK": "United Kingdom"
+    },
+    "states": {
+      "california": "California",
+      "newYork": "New York",
+      "texas": "Texas",
+      "tamilNadu": "Tamil Nadu",
+      "karnataka": "Karnataka",
+      "maharashtra": "Maharashtra",
+      "england": "England",
+      "scotland": "Scotland",
+      "wales": "Wales"
+    },
+    "frequencies": {
+      "realtime": "Real-time (Instant)",
+      "daily": "Daily Summary",
+      "weekly": "Weekly Digest"
+    },
+    "roles": {
+      "viewer": "Viewer",
+      "manager": "Manager",
+      "platformAdmin": "Platform Administrator"
+    },
+    "actions": {
+      "submit": "Complete Registration",
+      "reset": "Reset Form"
+    },
+    "toast": {
+      "submitted": "Onboarding completed successfully!",
+      "genericError": "Could not complete onboarding. Please check your inputs."
+    }
   }
 }

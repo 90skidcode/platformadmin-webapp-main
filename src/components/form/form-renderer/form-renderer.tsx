@@ -78,6 +78,7 @@ export function FormRenderer({
               form={form}
               translate={translate}
               apiFetcher={fetcher}
+              actionHandlers={actionHandlers}
             />
           </div>
         );

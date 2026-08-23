@@ -3,17 +3,51 @@ import { z, type ZodTypeAny } from "zod";
 import type { FieldValidation, FormField } from "../types";
 
 /** Builds a `z.object()` shape from a schema's `fields[]` -- the only place
- * a field's `validation` turns into an actual runtime/type check. */
+ * a field's `validation` turns into an actual runtime/type check.
+ * Supports conditional validation: dependent fields are validated only when parent is active. */
 export function schemaToZod(fields: FormField[]) {
   const shape: Record<string, ZodTypeAny> = {};
   for (const field of fields) {
-    shape[field.name] = fieldToZodType(field);
+    const isDependent = Boolean(field.dependsOn);
+    shape[field.name] = fieldToZodType(field, isDependent);
   }
-  return z.object(shape);
+
+  const baseObject = z.object(shape);
+
+  const dependentRequiredFields = fields.filter(
+    (f) => f.dependsOn && f.validation?.required,
+  );
+
+  if (dependentRequiredFields.length === 0) {
+    return baseObject;
+  }
+
+  return baseObject.superRefine((data, ctx) => {
+    for (const field of dependentRequiredFields) {
+      const parentName = field.dependsOn as string;
+      const parentVal = (data as Record<string, unknown>)[parentName];
+      const isParentActive = Boolean(parentVal);
+
+      if (isParentActive) {
+        const val = (data as Record<string, unknown>)[field.name];
+        if (val === undefined || val === null || val === "") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: field.validation?.messages?.required ?? "Required",
+            path: [field.name],
+          });
+        }
+      }
+    }
+  });
 }
 
-function fieldToZodType(field: FormField): ZodTypeAny {
-  const v = field.validation ?? {};
+function fieldToZodType(field: FormField, isDependent = false): ZodTypeAny {
+  const v = { ...field.validation };
+  if (isDependent && v.required) {
+    // If field is dependent, its requirement is evaluated dynamically in superRefine
+    v.required = false;
+  }
 
   switch (field.type) {
     case "number":

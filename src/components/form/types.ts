@@ -44,16 +44,25 @@ export interface FieldOption {
   value: string;
   label?: string;
   labelKey?: string;
+  /** Used for static cascading: only shown when parent field matches this value */
+  parentValue?: string | string[];
 }
 
 export type OptionsSource =
-  | { type: "static"; options: FieldOption[] }
+  | {
+      type: "static";
+      options: FieldOption[];
+      /** Client-side mapping of parentValue -> options for cascading selects */
+      optionsByParent?: Record<string, FieldOption[]>;
+    }
   | {
       type: "remote";
-      /** Resolved through the BFF proxy, exactly like an `endpoint.url` (plan §6). */
+      /** Resolved through the BFF proxy, e.g. "/states?country={country}" */
       url: string;
       valueKey?: string;
       labelKey?: string;
+      /** Parent field name to watch; URL will interpolate {parentFieldName} or pass as param */
+      dependsOn?: string;
     };
 
 export interface FormField {
@@ -72,6 +81,16 @@ export interface FormField {
   validation?: FieldValidation;
   /** `select` only. */
   optionsSource?: OptionsSource;
+  /** Parent field name whose value this select depends on (for cascading) */
+  dependsOn?: string;
+  /** `select` only: allow clearing selection */
+  clearable?: boolean;
+  /** Key into actionHandlers called when field value changes (e.g. onChange: "handleFieldChange") */
+  onChange?: string;
+  /** Key into actionHandlers called when field loses focus (e.g. onBlur: "handleFieldBlur") */
+  onBlur?: string;
+  /** Key into actionHandlers called on key up */
+  onKeyUp?: string;
 }
 
 export type ButtonVariant =

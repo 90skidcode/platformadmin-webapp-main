@@ -14,6 +14,7 @@ export function SwitchField({
     | string
     | undefined;
   const label = resolveText(translate, field.label, field.labelKey);
+  const helpText = resolveText(translate, field.helpText, field.helpTextKey);
   const errorId = `${field.name}-error`;
 
   return (
@@ -22,7 +23,20 @@ export function SwitchField({
         control={form.control}
         name={field.name}
         render={({ field: controllerField }) => (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-3 rounded-lg border border-input bg-card p-3 shadow-xs">
+            <div className="space-y-0.5 pr-2">
+              {label && (
+                <Label
+                  htmlFor={field.name}
+                  className="cursor-pointer font-medium text-foreground"
+                >
+                  {label}
+                </Label>
+              )}
+              {helpText && (
+                <p className="text-xs text-muted-foreground">{helpText}</p>
+              )}
+            </div>
             <Switch
               id={field.name}
               checked={!!controllerField.value}
@@ -30,7 +44,6 @@ export function SwitchField({
               disabled={field.disabled}
               aria-describedby={error ? errorId : undefined}
             />
-            {label && <Label htmlFor={field.name}>{label}</Label>}
           </div>
         )}
       />

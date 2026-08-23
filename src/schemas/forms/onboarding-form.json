@@ -1,0 +1,119 @@
+{
+  "id": "onboarding-form",
+  "i18nNamespace": "forms.onboarding",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "name": "category",
+      "type": "select",
+      "label": "1. Product Category (External API)",
+      "placeholder": "Select a live category from API...",
+      "validation": { "required": true },
+      "optionsSource": {
+        "type": "remote",
+        "url": "https://dummyjson.com/products/categories",
+        "valueKey": "slug",
+        "labelKey": "name"
+      }
+    },
+    {
+      "name": "subCategory",
+      "type": "select",
+      "label": "2. Sub-Category (Static JSON - Depends on Category)",
+      "placeholder": "Select sub-category (requires Category)...",
+      "dependsOn": "category",
+      "validation": { "required": true },
+      "optionsSource": {
+        "type": "static",
+        "options": [
+          {
+            "value": "skincare",
+            "label": "Skin Care & Serums",
+            "parentValue": "beauty"
+          },
+          {
+            "value": "makeup",
+            "label": "Cosmetics & Makeup",
+            "parentValue": "beauty"
+          },
+          {
+            "value": "perfume",
+            "label": "Luxury Perfumes",
+            "parentValue": "fragrances"
+          },
+          {
+            "value": "cologne",
+            "label": "Men's Cologne",
+            "parentValue": "fragrances"
+          },
+          {
+            "value": "sofas",
+            "label": "Living Room Sofas",
+            "parentValue": "furniture"
+          },
+          {
+            "value": "tables",
+            "label": "Dining Tables",
+            "parentValue": "furniture"
+          },
+          {
+            "value": "fruits",
+            "label": "Fresh Organic Fruits",
+            "parentValue": "groceries"
+          },
+          {
+            "value": "beverages",
+            "label": "Cold Drinks & Juices",
+            "parentValue": "groceries"
+          }
+        ]
+      }
+    },
+    {
+      "name": "enableExpressDelivery",
+      "type": "switch",
+      "label": "3. Priority Express Delivery (Switch Toggle)",
+      "helpText": "Toggle ON to enable dedicated delivery time slot scheduling.",
+      "defaultValue": false
+    },
+    {
+      "name": "deliveryTimeSlot",
+      "type": "select",
+      "label": "4. Delivery Time Slot (Depends on Switch - Validated When ON)",
+      "placeholder": "Enable express delivery switch first...",
+      "dependsOn": "enableExpressDelivery",
+      "validation": {
+        "required": true,
+        "messages": {
+          "required": "Please choose a delivery time slot for express delivery."
+        }
+      },
+      "optionsSource": {
+        "type": "static",
+        "options": [
+          {
+            "value": "morning",
+            "label": "Early Morning (08:00 AM - 11:00 AM)"
+          },
+          { "value": "afternoon", "label": "Afternoon (01:00 PM - 04:00 PM)" },
+          { "value": "evening", "label": "Evening (06:00 PM - 09:00 PM)" }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "submit",
+      "type": "submit",
+      "labelKey": "actions.submit",
+      "variant": "primary",
+      "onClick": "submitOnboarding"
+    },
+    {
+      "id": "reset",
+      "type": "reset",
+      "labelKey": "actions.reset",
+      "variant": "outline"
+    }
+  ]
+}

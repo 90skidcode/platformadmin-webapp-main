@@ -155,4 +155,46 @@ describe("schemaToZod", () => {
       expect(schemaToZod(fields).safeParse({}).success).toBe(true);
     });
   });
+
+  describe("a dependent field with conditional validation", () => {
+    const fields: FormField[] = [
+      { name: "enableDelivery", type: "switch" },
+      {
+        name: "deliverySlot",
+        type: "select",
+        dependsOn: "enableDelivery",
+        validation: { required: true, messages: { required: "Slot required" } },
+      },
+    ];
+
+    it("allows empty value when parent switch is false", () => {
+      expect(
+        schemaToZod(fields).safeParse({
+          enableDelivery: false,
+          deliverySlot: "",
+        }).success,
+      ).toBe(true);
+    });
+
+    it("rejects empty value when parent switch is true", () => {
+      const result = schemaToZod(fields).safeParse({
+        enableDelivery: true,
+        deliverySlot: "",
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe("Slot required");
+        expect(result.error.issues[0].path).toEqual(["deliverySlot"]);
+      }
+    });
+
+    it("accepts valid value when parent switch is true", () => {
+      expect(
+        schemaToZod(fields).safeParse({
+          enableDelivery: true,
+          deliverySlot: "morning",
+        }).success,
+      ).toBe(true);
+    });
+  });
 });
