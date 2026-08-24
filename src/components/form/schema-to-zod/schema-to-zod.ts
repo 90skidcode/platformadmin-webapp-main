@@ -26,6 +26,8 @@ function fieldToZodType(field: FormField): ZodTypeAny {
       return v.required
         ? z.literal(true, { error: v.messages?.required ?? "Required" })
         : z.boolean();
+    case "multi-select":
+      return applyArrayValidation(z.array(z.string()), v);
     case "hidden":
       return z.any().optional();
     case "email":
@@ -38,6 +40,29 @@ function fieldToZodType(field: FormField): ZodTypeAny {
     default:
       return applyStringValidation(z.string(), v);
   }
+}
+
+function applyArrayValidation(
+  base: z.ZodArray<z.ZodString>,
+  v: FieldValidation,
+): ZodTypeAny {
+  let schema = base;
+  if (v.min !== undefined) {
+    schema = schema.min(
+      v.min,
+      v.messages?.min ?? `Select at least ${v.min} options`,
+    );
+  }
+  if (v.max !== undefined) {
+    schema = schema.max(
+      v.max,
+      v.messages?.max ?? `Select at most ${v.max} options`,
+    );
+  }
+  if (v.required) {
+    return schema.min(1, v.messages?.required ?? "Required");
+  }
+  return schema.optional().default([]);
 }
 
 function applyStringValidation(

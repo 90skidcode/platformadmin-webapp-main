@@ -13,6 +13,7 @@ export type FormFieldType =
   | "number"
   | "textarea"
   | "select"
+  | "multi-select"
   | "checkbox"
   | "switch"
   | "date"
@@ -70,8 +71,10 @@ export interface FormField {
   /** Out of the schema's `layout.columns` grid, how many columns this field spans. */
   colSpan?: 1 | 2 | 3;
   validation?: FieldValidation;
-  /** `select` only. */
+  /** `select` and `multi-select` only. */
   optionsSource?: OptionsSource;
+  /** `multi-select` only -- enables in-dropdown search. */
+  searchable?: boolean;
 }
 
 export type ButtonVariant =

@@ -8,7 +8,17 @@ import { useApiFetcher, type ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { FIELD_REGISTRY } from "../field-registry";
 import { FormActions } from "../form-actions/form-actions";
 import { schemaToZod } from "../schema-to-zod";
-import type { ActionHandlers, FormSchema } from "../types";
+import type { ActionHandlers, FormField, FormSchema } from "../types";
+
+function getFieldDefaultValue(field: FormField): unknown {
+  if (field.defaultValue !== undefined) {
+    return field.defaultValue;
+  }
+  if (field.type === "multi-select") {
+    return [];
+  }
+  return "";
+}
 
 type ColumnCount = 1 | 2 | 3;
 
@@ -49,7 +59,7 @@ export function FormRenderer({
   const translate = useTranslations(schema.i18nNamespace);
 
   const schemaDefaults = Object.fromEntries(
-    schema.fields.map((field) => [field.name, field.defaultValue ?? ""]),
+    schema.fields.map((field) => [field.name, getFieldDefaultValue(field)]),
   );
 
   const form = useForm({

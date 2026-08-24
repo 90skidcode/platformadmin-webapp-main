@@ -120,7 +120,7 @@ describe("schemaToZod", () => {
     });
   });
 
-  describe("a field with a regex pattern", () => {
+  describe("when validating input against a pattern constraint", () => {
     const fields: FormField[] = [
       {
         name: "sku",
@@ -129,29 +129,137 @@ describe("schemaToZod", () => {
       },
     ];
 
-    it("rejects a value that doesn't match the pattern", () => {
+    it("should reject input that does not match the pattern", () => {
       expect(schemaToZod(fields).safeParse({ sku: "abc-1234" }).success).toBe(
         false,
       );
     });
 
-    it("accepts a value that matches the pattern", () => {
+    it("should accept input that matches the pattern", () => {
       expect(schemaToZod(fields).safeParse({ sku: "ABC-1234" }).success).toBe(
         true,
       );
     });
   });
 
-  describe("a hidden field", () => {
+  describe("when validating a required multi-select field", () => {
+    const fields: FormField[] = [
+      { name: "roles", type: "multi-select", validation: { required: true } },
+    ];
+
+    it("should reject submission with no selected items", () => {
+      const result = schemaToZod(fields).safeParse({ roles: [] });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0]?.message).toBe("Required");
+      }
+    });
+
+    it("should accept submission when at least one item is selected", () => {
+      expect(schemaToZod(fields).safeParse({ roles: ["admin"] }).success).toBe(
+        true,
+      );
+    });
+  });
+
+  describe("when validating a multi-select field with minimum selection requirements", () => {
+    it("should display the default minimum selection message when no custom message is set", () => {
+      const fields: FormField[] = [
+        {
+          name: "roles",
+          type: "multi-select",
+          validation: { required: true, min: 2 },
+        },
+      ];
+      const result = schemaToZod(fields).safeParse({ roles: ["admin"] });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0]?.message).toBe(
+          "Select at least 2 options",
+        );
+      }
+    });
+
+    it("should display the configured custom message when provided", () => {
+      const fields: FormField[] = [
+        {
+          name: "roles",
+          type: "multi-select",
+          validation: {
+            required: true,
+            min: 2,
+            messages: { min: "Select at least 2 roles" },
+          },
+        },
+      ];
+      const result = schemaToZod(fields).safeParse({ roles: ["admin"] });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0]?.message).toBe("Select at least 2 roles");
+      }
+    });
+  });
+
+  describe("when validating a multi-select field with maximum selection limits", () => {
+    it("should display the default maximum selection message when no custom message is set", () => {
+      const fields: FormField[] = [
+        {
+          name: "tags",
+          type: "multi-select",
+          validation: { max: 2 },
+        },
+      ];
+      const result = schemaToZod(fields).safeParse({
+        tags: ["tag1", "tag2", "tag3"],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0]?.message).toBe(
+          "Select at most 2 options",
+        );
+      }
+    });
+
+    it("should display the configured custom message when provided", () => {
+      const fields: FormField[] = [
+        {
+          name: "tags",
+          type: "multi-select",
+          validation: {
+            max: 2,
+            messages: { max: "Maximum 2 tags allowed" },
+          },
+        },
+      ];
+      const result = schemaToZod(fields).safeParse({
+        tags: ["tag1", "tag2", "tag3"],
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0]?.message).toBe("Maximum 2 tags allowed");
+      }
+    });
+  });
+
+  describe("when validating an optional multi-select field", () => {
+    const fields: FormField[] = [{ name: "tags", type: "multi-select" }];
+
+    it("should allow submission without any selections", () => {
+      expect(schemaToZod(fields).safeParse({ tags: [] }).success).toBe(true);
+      expect(schemaToZod(fields).safeParse({}).success).toBe(true);
+    });
+  });
+
+  describe("when validating a hidden field", () => {
     const fields: FormField[] = [{ name: "tenantId", type: "hidden" }];
 
-    it("passes a given value through untouched", () => {
+    it("should preserve the given field value", () => {
       expect(schemaToZod(fields).safeParse({ tenantId: "acme" }).success).toBe(
         true,
       );
     });
 
-    it("doesn't require a value at all", () => {
+    it("should allow omitting the hidden field value", () => {
       expect(schemaToZod(fields).safeParse({}).success).toBe(true);
     });
   });
