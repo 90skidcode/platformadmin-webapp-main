@@ -35,11 +35,11 @@ describe("Input", () => {
       expect(screen.getByLabelText("email")).toBeDisabled();
     });
 
-    it("blocks e and E when blockE is true", async () => {
-      render(<Input aria-label="username" blockE />);
-      const input = screen.getByLabelText("username");
-      await userEvent.type(input, "tEst");
-      expect(input).toHaveValue("tst");
+    it("only accepts numeric digits (0-9) when numericOnly is true", async () => {
+      render(<Input aria-label="quantity" numericOnly />);
+      const input = screen.getByLabelText("quantity");
+      await userEvent.type(input, "12a3e4E5+6-7.890");
+      expect(input).toHaveValue("1234567890");
     });
 
     it("toggles password visibility when clicking eye button", async () => {

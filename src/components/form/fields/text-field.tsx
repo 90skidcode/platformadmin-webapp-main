@@ -38,7 +38,7 @@ export function TextField({
         placeholder={placeholder}
         disabled={field.disabled}
         invalid={!!error}
-        blockE={field.blockE}
+        numericOnly={field.type === "number" || field.numericOnly}
         aria-describedby={error ? errorId : undefined}
         {...form.register(field.name)}
       />

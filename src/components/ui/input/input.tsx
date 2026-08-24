@@ -7,8 +7,8 @@ export interface InputProps
   extends React.InputHTMLAttributes<HTMLInputElement> {
   /** Marks the field as failing validation -- pairs with `aria-invalid` and red-border styling. */
   invalid?: boolean;
-  /** When true, prevents entering 'e' and 'E' characters */
-  blockE?: boolean;
+  /** When true or when type="number", restricts input to numeric digits (0-9) */
+  numericOnly?: boolean;
   /** Whether to show the toggle password visibility button (defaults to true for type="password") */
   showPasswordToggle?: boolean;
 }
@@ -19,7 +19,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       className,
       type = "text",
       invalid,
-      blockE,
+      numericOnly,
       showPasswordToggle = type === "password",
       onKeyDown,
       ...props
@@ -27,10 +27,29 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref,
   ) => {
     const [showPassword, setShowPassword] = React.useState(false);
+    const isNumeric = numericOnly || type === "number";
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (blockE && (e.key === "e" || e.key === "E")) {
-        e.preventDefault();
+      if (isNumeric) {
+        const isControlKey =
+          [
+            "Backspace",
+            "Tab",
+            "Delete",
+            "ArrowLeft",
+            "ArrowRight",
+            // "ArrowUp",
+            // "ArrowDown",
+            "Home",
+            "End",
+            "Enter",
+          ].includes(e.key) ||
+          e.ctrlKey ||
+          e.metaKey;
+
+        if (!/^\d$/.test(e.key) && !isControlKey) {
+          e.preventDefault();
+        }
       }
       onKeyDown?.(e);
     };

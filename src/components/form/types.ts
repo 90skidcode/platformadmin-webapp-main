@@ -72,8 +72,8 @@ export interface FormField {
   validation?: FieldValidation;
   /** `select` only. */
   optionsSource?: OptionsSource;
-  /** When true, prevents entering 'e' and 'E' characters */
-  blockE?: boolean;
+  /** When true, restricts input to numeric digits (0-9) */
+  numericOnly?: boolean;
 }
 
 export type ButtonVariant =
