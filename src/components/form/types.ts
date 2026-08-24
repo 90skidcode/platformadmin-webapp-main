@@ -56,6 +56,12 @@ export type OptionsSource =
       labelKey?: string;
     };
 
+export interface FieldEvents {
+  onChange?: string;
+  onBlur?: string;
+  onClick?: string;
+}
+
 export interface FormField {
   name: string;
   type: FormFieldType;
@@ -72,6 +78,7 @@ export interface FormField {
   validation?: FieldValidation;
   /** `select` only. */
   optionsSource?: OptionsSource;
+  events?: FieldEvents;
 }
 
 export type ButtonVariant =

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 
 import { useApiFetcher, type ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
+import type { FieldEventHandlers } from "../field-events";
 import { FIELD_REGISTRY } from "../field-registry";
 import { FormActions } from "../form-actions/form-actions";
 import { schemaToZod } from "../schema-to-zod";
@@ -27,6 +28,7 @@ const COL_SPAN_CLASS: Record<ColumnCount, string> = {
 export interface FormRendererProps {
   schema: FormSchema;
   actionHandlers?: ActionHandlers;
+  fieldEventHandlers?: FieldEventHandlers;
   /** Defaults to `useApiFetcher()` -- tests inject a mock without touching context providers (plan §6.3). */
   apiFetcher?: ApiFetcher;
   defaultValues?: Record<string, unknown>;
@@ -40,6 +42,7 @@ export interface FormRendererProps {
 export function FormRenderer({
   schema,
   actionHandlers = {},
+  fieldEventHandlers = {},
   apiFetcher,
   defaultValues,
   onRefetch,
@@ -78,6 +81,7 @@ export function FormRenderer({
               form={form}
               translate={translate}
               apiFetcher={fetcher}
+              fieldEventHandlers={fieldEventHandlers}
             />
           </div>
         );

@@ -2,11 +2,13 @@ import { Textarea } from "@/components/ui";
 import { FieldError } from "./field-error";
 import { FieldLabel, resolveText } from "./field-label";
 import type { FieldComponentProps } from "./field-types";
+import { useFieldEvents } from "./use-field-events";
 
 export function TextareaField({
   field,
   form,
   translate,
+  fieldEventHandlers,
 }: Readonly<FieldComponentProps>) {
   const error = form.formState.errors[field.name]?.message as
     | string
@@ -17,6 +19,11 @@ export function TextareaField({
     field.placeholderKey,
   );
   const errorId = `${field.name}-error`;
+  const { registerWithEvents } = useFieldEvents({
+    field,
+    form,
+    fieldEventHandlers,
+  });
 
   return (
     <div className="grid gap-1.5">
@@ -27,7 +34,7 @@ export function TextareaField({
         disabled={field.disabled}
         invalid={!!error}
         aria-describedby={error ? errorId : undefined}
-        {...form.register(field.name)}
+        {...registerWithEvents()}
       />
       <FieldError id={errorId} message={error} />
     </div>

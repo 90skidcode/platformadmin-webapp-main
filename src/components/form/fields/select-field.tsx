@@ -10,6 +10,7 @@ import {
 import { FieldError } from "./field-error";
 import { FieldLabel, resolveText } from "./field-label";
 import type { FieldComponentProps } from "./field-types";
+import { useFieldEvents } from "./use-field-events";
 import { useRemoteOptions } from "./use-remote-options";
 
 export function SelectField({
@@ -17,6 +18,7 @@ export function SelectField({
   form,
   translate,
   apiFetcher,
+  fieldEventHandlers,
 }: Readonly<FieldComponentProps>) {
   const error = form.formState.errors[field.name]?.message as
     | string
@@ -31,6 +33,11 @@ export function SelectField({
     field.optionsSource,
     apiFetcher,
   );
+  const { triggerEvent } = useFieldEvents({
+    field,
+    form,
+    fieldEventHandlers,
+  });
 
   return (
     <div className="grid gap-1.5">
@@ -41,12 +48,22 @@ export function SelectField({
         render={({ field: controllerField }) => (
           <Select
             value={controllerField.value ?? ""}
-            onValueChange={controllerField.onChange}
+            onValueChange={(value) => {
+              controllerField.onChange(value);
+              void triggerEvent("onChange");
+            }}
             disabled={field.disabled || loading}
           >
             <SelectTrigger
               id={field.name}
               aria-describedby={error ? errorId : undefined}
+              onBlur={() => {
+                controllerField.onBlur();
+                void triggerEvent("onBlur");
+              }}
+              onClick={() => {
+                void triggerEvent("onClick");
+              }}
             >
               <SelectValue placeholder={loading ? "..." : placeholder} />
             </SelectTrigger>
