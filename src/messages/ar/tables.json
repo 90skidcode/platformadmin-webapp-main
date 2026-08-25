@@ -1,0 +1,74 @@
+{
+  "employees": {
+    "columns": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "department": "القسم",
+      "title": "المسمى الوظيفي",
+      "startDate": "تاريخ البدء",
+      "status": "الحالة"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف"
+    },
+    "confirm": {
+      "delete": {
+        "title": "حذف هذا الموظف؟",
+        "message": "لا يمكن التراجع عن هذا الإجراء."
+      }
+    },
+    "toast": {
+      "deleted": "تم حذف الموظف.",
+      "genericError": "تعذر حذف الموظف. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "users": {
+    "columns": {
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "status": "الحالة",
+      "createdAt": "تاريخ الإنشاء"
+    },
+    "actions": {
+      "edit": "تعديل",
+      "delete": "حذف",
+      "resendInvite": "إعادة إرسال الدعوة",
+      "newUser": "دعوة مستخدم",
+      "save": "حفظ"
+    },
+    "confirm": {
+      "delete": {
+        "title": "حذف هذا المستخدم؟",
+        "message": "لا يمكن التراجع عن هذا الإجراء."
+      }
+    },
+    "toast": {
+      "deleted": "تم حذف المستخدم.",
+      "inviteResent": "تم إعادة إرسال الدعوة.",
+      "userUpdated": "تم تحديث المستخدم.",
+      "userInvited": "تم إرسال الدعوة.",
+      "genericError": "تعذر إتمام هذا الإجراء. يرجى المحاولة مرة أخرى."
+    },
+    "editRolesDialog": {
+      "title": "تعديل {name}",
+      "roleLabel": "الدور",
+      "statusLabel": "الحالة",
+      "name": "الاسم",
+      "email": "البريد الإلكتروني"
+    },
+    "inviteDialog": {
+      "title": "دعوة مستخدم جديد"
+    },
+    "roles": {
+      "platform-admin": "مسؤول المنصة",
+      "manager": "مدير",
+      "viewer": "مشاهد"
+    },
+    "status": {
+      "active": "نشط",
+      "invited": "مدعو",
+      "deactivated": "معطل"
+    }
+  }
+}

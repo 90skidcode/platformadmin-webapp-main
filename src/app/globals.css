@@ -1,0 +1,78 @@
+@import "tailwindcss";
+@import "../styles/tokens.css";
+@plugin "tailwindcss-animate";
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+    outline-color: var(--color-ring);
+  }
+
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+  }
+
+  /*
+   * Tailwind v4 Preflight sets `cursor: default` on <button> (matching
+   * native browser behavior, a deliberate change from v3.4 onward), which
+   * overrides the browser's own pointer cursor. That leaves every
+   * `<button>`-based control in the app -- Button, dialog
+   * triggers/close, AlertDialogAction/Cancel, etc. -- without a hand
+   * cursor unless a component opts back in itself. Restore the pointer
+   * cursor for anything actually clickable, app-wide, instead of patching
+   * `cursor-pointer` onto each component individually. `:disabled` and
+   * `[aria-disabled="true"]` are excluded so non-interactive controls keep
+   * showing `not-allowed` (set locally, e.g. Button/Input's
+   * `disabled:cursor-not-allowed`).
+   */
+  button:not(:disabled, [aria-disabled="true"]),
+  [type="button"]:not(:disabled, [aria-disabled="true"]),
+  [type="submit"]:not(:disabled, [aria-disabled="true"]),
+  [type="reset"]:not(:disabled, [aria-disabled="true"]),
+  a[href],
+  label[for],
+  select:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+}
+
+@layer components {
+  /*
+   * The local Toast's swipe-to-dismiss gesture (src/components/toast/toast.tsx,
+   * a local pointer-events implementation -- no @radix-ui/react-toast):
+   * the X offset is injected as an inline custom property per swipe frame
+   * (--toast-swipe-end-x / -move-x), so it can never be a static theme
+   * value. Deliberately NOT Tailwind's "translate-x" utility with an
+   * arbitrary bracketed argument, and this comment deliberately doesn't
+   * spell that syntax out either: Tailwind's class scanner is a plain text
+   * match over every scanned file, comments included, and its compiler has
+   * a real bug where two such arbitrary translate-x candidates sharing a
+   * long common prefix and differing only in the middle (exactly
+   * "-end-x" vs "-move-x" here) get merged into one corrupted rule with a
+   * stray wildcard where they differ -- invalid CSS that's a silent dead
+   * rule under `next build` but a hard parse error under `next dev`'s
+   * stricter pipeline. (An earlier version of this exact comment, written
+   * with the literal bracket syntax as an example, reintroduced the same
+   * crash on its own -- the scanner doesn't know it's inside a comment.)
+   * Below is plain CSS instead, using the same --tw-translate-x /
+   * --tw-translate-y custom properties plus the `translate` CSS property
+   * that Tailwind's own translate utilities use, so this still composes
+   * correctly with the enter/exit slide animations (tailwindcss-animate)
+   * on the same element.
+   */
+  [data-swipe="cancel"] {
+    --tw-translate-x: 0px;
+    translate: var(--tw-translate-x) var(--tw-translate-y, 0);
+  }
+  [data-swipe="end"] {
+    --tw-translate-x: var(--toast-swipe-end-x);
+    translate: var(--tw-translate-x) var(--tw-translate-y, 0);
+  }
+  [data-swipe="move"] {
+    --tw-translate-x: var(--toast-swipe-move-x);
+    translate: var(--tw-translate-x) var(--tw-translate-y, 0);
+  }
+}

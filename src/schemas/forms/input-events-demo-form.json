@@ -1,0 +1,72 @@
+{
+  "id": "input-events-demo-form",
+  "i18nNamespace": "forms.inputEventsDemo",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "name": "fieldA",
+      "type": "text",
+      "labelKey": "fields.fieldA.label",
+      "placeholderKey": "fields.fieldA.placeholder",
+      "helpTextKey": "fields.fieldA.helpText",
+      "onKeyUp": "checkFieldAAvailability"
+    },
+    {
+      "name": "fieldB",
+      "type": "text",
+      "labelKey": "fields.fieldB.label",
+      "placeholderKey": "fields.fieldB.placeholder",
+      "helpTextKey": "fields.fieldB.helpText"
+    },
+    {
+      "name": "fieldC",
+      "type": "email",
+      "labelKey": "fields.fieldC.label",
+      "placeholderKey": "fields.fieldC.placeholder",
+      "helpTextKey": "fields.fieldC.helpText"
+    },
+    {
+      "name": "fieldD",
+      "type": "checkbox",
+      "labelKey": "fields.fieldD.label",
+      "helpTextKey": "fields.fieldD.helpText"
+    },
+    {
+      "name": "fieldE",
+      "type": "select",
+      "labelKey": "fields.fieldE.label",
+      "placeholderKey": "fields.fieldE.placeholder",
+      "helpTextKey": "fields.fieldE.helpText",
+      "optionsSource": {
+        "type": "static",
+        "options": [
+          { "value": "one", "labelKey": "options.one" },
+          { "value": "two", "labelKey": "options.two" },
+          { "value": "three", "labelKey": "options.three" }
+        ]
+      },
+      "onValueChange": "customErrorHandler"
+    },
+    {
+      "name": "fieldF",
+      "type": "switch",
+      "labelKey": "fields.fieldF.label",
+      "helpTextKey": "fields.fieldF.helpText"
+    },
+    {
+      "name": "fieldG",
+      "type": "textarea",
+      "labelKey": "fields.fieldG.label",
+      "placeholderKey": "fields.fieldG.placeholder"
+    }
+  ],
+  "actions": [
+    {
+      "id": "submit",
+      "type": "submit",
+      "labelKey": "actions.submit",
+      "variant": "primary",
+      "onClick": "logValues"
+    }
+  ]
+}

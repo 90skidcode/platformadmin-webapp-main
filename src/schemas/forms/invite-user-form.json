@@ -1,0 +1,49 @@
+{
+  "id": "invite-user-form",
+  "i18nNamespace": "tables.users",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "name": "name",
+      "type": "text",
+      "labelKey": "columns.name",
+      "validation": { "required": true }
+    },
+    {
+      "name": "email",
+      "type": "email",
+      "labelKey": "columns.email",
+      "validation": { "required": true }
+    },
+    {
+      "name": "role",
+      "type": "select",
+      "labelKey": "editRolesDialog.roleLabel",
+      "validation": { "required": true },
+      "optionsSource": {
+        "type": "static",
+        "options": [
+          { "value": "viewer", "labelKey": "roles.viewer" },
+          { "value": "manager", "labelKey": "roles.manager" },
+          { "value": "platform-admin", "labelKey": "roles.platform-admin" }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "submit",
+      "type": "submit",
+      "labelKey": "actions.newUser",
+      "variant": "primary",
+      "onClick": "inviteUser",
+      "onSuccess": {
+        "toast": { "variant": "success", "messageKey": "toast.userInvited" },
+        "refetch": true
+      },
+      "onError": {
+        "toast": { "variant": "error", "messageKey": "toast.genericError" }
+      }
+    }
+  ]
+}

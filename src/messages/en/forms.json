@@ -1,0 +1,66 @@
+{
+  "inputEventsDemo": {
+    "fields": {
+      "fieldA": {
+        "label": "Field A",
+        "placeholder": "Type a name, e.g. \"Priya\" — checks the Users API on keyup",
+        "helpText": "On keyup, calls the Users API for a matching name. A match disables Field B and puts Field C into an error state. Clear it to release both."
+      },
+      "fieldB": {
+        "label": "Field B",
+        "placeholder": "Disables on a match; otherwise filled in from Field A",
+        "helpText": "Driven entirely by Field A's onKeyUp handler -- try nothing here."
+      },
+      "fieldC": {
+        "label": "Field C",
+        "placeholder": "Shows an error once Field A's keyup lookup finds a match",
+        "helpText": "Still editable -- only its error state is controlled by Field A's onKeyUp handler.",
+        "dependencyError": "Field C is invalid -- Field A matches an existing user."
+      },
+      "fieldD": {
+        "label": "Field D (checkbox)",
+        "helpText": "Same event standard as the text fields -- watch the log for onCheckedChange, onClick, onKeyDown, etc."
+      },
+      "fieldE": {
+        "label": "Field E (select)",
+        "placeholder": "Choose one",
+        "helpText": "Same standard -- click/focus/keydown on the trigger, plus onValueChange."
+      },
+      "fieldF": {
+        "label": "Field F (switch)",
+        "helpText": "Same standard as Field D's checkbox."
+      },
+      "fieldG": {
+        "label": "Field G (textarea)",
+        "placeholder": "Multi-line text -- full event set, incl. paste/copy/cut/select"
+      }
+    },
+    "options": {
+      "one": "One",
+      "two": "Two",
+      "three": "Three"
+    },
+    "actions": {
+      "submit": "Log values"
+    }
+  },
+  "employeeOnboarding": {
+    "fields": {
+      "name": { "label": "Full name" },
+      "email": { "label": "Email" },
+      "department": { "label": "Department" },
+      "title": { "label": "Job title" },
+      "startDate": { "label": "Start date" },
+      "notes": { "label": "Notes" }
+    },
+    "actions": {
+      "submit": "Create employee",
+      "cancel": "Cancel",
+      "preview": "Preview"
+    },
+    "toast": {
+      "employeeCreated": "Employee created.",
+      "genericError": "Could not create the employee. Please try again."
+    }
+  }
+}

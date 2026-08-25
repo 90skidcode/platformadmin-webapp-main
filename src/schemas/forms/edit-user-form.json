@@ -1,0 +1,49 @@
+{
+  "id": "edit-user-form",
+  "i18nNamespace": "tables.users",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "name": "name",
+      "type": "text",
+      "labelKey": "editRolesDialog.name",
+      "validation": { "required": true }
+    },
+    {
+      "name": "email",
+      "type": "email",
+      "labelKey": "editRolesDialog.email",
+      "validation": { "required": true }
+    },
+    {
+      "name": "status",
+      "type": "select",
+      "labelKey": "editRolesDialog.statusLabel",
+      "validation": { "required": true },
+      "optionsSource": {
+        "type": "static",
+        "options": [
+          { "value": "active", "labelKey": "status.active" },
+          { "value": "invited", "labelKey": "status.invited" },
+          { "value": "deactivated", "labelKey": "status.deactivated" }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "submit",
+      "type": "submit",
+      "labelKey": "actions.save",
+      "variant": "primary",
+      "onClick": "saveUser",
+      "onSuccess": {
+        "toast": { "variant": "success", "messageKey": "toast.userUpdated" },
+        "refetch": true
+      },
+      "onError": {
+        "toast": { "variant": "error", "messageKey": "toast.genericError" }
+      }
+    }
+  ]
+}

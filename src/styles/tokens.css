@@ -1,0 +1,287 @@
+/**
+ * Design tokens -- the single source of truth for every color, spacing,
+ * typography, radius, shadow, z-index, and motion value in the app.
+ *
+ * Nothing outside this file should contain a raw hex/px/ms value for these
+ * categories. `stylelint-declaration-strict-value` (Phase 0f, plan §16.3)
+ * enforces this at the CSS layer; `eslint-plugin-tailwindcss`'s
+ * `no-arbitrary-value` enforces the Tailwind-utility side of the same rule.
+ *
+ * Structure, per Tailwind v4's CSS-first config:
+ *   1. `:root` / `.dark`  -- raw values, semantic tokens resolved per theme.
+ *   2. `@theme inline`    -- registers those tokens as Tailwind utilities
+ *                            (bg-primary, text-foreground, rounded-md, ...).
+ */
+
+:root {
+  /* ---- Neutral scale ---- */
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+  --color-neutral-950: #0a0a0a;
+
+  /* ---- Brand / primary scale ---- */
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+
+  /* ---- Status scales (one shade each is enough at primitive level) ---- */
+  --color-success-50: #f0fdf4;
+  --color-success-500: #22c55e;
+  --color-success-600: #16a34a;
+  --color-success-700: #15803d;
+
+  --color-warning-50: #fffbeb;
+  --color-warning-500: #f59e0b;
+  --color-warning-600: #d97706;
+  --color-warning-700: #b45309;
+
+  --color-destructive-50: #fef2f2;
+  --color-destructive-500: #ef4444;
+  --color-destructive-600: #dc2626;
+  --color-destructive-700: #b91c1c;
+
+  --color-info-50: #eff6ff;
+  --color-info-500: #3b82f6;
+  --color-info-600: #2563eb;
+  --color-info-700: #1d4ed8;
+
+  /* ---- Semantic tokens (light theme) -- everything else consumes these ---- */
+  --color-background: var(--color-neutral-0);
+  --color-foreground: var(--color-neutral-900);
+  --color-muted: var(--color-neutral-100);
+  --color-muted-foreground: var(--color-neutral-500);
+  --color-card: var(--color-neutral-0);
+  --color-card-foreground: var(--color-neutral-900);
+  --color-popover: var(--color-neutral-0);
+  --color-popover-foreground: var(--color-neutral-900);
+  --color-border: var(--color-neutral-200);
+  --color-input: var(--color-neutral-200);
+  --color-ring: var(--color-primary-500);
+
+  --color-primary: var(--color-primary-600);
+  --color-primary-foreground: var(--color-neutral-0);
+  --color-secondary: var(--color-neutral-100);
+  --color-secondary-foreground: var(--color-neutral-900);
+  --color-accent: var(--color-neutral-100);
+  --color-accent-foreground: var(--color-neutral-900);
+
+  --color-success: var(--color-success-600);
+  --color-success-foreground: var(--color-neutral-0);
+  --color-warning: var(--color-warning-600);
+  --color-warning-foreground: var(--color-neutral-0);
+  --color-destructive: var(--color-destructive-600);
+  --color-destructive-foreground: var(--color-neutral-0);
+  --color-info: var(--color-info-600);
+  --color-info-foreground: var(--color-neutral-0);
+
+  /* ---- Typography ---- */
+  --font-sans:
+    var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:
+    var(--font-geist-mono), ui-monospace, "SF Mono", monospace;
+
+  --text-xs: 0.75rem;
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl: 1.25rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl: 1.5rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl: 1.875rem;
+  --text-3xl--line-height: 2.25rem;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ---- Spacing (4px base grid) ---- */
+  --spacing-0: 0px;
+  --spacing-px: 1px;
+  --spacing-0-5: 0.125rem;
+  --spacing-1: 0.25rem;
+  --spacing-1-5: 0.375rem;
+  --spacing-2: 0.5rem;
+  --spacing-2-5: 0.625rem;
+  --spacing-3: 0.75rem;
+  --spacing-4: 1rem;
+  --spacing-5: 1.25rem;
+  --spacing-6: 1.5rem;
+  --spacing-8: 2rem;
+  --spacing-10: 2.5rem;
+  --spacing-12: 3rem;
+  --spacing-16: 4rem;
+  --spacing-20: 5rem;
+  --spacing-24: 6rem;
+
+  /* ---- Radius ---- */
+  --radius-none: 0px;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
+
+  /* ---- Shadow ---- */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg:
+    0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl:
+    0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* ---- Z-index (named layers, not raw numbers, so stacking order is legible) ---- */
+  --z-dropdown: 1000;
+  --z-sticky: 1100;
+  --z-fixed: 1200;
+  --z-modal-backdrop: 1300;
+  --z-modal: 1400;
+  --z-popover: 1500;
+  --z-tooltip: 1600;
+  --z-toast: 1700;
+
+  /* ---- Motion ---- */
+  --duration-fast: 100ms;
+  --duration-base: 150ms;
+  --duration-slow: 250ms;
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerate: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* ---- Dark theme -- override the semantic tokens only, primitives never re-map ---- */
+.dark {
+  --color-background: var(--color-neutral-950);
+  --color-foreground: var(--color-neutral-50);
+  --color-muted: var(--color-neutral-800);
+  --color-muted-foreground: var(--color-neutral-400);
+  --color-card: var(--color-neutral-900);
+  --color-card-foreground: var(--color-neutral-50);
+  --color-popover: var(--color-neutral-900);
+  --color-popover-foreground: var(--color-neutral-50);
+  --color-border: var(--color-neutral-800);
+  --color-input: var(--color-neutral-800);
+  --color-ring: var(--color-primary-400);
+
+  --color-primary: var(--color-primary-500);
+  --color-primary-foreground: var(--color-neutral-950);
+  --color-secondary: var(--color-neutral-800);
+  --color-secondary-foreground: var(--color-neutral-50);
+  --color-accent: var(--color-neutral-800);
+  --color-accent-foreground: var(--color-neutral-50);
+
+  --color-success-foreground: var(--color-neutral-950);
+  --color-warning-foreground: var(--color-neutral-950);
+  --color-destructive-foreground: var(--color-neutral-950);
+  --color-info-foreground: var(--color-neutral-950);
+}
+
+/* Register every token above as a Tailwind v4 utility-generating theme value. */
+@theme inline {
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-card: var(--color-card);
+  --color-card-foreground: var(--color-card-foreground);
+  --color-popover: var(--color-popover);
+  --color-popover-foreground: var(--color-popover-foreground);
+  --color-border: var(--color-border);
+  --color-input: var(--color-input);
+  --color-ring: var(--color-ring);
+
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-secondary: var(--color-secondary);
+  --color-secondary-foreground: var(--color-secondary-foreground);
+  --color-accent: var(--color-accent);
+  --color-accent-foreground: var(--color-accent-foreground);
+
+  --color-success: var(--color-success);
+  --color-success-foreground: var(--color-success-foreground);
+  --color-warning: var(--color-warning);
+  --color-warning-foreground: var(--color-warning-foreground);
+  --color-destructive: var(--color-destructive);
+  --color-destructive-foreground: var(--color-destructive-foreground);
+  --color-info: var(--color-info);
+  --color-info-foreground: var(--color-info-foreground);
+
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+
+  --text-xs: var(--text-xs);
+  --text-sm: var(--text-sm);
+  --text-base: var(--text-base);
+  --text-lg: var(--text-lg);
+  --text-xl: var(--text-xl);
+  --text-2xl: var(--text-2xl);
+  --text-3xl: var(--text-3xl);
+
+  --spacing-0-5: var(--spacing-0-5);
+  --spacing-1-5: var(--spacing-1-5);
+  --spacing-2-5: var(--spacing-2-5);
+
+  --radius-none: var(--radius-none);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-2xl: var(--radius-2xl);
+  --radius-full: var(--radius-full);
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+
+  /* §16.3: registered as real utility-generating scale entries (z-modal,
+     ease-standard, ...) specifically so the "no arbitrary Tailwind values"
+     ESLint rule can be turned on and mean it -- these used to be consumed
+     as bracketed-arbitrary-value escapes, which is exactly the pattern
+     that rule exists to catch. (Not spelling that bracket syntax out
+     literally here: Tailwind's class scanner text-matches every file it
+     reads, comments included, and doing so once already caused a real
+     compiler crash from inside a comment -- see the notes in
+     src/app/globals.css and src/components/toast/toast.tsx.)
+     `--duration-*` deliberately isn't here: verified empirically (real
+     `next build`, inspected the compiled CSS) that Tailwind v4's duration
+     utility does NOT read named theme entries the way ease/z-index do -- a
+     duration-fast class silently generates no CSS rule at all. The
+     bracketed-arbitrary-value form stays the correct way to consume that
+     token; it's one of the documented exceptions where the "no arbitrary
+     values" rule is disabled per-line, at each place it's used. */
+  --z-index-dropdown: var(--z-dropdown);
+  --z-index-sticky: var(--z-sticky);
+  --z-index-fixed: var(--z-fixed);
+  --z-index-modal-backdrop: var(--z-modal-backdrop);
+  --z-index-modal: var(--z-modal);
+  --z-index-popover: var(--z-popover);
+  --z-index-tooltip: var(--z-tooltip);
+  --z-index-toast: var(--z-toast);
+
+  --ease-standard: var(--ease-standard);
+  --ease-decelerate: var(--ease-decelerate);
+  --ease-accelerate: var(--ease-accelerate);
+}

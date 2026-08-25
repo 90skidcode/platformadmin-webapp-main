@@ -1,0 +1,94 @@
+{
+  "app": {
+    "name": "إدارة المنصة"
+  },
+  "actions": {
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "confirm": "تأكيد",
+    "signOut": "تسجيل الخروج",
+    "retry": "إعادة المحاولة",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
+  },
+  "environments": {
+    "dev": "التطوير",
+    "staging": "التجريبي",
+    "production": "الإنتاج"
+  },
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "users": "المستخدمون",
+    "inputEventsDemo": "عرض أحداث الإدخال"
+  },
+  "topbar": {
+    "environment": "البيئة",
+    "tenant": "المستأجر",
+    "myAccount": "حسابي",
+    "profile": "الملف الشخصي",
+    "signedOutToast": "لقد تم تسجيل خروجك.",
+    "sessionExpiredToast": "انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى."
+  },
+  "sidebar": {
+    "collapse": "طي الشريط الجانبي",
+    "expand": "توسيع الشريط الجانبي"
+  },
+  "toast": {
+    "genericError": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "saved": "تم الحفظ بنجاح."
+  },
+  "table": {
+    "search": "بحث...",
+    "noResults": "لا توجد نتائج.",
+    "rowsPerPage": "صفوف لكل صفحة",
+    "page": "صفحة {page} من {totalPages}",
+    "pagination": "التنقل بين الصفحات",
+    "previousPage": "السابق",
+    "nextPage": "التالي",
+    "goToPage": "الذهاب إلى الصفحة {page}",
+    "morePages": "المزيد من الصفحات",
+    "selectedCount": "تم تحديد {count}",
+    "allFilterOption": "الكل - {label}",
+    "filters": "الفلاتر",
+    "filtersDescription": "قم بتضييق الجدول باستخدام الحقول أدناه.",
+    "clearFilters": "مسح",
+    "applyFilters": "تطبيق"
+  },
+  "loading": "جارٍ التحميل...",
+  "dashboard": {
+    "welcome": "مرحبًا بعودتك، {name}",
+    "subtitle": "هذا ما هو متاح لدورك في {tenant}.",
+    "quickLinks": "روابط سريعة"
+  },
+  "apiMessages": {
+    "AUTH_REQUIRED": "المصادقة مطلوبة",
+    "AUTH_LOGIN_OK": "تم تسجيل الدخول بنجاح",
+    "AUTH_INVALID_CREDENTIALS": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+    "AUTH_REFRESH_OK": "تم تحديث الرمز بنجاح",
+    "AUTH_INVALID_REFRESH_TOKEN": "رمز التحديث غير صالح أو منتهي الصلاحية",
+    "USR_LIST_OK": "تم جلب المستخدمين بنجاح",
+    "USR_CREATED": "تم إنشاء المستخدم بنجاح",
+    "USR_UPDATED": "تم تحديث المستخدم بنجاح",
+    "USR_NOT_FOUND": "المستخدم غير موجود",
+    "USR_ALREADY_ACTIVE": "قبل هذا المستخدم دعوته بالفعل",
+    "USR_INVITE_RESENT": "تم إعادة إرسال الدعوة بنجاح",
+    "EMP_LIST_OK": "تم جلب الموظفين بنجاح",
+    "EMP_CREATED": "تم إنشاء الموظف بنجاح",
+    "EMP_FETCH_OK": "تم جلب الموظف بنجاح",
+    "EMP_UPDATED": "تم تحديث الموظف بنجاح",
+    "EMP_DELETED": "تم حذف الموظف بنجاح",
+    "EMP_NOT_FOUND": "الموظف غير موجود",
+    "SETTINGS_FETCH_OK": "تم جلب الإعدادات بنجاح",
+    "SETTINGS_UPDATED": "تم تحديث الإعدادات بنجاح",
+    "AUDIT_LIST_OK": "تم جلب سجل التدقيق بنجاح",
+    "ME_FETCH_OK": "تم جلب الملف الشخصي بنجاح",
+    "VALIDATION_FAILED": "فشل التحقق من الصحة"
+  },
+  "apiFieldErrors": {
+    "nameRequired": "الاسم مطلوب",
+    "emailRequired": "البريد الإلكتروني مطلوب"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "id": "login-form",
+  "i18nNamespace": "auth.login",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "name": "email",
+      "type": "email",
+      "labelKey": "fields.email.label",
+      "validation": { "required": true }
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "labelKey": "fields.password.label",
+      "validation": { "required": true, "minLength": 8 }
+    }
+  ],
+  "actions": [
+    {
+      "id": "submit",
+      "type": "button",
+      "labelKey": "actions.signIn",
+      "variant": "primary",
+      "onClick": "signInWithCredentials"
+    }
+  ]
+}
