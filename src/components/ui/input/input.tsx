@@ -22,6 +22,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       numericOnly,
       showPasswordToggle = type === "password",
       onKeyDown,
+      onWheel,
       ...props
     },
     ref,
@@ -38,14 +39,19 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "Delete",
             "ArrowLeft",
             "ArrowRight",
-            // "ArrowUp",
-            // "ArrowDown",
             "Home",
             "End",
             "Enter",
           ].includes(e.key) ||
           e.ctrlKey ||
           e.metaKey;
+
+        if (
+          type === "number" &&
+          (e.key === "ArrowUp" || e.key === "ArrowDown")
+        ) {
+          e.preventDefault();
+        }
 
         if (!/^\d$/.test(e.key) && !isControlKey) {
           e.preventDefault();
@@ -63,6 +69,12 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         type={actualType}
         aria-invalid={invalid || undefined}
         onKeyDown={handleKeyDown}
+        onWheel={(e) => {
+          if (type === "number") {
+            e.currentTarget.blur();
+          }
+          onWheel?.(e);
+        }}
         className={cn(
           // eslint-disable-next-line tailwindcss/no-arbitrary-value
           "flex h-10 w-full [appearance:textfield] rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-colors duration-[var(--duration-fast)] file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-ring/15 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:focus-visible:border-destructive aria-invalid:focus-visible:ring-destructive/15 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
