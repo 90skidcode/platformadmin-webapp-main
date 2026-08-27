@@ -54,3 +54,33 @@ export function statusPrefixOf(code: string | undefined): StatusPrefix | null {
 export function isErrorEnvelope(code: string | undefined): boolean {
   return statusPrefixOf(code) === "E";
 }
+
+export function parseApiErrorMessage(
+  body: unknown,
+  fallbackStatus: number,
+): string {
+  const b = body as {
+    message?: string;
+    detail?: string | { msg?: string }[];
+    data?: { errors?: { issue?: string }[] };
+  } | null;
+
+  const dataErrors = b?.data?.errors
+    ?.map((e) => e.issue)
+    .filter(Boolean)
+    .join(", ");
+  if (dataErrors) return dataErrors;
+
+  if (typeof b?.detail === "string") return b.detail;
+  if (Array.isArray(b?.detail)) {
+    const detailErrors = b.detail
+      .map((d) => d.msg)
+      .filter(Boolean)
+      .join(", ");
+    if (detailErrors) return detailErrors;
+  }
+
+  if (b?.message) return b.message;
+
+  return `Request failed with ${fallbackStatus}`;
+}

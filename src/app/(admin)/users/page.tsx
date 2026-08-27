@@ -15,10 +15,10 @@ import {
 import { FormRenderer, type FormSchema } from "@/components/form";
 import { TableRenderer } from "@/components/table";
 import { apiEndpoints } from "@/lib/api-endpoints";
+import { parseApiErrorMessage } from "@/lib/api-envelope";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { usersTableSchema } from "@/schemas/tables/users-table";
 import inviteUserFormSchema from "@/schemas/forms/invite-user-form.json";
-import editUserFormSchema from "@/schemas/forms/edit-user-form.json";
 
 interface UserRow {
   [key: string]: unknown;
@@ -37,7 +37,6 @@ export default function UsersPage() {
   const t = useTranslations("tables.users");
   const commonT = useTranslations("common");
   const [inviteOpen, setInviteOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserRow | null>(null);
   const [tableKey, setTableKey] = useState(0);
   const refreshTable = () => setTableKey((k) => k + 1);
 
@@ -51,14 +50,16 @@ export default function UsersPage() {
         key={tableKey}
         schema={usersTableSchema}
         actionHandlers={{
-          editUser: async (row) => setEditingUser(row as UserRow),
           resendInvite: async (row) => {
             const typedRow = row as UserRow;
             const res = await apiFetcher(
               apiEndpoints.users.resendInvite(typedRow.id),
               { method: "POST" },
             );
-            if (!res.ok) throw new Error(`Request failed with ${res.status}`);
+            if (!res.ok) {
+              const body = await res.json().catch(() => null);
+              throw new Error(parseApiErrorMessage(body, res.status));
+            }
           },
         }}
         toolbarEnd={
@@ -93,55 +94,14 @@ export default function UsersPage() {
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ ...rest, roles: [role] }),
                 });
-                if (!res.ok)
-                  throw new Error(`Request failed with ${res.status}`);
+                if (!res.ok) {
+                  const body = await res.json().catch(() => null);
+                  throw new Error(parseApiErrorMessage(body, res.status));
+                }
                 setInviteOpen(false);
               },
             }}
           />
-        </SheetContent>
-      </Sheet>
-
-      <Sheet
-        open={!!editingUser}
-        onOpenChange={(open) => !open && setEditingUser(null)}
-      >
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>
-              {editingUser
-                ? t("editRolesDialog.title", { name: editingUser.name })
-                : ""}
-            </SheetTitle>
-          </SheetHeader>
-          {editingUser && (
-            <FormRenderer
-              schema={editUserFormSchema as unknown as FormSchema}
-              defaultValues={{
-                name: editingUser.name,
-                email: editingUser.email,
-                status: editingUser.status,
-              }}
-              onRefetch={refreshTable}
-              actionHandlers={{
-                // Matches the real `PATCH /users/{id}` contract exactly --
-                // `{ name, email, status }` in, the updated record back out.
-                saveUser: async (values) => {
-                  const res = await apiFetcher(
-                    apiEndpoints.users.byId(editingUser.id),
-                    {
-                      method: "PATCH",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify(values),
-                    },
-                  );
-                  if (!res.ok)
-                    throw new Error(`Request failed with ${res.status}`);
-                  setEditingUser(null);
-                },
-              }}
-            />
-          )}
         </SheetContent>
       </Sheet>
     </div>

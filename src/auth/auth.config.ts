@@ -57,7 +57,7 @@ export const authConfig: NextAuthConfig = {
             );
             return null;
           }
-          
+
           const body = (await res.json()) as ApiEnvelope<RealLoginData>;
           const accessToken = body.data.access_token;
           const refreshToken = body.data.refresh_token;

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { Session } from "next-auth";
@@ -7,6 +7,7 @@ import messages from "@/messages/en/common.json";
 import tablesMessages from "@/messages/en/tables.json";
 import { renderWithProviders } from "@/test/test-utils";
 import { buildSession } from "@/test/session-factory";
+import { Toaster } from "@/components/toast";
 import UsersPage from "./page";
 
 const session = buildSession({
@@ -52,10 +53,16 @@ const fetchMock = vi
 
 function renderPage(sessionOverride: Session = session) {
   vi.stubGlobal("fetch", fetchMock);
-  renderWithProviders(<UsersPage />, {
-    messages: { common: messages, tables: tablesMessages },
-    session: sessionOverride,
-  });
+  renderWithProviders(
+    <>
+      <Toaster />
+      <UsersPage />
+    </>,
+    {
+      messages: { common: messages, tables: tablesMessages },
+      session: sessionOverride,
+    },
+  );
 }
 
 /** Finds the fetch call made with the given HTTP method -- the initial
@@ -67,7 +74,27 @@ function findCallByMethod(method: string) {
   );
 }
 
+const pushMock = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: pushMock,
+    replace: vi.fn(),
+    refresh: vi.fn(),
+    back: vi.fn(),
+    forward: vi.fn(),
+    prefetch: vi.fn(),
+  }),
+  usePathname: () => "/users",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 describe("UsersPage", () => {
+  beforeEach(() => {
+    pushMock.mockReset();
+    fetchMock.mockReset();
+    fetchMock.mockImplementation(() => Promise.resolve(makeUsersResponse()));
+  });
+
   describe("the Add User button", () => {
     it("shows for a session with users.invite", async () => {
       renderPage();
@@ -79,13 +106,11 @@ describe("UsersPage", () => {
     // Skipped: the `users.invite` gate on this button is temporarily
     // stripped (no roles/permissions source from the backend yet, see
     // users-table.ts) -- re-enable once that gate comes back.
-    it.skip("hides for a session lacking users.invite", async () => {
-      const noInvite = {
-        ...session,
-        user: { ...session.user, permissions: ["users.read"] },
-      } as Session;
-      renderPage(noInvite);
-      await waitFor(() => expect(fetchMock).toHaveBeenCalled());
+    it.skip("hides for a session lacking users.invite", () => {
+      const noInviteSession = buildSession({
+        permissions: ["users.read"],
+      });
+      renderPage(noInviteSession);
       expect(
         screen.queryByRole("button", { name: /Add User/ }),
       ).not.toBeInTheDocument();
@@ -108,30 +133,13 @@ describe("UsersPage", () => {
   });
 
   describe("editing a user", () => {
-    it("opens pre-filled with the row's data and PATCHes { name, email, status } on save", async () => {
+    it("navigates to /users/{id} when Edit is clicked", async () => {
       renderPage();
       await userEvent.click(
         await screen.findByRole("button", { name: "Edit" }),
       );
 
-      // Required fields render a trailing "*" as part of the label's
-      // accessible text (see Label's required indicator), hence the regex.
-      const nameField = screen.getByLabelText(/^Name/);
-      expect(nameField).toHaveValue("Kavya Iyer");
-      expect(screen.getByLabelText(/^Email/)).toHaveValue("kavya@acme.example");
-
-      await userEvent.clear(nameField);
-      await userEvent.type(nameField, "Kavya I.");
-      await userEvent.click(screen.getByRole("button", { name: "Save" }));
-
-      await waitFor(() => expect(findCallByMethod("PATCH")).toBeDefined());
-      const [url, init] = findCallByMethod("PATCH")!;
-      expect(url).toBe("/api/proxy/users/user-1");
-      expect(JSON.parse((init as RequestInit).body as string)).toEqual({
-        name: "Kavya I.",
-        email: "kavya@acme.example",
-        status: "active",
-      });
+      expect(pushMock).toHaveBeenCalledWith("/users/user-1");
     });
   });
 

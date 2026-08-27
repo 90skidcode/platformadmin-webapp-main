@@ -35,7 +35,8 @@
       "delete": "حذف",
       "resendInvite": "إعادة إرسال الدعوة",
       "newUser": "دعوة مستخدم",
-      "save": "حفظ"
+      "save": "حفظ",
+      "cancel": "إلغاء"
     },
     "confirm": {
       "delete": {
@@ -67,6 +68,7 @@
     },
     "status": {
       "active": "نشط",
+      "inactive": "غير نشط",
       "invited": "مدعو",
       "deactivated": "معطل"
     }
