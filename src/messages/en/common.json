@@ -22,6 +22,8 @@
   "nav": {
     "dashboard": "Dashboard",
     "users": "Users",
+    "auditLogs": "Audit Logs",
+    "roleManager": "Role Manager",
     "inputEventsDemo": "Input Events Demo"
   },
   "topbar": {

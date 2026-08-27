@@ -70,5 +70,78 @@
       "invited": "مدعو",
       "deactivated": "معطل"
     }
+  },
+  "auditLogs": {
+    "description": "عرض سجلات نشاط النظام وعمليات المستخدمين والأحداث الأمنية.",
+    "columns": {
+      "action": "الإجراء",
+      "resourceType": "نوع المورد",
+      "resourceId": "معرف المورد",
+      "actorType": "نوع الفاعل",
+      "actor": "المستخدم",
+      "ipAddress": "عنوان IP",
+      "createdAt": "الوقت والتاريخ"
+    },
+    "actions": {
+      "create": "إنشاء",
+      "update": "تحديث",
+      "delete": "حذف",
+      "login": "تسجيل دخول",
+      "logout": "تسجيل خروج"
+    },
+    "resourceTypes": {
+      "all": "الكل",
+      "user": "مستخدم",
+      "role": "دور",
+      "tenant": "مستأجر",
+      "auth": "مصادقة",
+      "system": "نظام"
+    },
+    "actorTypes": {
+      "all": "الكل",
+      "user": "مستخدم",
+      "system": "نظام",
+      "service": "خدمة"
+    },
+    "confirm": {
+      "delete": {
+        "title": "حذف سجل التدقيق هذا؟",
+        "message": "لا يمكن التراجع عن هذا الإجراء."
+      }
+    },
+    "toast": {
+      "deleted": "تم حذف سجل التدقيق.",
+      "genericError": "تعذر إتمام هذا الإجراء. يرجى المحاولة مرة أخرى."
+    }
+  },
+  "roles": {
+    "description": "إدارة أدوار النظام وتكوين أذونات الوصول إلى الشاشات.",
+    "columns": {
+      "name": "اسم الدور",
+      "identifier": "المعرف",
+      "description": "الوصف",
+      "screens": "أسماء الشاشات"
+    },
+    "actions": {
+      "newRole": "دور جديد",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "saveRole": "حفظ الدور"
+    },
+    "form": {
+      "name": "اسم الدور",
+      "description": "وصف الدور",
+      "screens": "أسماء الشاشات"
+    },
+    "dialog": {
+      "newTitle": "إنشاء دور جديد",
+      "editTitle": "تعديل الدور - {name}"
+    },
+    "confirm": {
+      "delete": {
+        "title": "حذف هذا الدور؟",
+        "message": "سيؤدي هذا الإجراء إلى حذف هذا الدور ومصفوفة الأذونات الخاصة به نهائيًا."
+      }
+    }
   }
 }

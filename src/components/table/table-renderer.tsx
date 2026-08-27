@@ -168,7 +168,8 @@ export function TableRenderer<T extends Record<string, unknown>>({
         header: () =>
           resolveText(translate, column.header, column.headerKey) ??
           column.accessorKey,
-        cell: ({ getValue }) => renderCell(column, getValue()),
+        cell: ({ getValue, row }) =>
+          renderCell(column, getValue(), row.original),
         enableSorting: !!column.sortable,
         size: column.width ? Number(column.width) : undefined,
       });

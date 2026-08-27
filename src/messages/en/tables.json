@@ -70,5 +70,79 @@
       "invited": "Invited",
       "deactivated": "Deactivated"
     }
+  },
+  "auditLogs": {
+    "description": "View system activity logs, user operations, and security events.",
+    "columns": {
+      "user": "User",
+      "action": "Action",
+      "resourceType": "Resource Type",
+      "resourceId": "Resource ID",
+      "actorType": "Actor Type",
+      "actor": "User",
+      "ipAddress": "IP Address",
+      "createdAt": "Timestamp"
+    },
+    "actions": {
+      "create": "Create",
+      "update": "Update",
+      "delete": "Delete",
+      "login": "Login",
+      "logout": "Logout"
+    },
+    "resourceTypes": {
+      "all": "All",
+      "user": "User",
+      "role": "Role",
+      "tenant": "Tenant",
+      "auth": "Auth",
+      "system": "System"
+    },
+    "actorTypes": {
+      "all": "All",
+      "user": "User",
+      "system": "System",
+      "service": "Service"
+    },
+    "confirm": {
+      "delete": {
+        "title": "Delete this audit log entry?",
+        "message": "This action cannot be undone."
+      }
+    },
+    "toast": {
+      "deleted": "Audit log entry deleted.",
+      "genericError": "That action could not be completed. Please try again."
+    }
+  },
+  "roles": {
+    "description": "Manage system roles and configure screen access permissions.",
+    "columns": {
+      "name": "Role Name",
+      "identifier": "Identifier",
+      "description": "Description",
+      "screens": "Screen Names"
+    },
+    "actions": {
+      "newRole": "New Role",
+      "edit": "Edit",
+      "delete": "Delete",
+      "saveRole": "Save Role"
+    },
+    "form": {
+      "name": "Role Name",
+      "description": "Role Description",
+      "screens": "Screen Names"
+    },
+    "dialog": {
+      "newTitle": "Create New Role",
+      "editTitle": "Edit Role - {name}"
+    },
+    "confirm": {
+      "delete": {
+        "title": "Delete this role?",
+        "message": "This will permanently remove the role and its permission matrix."
+      }
+    }
   }
 }

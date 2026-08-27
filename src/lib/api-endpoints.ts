@@ -42,4 +42,8 @@ export const apiEndpoints = {
     resendInvite: (userId: string) =>
       `${PROXY_BASE_PATH}/users/${userId}/resend-invite`,
   },
+  auditLogs: {
+    list: `${PROXY_BASE_PATH}/audit-logs`,
+    byId: (logId: string) => `${PROXY_BASE_PATH}/audit-logs/${logId}`,
+  },
 } as const;

@@ -31,6 +31,18 @@ export const NAV_ITEMS: NavItem[] = [
     // source from the backend yet (see resolve-roles.ts / permissions.ts)
   },
   {
+    id: "audit-logs",
+    labelKey: "nav.auditLogs",
+    href: "/audit-logs",
+    icon: "history",
+  },
+  {
+    id: "role-manager",
+    labelKey: "nav.roleManager",
+    href: "/role-manager",
+    icon: "shieldCheck",
+  },
+  {
     id: "input-events-demo",
     labelKey: "nav.inputEventsDemo",
     href: "/input-events-demo",

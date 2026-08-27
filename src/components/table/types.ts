@@ -6,13 +6,22 @@ export type {
   ToastActionConfig,
 } from "@/lib/action-handlers/action-result";
 
-export type CellType = "text" | "badge" | "date" | "email";
+export type CellType =
+  | "text"
+  | "badge"
+  | "date"
+  | "datetime"
+  | "timestamp"
+  | "email"
+  | "link";
 
 export interface TableColumn {
   accessorKey: string;
   header?: string;
   headerKey?: string;
   cell?: CellType;
+  /** Template URL for `cell: "link"`, e.g. `"/role-manager/{id}"`. Replaces `{key}` with row values. */
+  linkTemplate?: string;
   /** Maps a raw cell value to a Badge variant, `cell: "badge"` only -- e.g. `{ active: "success", offboarded: "destructive" }`. */
   badgeVariants?: Record<
     string,
