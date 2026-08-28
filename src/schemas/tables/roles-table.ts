@@ -1,3 +1,4 @@
+import { apiEndpoints } from "@/lib/api-endpoints";
 import type { TableSchema } from "@/components/table";
 
 export interface RoleItem {
@@ -5,9 +6,12 @@ export interface RoleItem {
   id: string;
   name: string;
   code?: string;
-  description: string;
-  screens: string;
-  permissions?: Record<string, boolean>;
+  description?: string | null;
+  status: string;
+  screens?: string;
+  permissions?: string[] | Record<string, boolean>;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export const defaultRolesData: RoleItem[] = [
@@ -15,6 +19,7 @@ export const defaultRolesData: RoleItem[] = [
     id: "super-admin",
     name: "Super Admin",
     code: "ROLE_SUPER_ADMIN",
+    status: "active",
     description:
       "Full system control and unrestricted access across all screens and resources.",
     screens: "Dashboard, User, Profile",
@@ -31,6 +36,7 @@ export const defaultRolesData: RoleItem[] = [
     id: "platform-admin",
     name: "Platform Admin",
     code: "ROLE_PLATFORM_ADMIN",
+    status: "active",
     description:
       "Administrative access to configure roles, view activity, and manage members.",
     screens: "Dashboard, User, Profile",
@@ -47,6 +53,7 @@ export const defaultRolesData: RoleItem[] = [
     id: "future-admin",
     name: "Future Admin",
     code: "ROLE_FUTURE_ADMIN",
+    status: "active",
     description:
       "Configurable role template with customizable screen permissions.",
     screens: "Dashboard, User, Profile",
@@ -64,7 +71,8 @@ export const defaultRolesData: RoleItem[] = [
 export const rolesTableSchema: TableSchema = {
   id: "roles-table",
   i18nNamespace: "tables.roles",
-  mode: "client",
+  mode: "server",
+  endpoint: { url: apiEndpoints.roles.list },
   search: { enabled: true },
   pageSize: 10,
   columns: [
@@ -76,18 +84,18 @@ export const rolesTableSchema: TableSchema = {
       sortable: true,
     },
     {
-      accessorKey: "code",
-      headerKey: "columns.identifier",
-      sortable: true,
-    },
-    {
       accessorKey: "description",
       headerKey: "columns.description",
       sortable: true,
     },
     {
-      accessorKey: "screens",
-      headerKey: "columns.screens",
+      accessorKey: "status",
+      headerKey: "columns.status",
+      cell: "badge",
+      badgeVariants: {
+        active: "success",
+        inactive: "destructive",
+      },
     },
   ],
   rowActions: [

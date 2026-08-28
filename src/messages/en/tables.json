@@ -125,7 +125,12 @@
       "name": "Role Name",
       "identifier": "Identifier",
       "description": "Description",
-      "screens": "Screen Names"
+      "screens": "Screen Names",
+      "status": "Status"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
     },
     "actions": {
       "newRole": "New Role",

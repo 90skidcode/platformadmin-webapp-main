@@ -1,27 +1,19 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui";
 import { TableRenderer } from "@/components/table";
-import {
-  defaultRolesData,
-  rolesTableSchema,
-  type RoleItem,
-} from "@/schemas/tables/roles-table";
+import { rolesTableSchema, type RoleItem } from "@/schemas/tables/roles-table";
 
 export default function RoleManagerPage() {
   const commonT = useTranslations("common");
   const t = useTranslations("tables.roles");
 
-  const [roles, setRoles] = useState<RoleItem[]>(defaultRolesData);
-
-  const handleDeleteRole = async (row: unknown) => {
-    const typedRow = row as RoleItem;
-    setRoles((prev) => prev.filter((r) => r.id !== typedRow.id));
+  const handleDeleteRole = async (_row: unknown) => {
+    // Row deletion will be connected to the API endpoint later
   };
 
   return (
@@ -37,7 +29,6 @@ export default function RoleManagerPage() {
       {/* Schema-Driven Table */}
       <TableRenderer<RoleItem>
         schema={rolesTableSchema}
-        data={roles}
         actionHandlers={{
           deleteRole: handleDeleteRole,
         }}

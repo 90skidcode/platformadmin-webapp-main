@@ -123,7 +123,12 @@
       "name": "اسم الدور",
       "identifier": "المعرف",
       "description": "الوصف",
-      "screens": "أسماء الشاشات"
+      "screens": "أسماء الشاشات",
+      "status": "الحالة"
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
     },
     "actions": {
       "newRole": "دور جديد",
