@@ -28,14 +28,16 @@
       "name": "Name",
       "email": "Email",
       "status": "Status",
-      "createdAt": "Created"
+      "createdAt": "Created",
+      "updatedAt": "Updated"
     },
     "actions": {
       "edit": "Edit",
       "delete": "Delete",
       "resendInvite": "Resend invite",
       "newUser": "Add User",
-      "save": "Save"
+      "save": "Save",
+      "cancel": "Cancel"
     },
     "confirm": {
       "delete": {
@@ -67,6 +69,7 @@
     },
     "status": {
       "active": "Active",
+      "inactive": "Inactive",
       "invited": "Invited",
       "deactivated": "Deactivated"
     }

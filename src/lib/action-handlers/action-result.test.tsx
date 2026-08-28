@@ -54,6 +54,17 @@ describe("triggerToastFromConfig", () => {
       triggerToastFromConfig({ toast: { titleKey: "toast.saved" } });
       expect(await screen.findByText("toast.saved")).toBeInTheDocument();
     });
+
+    it("prefers fallbackMessage over messageKey when provided", async () => {
+      renderToaster();
+      triggerToastFromConfig(
+        { toast: { messageKey: "toast.genericError" } },
+        { fallbackMessage: "Name must follow the valid format" },
+      );
+      expect(
+        await screen.findByText("Name must follow the valid format"),
+      ).toBeInTheDocument();
+    });
   });
 
   describe("redirecting", () => {

@@ -316,8 +316,25 @@ describe("TableRenderer", () => {
       await userEvent.click(screen.getByRole("button", { name: "Apply" }));
       expect(screen.queryByText("Rahul Verma")).not.toBeInTheDocument();
 
-      await userEvent.click(screen.getByRole("button", { name: /Filters/ }));
+      await userEvent.click(screen.getByRole("button", { name: /^Filters/ }));
       await userEvent.click(screen.getByRole("button", { name: "Clear" }));
+
+      expect(screen.getByText("Kavya Iyer")).toBeInTheDocument();
+      expect(screen.getByText("Rahul Verma")).toBeInTheDocument();
+    });
+
+    it("client mode: clears applied filters from outside using the clear icon button", async () => {
+      renderTable(schemaWithStatusFilter(), { data: employeesWithStatus });
+
+      await openFilterSheetAndSelect("Active");
+      await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+      expect(screen.queryByText("Rahul Verma")).not.toBeInTheDocument();
+
+      // Clear icon button next to Filters
+      const clearBtn = screen.getByRole("button", {
+        name: /clearAllFilters/i,
+      });
+      await userEvent.click(clearBtn);
 
       expect(screen.getByText("Kavya Iyer")).toBeInTheDocument();
       expect(screen.getByText("Rahul Verma")).toBeInTheDocument();

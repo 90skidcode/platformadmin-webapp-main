@@ -18,8 +18,7 @@ export const usersTableSchema: TableSchema = {
       labelKey: "columns.status",
       options: [
         { value: "active", labelKey: "status.active" },
-        { value: "invited", labelKey: "status.invited" },
-        { value: "deactivated", labelKey: "status.deactivated" },
+        { value: "inactive", labelKey: "status.inactive" },
       ],
     },
   ],
@@ -36,13 +35,18 @@ export const usersTableSchema: TableSchema = {
       cell: "badge",
       badgeVariants: {
         active: "success",
-        invited: "warning",
-        deactivated: "destructive",
+        inactive: "destructive",
       },
     },
     {
       accessorKey: "created_at",
       headerKey: "columns.createdAt",
+      cell: "date",
+      sortable: true,
+    },
+    {
+      accessorKey: "updated_at",
+      headerKey: "columns.updatedAt",
       cell: "date",
       sortable: true,
     },
@@ -54,23 +58,9 @@ export const usersTableSchema: TableSchema = {
       id: "edit",
       labelKey: "actions.edit",
       icon: "pencil",
-      handler: "custom",
-      onClick: "editUser",
+      handler: "navigate",
+      target: "/users/{id}",
       // permission: "users.write",
-    },
-    {
-      id: "resend-invite",
-      labelKey: "actions.resendInvite",
-      icon: "mail",
-      handler: "custom",
-      onClick: "resendInvite",
-      // permission: "users.invite",
-      onSuccess: {
-        toast: { variant: "success", messageKey: "toast.inviteResent" },
-      },
-      onError: {
-        toast: { variant: "error", messageKey: "toast.genericError" },
-      },
     },
     {
       // Real `DELETE /users/{id}` (confirmed against a live response) --

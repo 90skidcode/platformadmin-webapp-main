@@ -24,8 +24,7 @@
         "type": "static",
         "options": [
           { "value": "active", "labelKey": "status.active" },
-          { "value": "invited", "labelKey": "status.invited" },
-          { "value": "deactivated", "labelKey": "status.deactivated" }
+          { "value": "inactive", "labelKey": "status.inactive" }
         ]
       }
     }
@@ -44,6 +43,13 @@
       "onError": {
         "toast": { "variant": "error", "messageKey": "toast.genericError" }
       }
+    },
+    {
+      "id": "cancel",
+      "type": "link",
+      "labelKey": "actions.cancel",
+      "variant": "outline",
+      "href": "/users"
     }
   ]
 }

@@ -71,11 +71,24 @@ export function FormActions({
     (action) => !action.permission || can(action.permission, session),
   );
 
-  async function runResult(action: FormAction, succeeded: boolean) {
+  async function runResult(
+    action: FormAction,
+    succeeded: boolean,
+    error?: unknown,
+  ) {
+    const fallbackMessage =
+      !succeeded &&
+      error instanceof Error &&
+      error.message &&
+      !error.message.startsWith("Request failed with ")
+        ? error.message
+        : undefined;
+
     triggerToastFromConfig(succeeded ? action.onSuccess : action.onError, {
       translate,
       router,
       refetch: onRefetch,
+      fallbackMessage,
     });
   }
 
@@ -96,8 +109,8 @@ export function FormActions({
           }
         }
         await runResult(action, true);
-      } catch {
-        await runResult(action, false);
+      } catch (err) {
+        await runResult(action, false, err);
       }
     })();
   }

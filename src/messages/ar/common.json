@@ -55,6 +55,7 @@
     "filters": "الفلاتر",
     "filtersDescription": "قم بتضييق الجدول باستخدام الحقول أدناه.",
     "clearFilters": "مسح",
+    "clearAllFilters": "مسح جميع الفلاتر",
     "applyFilters": "تطبيق"
   },
   "loading": "جارٍ التحميل...",

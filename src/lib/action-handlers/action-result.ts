@@ -22,6 +22,8 @@ export interface TriggerToastContext {
   translate?: (key: string) => string;
   router?: { push: (href: string) => void };
   refetch?: () => void;
+  /** Specific error message (e.g. from backend API response), overriding the generic error messageKey. */
+  fallbackMessage?: string;
 }
 
 /**
@@ -44,12 +46,17 @@ export function triggerToastFromConfig(
       message,
       messageKey,
     } = config.toast;
+    let description = message;
+    if (ctx.fallbackMessage) {
+      description = ctx.fallbackMessage;
+    } else if (messageKey) {
+      description = ctx.translate?.(messageKey) ?? messageKey;
+    }
+
     toast({
       variant,
       title: titleKey ? (ctx.translate?.(titleKey) ?? titleKey) : title,
-      description: messageKey
-        ? (ctx.translate?.(messageKey) ?? messageKey)
-        : message,
+      description,
     });
   }
 

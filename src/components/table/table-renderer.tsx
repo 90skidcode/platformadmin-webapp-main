@@ -15,7 +15,7 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer, type Virtualizer } from "@tanstack/react-virtual";
 import { useTranslations } from "next-intl";
-import { ArrowDown, ArrowUp, ArrowUpDown, ListFilter } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, ListFilter, X } from "lucide-react";
 
 import {
   Badge,
@@ -324,7 +324,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
                 onDone={() => setRowSelection({})}
               />
             )}
-            {!!schema.filters?.length && (
+            {!!schema.filters?.length && activeFilterCount === 0 && (
               <Button
                 type="button"
                 variant="outline"
@@ -333,12 +333,37 @@ export function TableRenderer<T extends Record<string, unknown>>({
               >
                 <ListFilter className="size-4" aria-hidden="true" />
                 {commonT("table.filters")}
-                {activeFilterCount > 0 && (
-                  <Badge variant="secondary" className="px-1.5">
+              </Button>
+            )}
+            {!!schema.filters?.length && activeFilterCount > 0 && (
+              <div className="inline-flex h-10 items-center rounded-lg border border-border bg-background text-sm font-medium transition-colors">
+                <button
+                  type="button"
+                  onClick={openFilterSheet}
+                  className="inline-flex h-full items-center gap-2 rounded-l-lg px-3.5 hover:bg-accent hover:text-accent-foreground focus-visible:ring-4 focus-visible:ring-ring/20 focus-visible:outline-none"
+                >
+                  <ListFilter className="size-4" aria-hidden="true" />
+                  {commonT("table.filters")}
+                  <Badge
+                    variant="secondary"
+                    className="pointer-events-none px-1.5"
+                  >
                     {activeFilterCount}
                   </Badge>
-                )}
-              </Button>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    clearFilters();
+                  }}
+                  aria-label={commonT("table.clearAllFilters")}
+                  title={commonT("table.clearAllFilters")}
+                  className="inline-flex h-full items-center justify-center rounded-r-lg border-l border-border px-2 text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring/20 focus-visible:outline-none"
+                >
+                  <X className="size-3.5" aria-hidden="true" />
+                </button>
+              </div>
             )}
             {toolbarEnd}
           </div>
