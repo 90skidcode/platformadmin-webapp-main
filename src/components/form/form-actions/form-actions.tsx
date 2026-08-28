@@ -176,7 +176,7 @@ export function FormActions({
         return (
           <Button
             key={action.id}
-            type="button"
+            type={action.type || "button"}
             variant={action.variant ?? "primary"}
             loading={form.formState.isSubmitting}
             onClick={() => handleSubmit(action)}

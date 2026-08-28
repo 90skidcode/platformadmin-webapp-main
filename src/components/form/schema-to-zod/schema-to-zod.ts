@@ -29,12 +29,7 @@ function fieldToZodType(field: FormField): ZodTypeAny {
     case "hidden":
       return z.any().optional();
     case "email":
-      return applyStringValidation(
-        z
-          .string(v.required ? { error: v.messages?.required } : undefined)
-          .email(v.messages?.email),
-        v,
-      );
+      return applyStringValidation(z.string(), v, true);
     default:
       return applyStringValidation(z.string(), v);
   }
@@ -43,8 +38,20 @@ function fieldToZodType(field: FormField): ZodTypeAny {
 function applyStringValidation(
   base: z.ZodString,
   v: FieldValidation,
+  isEmail = false,
 ): ZodTypeAny {
   let schema = base;
+
+  // 1. If required, check min(1) FIRST so empty strings fail immediately
+  // with the `required` message, before minLength/maxLength/pattern/email run.
+  if (v.required) {
+    schema = schema.min(1, v.messages?.required ?? "Required");
+  }
+
+  // 2. Format & length checks (only run on non-empty values)
+  if (isEmail) {
+    schema = schema.email(v.messages?.email);
+  }
   if (v.minLength !== undefined)
     schema = schema.min(v.minLength, v.messages?.minLength);
   if (v.maxLength !== undefined)
@@ -52,10 +59,12 @@ function applyStringValidation(
   if (v.pattern)
     schema = schema.regex(new RegExp(v.pattern), v.messages?.pattern);
 
-  if (v.required) {
-    return schema.min(1, v.messages?.required ?? "Required");
+  // 3. If optional, allow omitted / empty string
+  if (!v.required) {
+    return schema.optional().or(z.literal(""));
   }
-  return schema.optional().or(z.literal(""));
+
+  return schema;
 }
 
 function applyNumberValidation(

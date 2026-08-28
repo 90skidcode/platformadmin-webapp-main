@@ -1,0 +1,34 @@
+{
+  "id": "verify-otp-form",
+  "i18nNamespace": "auth.verifyOtp",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "name": "otp",
+      "type": "text",
+      "labelKey": "fields.otp.label",
+      "placeholderKey": "fields.otp.placeholder",
+      "validation": {
+        "required": true,
+        "minLength": 5,
+        "maxLength": 5,
+        "pattern": "^[0-9]{5}$",
+        "messages": {
+          "required": "validation.otpRequired",
+          "minLength": "validation.otpInvalid",
+          "maxLength": "validation.otpInvalid",
+          "pattern": "validation.otpInvalid"
+        }
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "submit",
+      "type": "submit",
+      "labelKey": "actions.verifyOtp",
+      "variant": "primary",
+      "onClick": "verifyOtp"
+    }
+  ]
+}

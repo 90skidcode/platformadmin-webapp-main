@@ -36,10 +36,22 @@ export function proxy(request: NextRequest) {
   const hasSessionCookie = SESSION_COOKIE_NAMES.some((name) =>
     request.cookies.has(name),
   );
-  const isLoginRoute = request.nextUrl.pathname.startsWith("/login");
+  // All pre-login auth pages must be allowed through without a session cookie,
+  // same as /login itself -- otherwise an unauthenticated visitor would be
+  // redirected to /login from /forgot-password, which redirects to /login
+  // from /verify-otp, and so on in a redirect loop.
+  const AUTH_PUBLIC_PATHS = [
+    "/login",
+    "/forgot-password",
+    "/verify-otp",
+    "/reset-password",
+  ];
+  const isPublicAuthRoute = AUTH_PUBLIC_PATHS.some((p) =>
+    request.nextUrl.pathname.startsWith(p),
+  );
 
   const response =
-    !hasSessionCookie && !isLoginRoute
+    !hasSessionCookie && !isPublicAuthRoute
       ? NextResponse.redirect(withRedirectTarget(request))
       : NextResponse.next({ request: { headers: requestHeaders } });
 

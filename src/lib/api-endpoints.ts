@@ -35,6 +35,15 @@ export const apiEndpoints = {
     login: "/auth/login",
     refresh: "/auth/refresh",
     me: "/me",
+    // Public password-reset forwarders -- same-origin Next.js Route Handlers
+    // that proxy to the backend without requiring an authenticated session.
+    // The browser calls /api/auth/*, never the backend directly (API_URL stays
+    // server-only). Not routed through the BFF proxy (/api/proxy/*) because
+    // those routes require a valid session.
+    generateOtp: "/api/auth/generate-otp",
+    verifyOtp: "/api/auth/verify-otp",
+    // eslint-disable-next-line sonarjs/no-hardcoded-passwords -- API route path, not a credential
+    updatePassword: "/api/auth/update-password",
   },
   users: {
     list: `${PROXY_BASE_PATH}/users`,

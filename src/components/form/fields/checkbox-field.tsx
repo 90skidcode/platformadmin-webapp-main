@@ -87,7 +87,7 @@ export function CheckboxField({
           </div>
         )}
       />
-      <FieldError id={errorId} message={displayError} />
+      <FieldError id={errorId} message={displayError} translate={translate} />
     </div>
   );
 }
