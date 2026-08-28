@@ -16,18 +16,10 @@
       "validation": { "required": true }
     },
     {
-      "name": "role",
-      "type": "select",
-      "labelKey": "editRolesDialog.roleLabel",
-      "validation": { "required": true },
-      "optionsSource": {
-        "type": "static",
-        "options": [
-          { "value": "viewer", "labelKey": "roles.viewer" },
-          { "value": "manager", "labelKey": "roles.manager" },
-          { "value": "platform-admin", "labelKey": "roles.platform-admin" }
-        ]
-      }
+      "name": "password",
+      "type": "password",
+      "labelKey": "columns.password",
+      "validation": { "required": true }
     }
   ],
   "actions": [

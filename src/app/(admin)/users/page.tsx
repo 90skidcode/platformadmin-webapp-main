@@ -19,6 +19,7 @@ import { parseApiErrorMessage } from "@/lib/api-envelope";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { usersTableSchema } from "@/schemas/tables/users-table";
 import inviteUserFormSchema from "@/schemas/forms/invite-user-form.json";
+import editUserFormSchema from "@/schemas/forms/edit-user-form.json";
 
 interface UserRow {
   [key: string]: unknown;
@@ -37,6 +38,7 @@ export default function UsersPage() {
   const t = useTranslations("tables.users");
   const commonT = useTranslations("common");
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserRow | null>(null);
   const [tableKey, setTableKey] = useState(0);
   const refreshTable = () => setTableKey((k) => k + 1);
 
@@ -50,6 +52,7 @@ export default function UsersPage() {
         key={tableKey}
         schema={usersTableSchema}
         actionHandlers={{
+          editUser: async (row) => setEditingUser(row as UserRow),
           resendInvite: async (row) => {
             const typedRow = row as UserRow;
             const res = await apiFetcher(
@@ -84,15 +87,15 @@ export default function UsersPage() {
             onRefetch={refreshTable}
             actionHandlers={{
               inviteUser: async (values) => {
-                const { role, ...rest } = values as {
-                  role: string;
+                const { name, email, password } = values as {
                   name: string;
                   email: string;
+                  password?: string;
                 };
                 const res = await apiFetcher(apiEndpoints.users.list, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ ...rest, roles: [role] }),
+                  body: JSON.stringify({ name, email, password }),
                 });
                 if (!res.ok) {
                   const body = await res.json().catch(() => null);
@@ -102,6 +105,49 @@ export default function UsersPage() {
               },
             }}
           />
+        </SheetContent>
+      </Sheet>
+
+      <Sheet
+        open={!!editingUser}
+        onOpenChange={(open) => !open && setEditingUser(null)}
+      >
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>
+              {editingUser
+                ? t("editRolesDialog.title", { name: editingUser.name })
+                : ""}
+            </SheetTitle>
+          </SheetHeader>
+          {editingUser && (
+            <FormRenderer
+              schema={editUserFormSchema as unknown as FormSchema}
+              defaultValues={{
+                name: editingUser.name,
+                email: editingUser.email,
+                status: editingUser.status,
+              }}
+              onRefetch={refreshTable}
+              actionHandlers={{
+                saveUser: async (values) => {
+                  const res = await apiFetcher(
+                    apiEndpoints.users.byId(editingUser.id),
+                    {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(values),
+                    },
+                  );
+                  if (!res.ok) {
+                    const body = await res.json().catch(() => null);
+                    throw new Error(parseApiErrorMessage(body, res.status));
+                  }
+                  setEditingUser(null);
+                },
+              }}
+            />
+          )}
         </SheetContent>
       </Sheet>
     </div>
