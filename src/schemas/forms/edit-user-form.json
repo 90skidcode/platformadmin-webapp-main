@@ -43,13 +43,6 @@
       "onError": {
         "toast": { "variant": "error", "messageKey": "toast.genericError" }
       }
-    },
-    {
-      "id": "cancel",
-      "type": "link",
-      "labelKey": "actions.cancel",
-      "variant": "outline",
-      "href": "/users"
     }
   ]
 }

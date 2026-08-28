@@ -58,8 +58,8 @@ export const usersTableSchema: TableSchema = {
       id: "edit",
       labelKey: "actions.edit",
       icon: "pencil",
-      handler: "navigate",
-      target: "/users/{id}",
+      handler: "custom",
+      onClick: "editUser",
       // permission: "users.write",
     },
     {

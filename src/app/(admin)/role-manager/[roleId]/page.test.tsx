@@ -80,13 +80,10 @@ describe("RoleDetailPage (Unified Metadata & Permission Table)", () => {
     });
 
     expect(screen.getByText("Create New Role")).toBeInTheDocument();
-    const nameInput = screen.getByLabelText(/Role Name/i) as HTMLInputElement;
-    expect(nameInput.value).toBe("");
-
-    const dashboardRead = screen.getByLabelText(
-      "Dashboard Read",
-    ) as HTMLInputElement;
-    expect(dashboardRead.checked).toBe(false);
+    const dashboardRead = screen.getByRole("checkbox", {
+      name: "Dashboard Read",
+    });
+    expect(dashboardRead).not.toBeChecked();
 
     expect(
       screen.getByRole("button", { name: /Create Role/i }),

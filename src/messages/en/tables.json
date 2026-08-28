@@ -28,6 +28,7 @@
       "name": "Name",
       "email": "Email",
       "status": "Status",
+      "password": "Password",
       "createdAt": "Created",
       "updatedAt": "Updated"
     },
