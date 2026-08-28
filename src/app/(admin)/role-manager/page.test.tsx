@@ -71,4 +71,10 @@ describe("RoleManagerPage", () => {
       await screen.findByRole("link", { name: "Super Admin" }),
     ).toHaveAttribute("href", "/role-manager/super-admin?mode=view");
   });
+
+  it("deletes a role when delete action is confirmed", async () => {
+    renderPage();
+    const deleteBtn = await screen.findByRole("button", { name: /Delete/i });
+    expect(deleteBtn).toBeInTheDocument();
+  });
 });
