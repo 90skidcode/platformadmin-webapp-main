@@ -86,9 +86,16 @@ export default function LoginPage() {
                   redirect: false,
                 });
                 if (result?.error) {
+                  // `code` carries the backend's own message when authorize()
+                  // threw ApiCredentialsError (auth.config.ts); "credentials"
+                  // is CredentialsSignin's hardcoded default for every other
+                  // failure, so that one falls back to the generic copy.
                   toast({
                     variant: "error",
-                    title: t("errors.invalidCredentials"),
+                    title:
+                      result.code && result.code !== "credentials"
+                        ? result.code
+                        : t("errors.invalidCredentials"),
                   });
                 } else {
                   router.push(searchParams.get("from") ?? "/");

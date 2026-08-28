@@ -1,11 +1,23 @@
 import Credentials from "next-auth/providers/credentials";
-import type { NextAuthConfig } from "next-auth";
+import { CredentialsSignin, type NextAuthConfig } from "next-auth";
 
-import type { ApiEnvelope } from "@/lib/api-envelope";
+import { parseApiErrorMessage, type ApiEnvelope } from "@/lib/api-envelope";
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { resolveAccess, type LoginResponse } from "./resolve-roles";
 import { refreshAccessToken } from "./refresh-token";
 import { decodeJwtPayload } from "./decode-jwt";
+
+/** `CredentialsSignin`'s own constructor hardcodes `code = "credentials"` --
+ * Auth.js's client only ever gets this `code` field back (never a free-form
+ * `message`) across the redirect round-trip, so this is the one channel
+ * available for the backend's actual reason ("account locked", "invalid
+ * password", ...) to reach the login page's toast (login/page.tsx). */
+class ApiCredentialsError extends CredentialsSignin {
+  constructor(message: string) {
+    super();
+    this.code = message;
+  }
+}
 
 /** Real backend's actual `/auth/login` shape -- `email`/`password` in (the
  * new standard the backend team settled on, superseding the `username` key
@@ -33,12 +45,6 @@ export const authConfig: NextAuthConfig = {
     Credentials({
       credentials: { email: {}, password: {} },
       authorize: async (credentials) => {
-        // TEMP diagnostic -- remove once the CredentialsSignin root cause is
-        // confirmed; NextAuth otherwise swallows whatever went wrong here.
-        console.error(
-          "[auth] authorize() called with keys",
-          Object.keys(credentials ?? {}),
-        );
         try {
           const res = await fetch(
             `${process.env.API_URL}${apiEndpoints.auth.login}`,
@@ -48,14 +54,15 @@ export const authConfig: NextAuthConfig = {
               body: JSON.stringify(credentials),
             },
           );
-          // Wrong password / unknown user -> NextAuth surfaces a generic auth error.
+          // Wrong password, unknown user, locked account, ... -- whatever the
+          // backend's `message` says, forwarded verbatim to the login page's
+          // toast via ApiCredentialsError's `code` (see its own doc comment).
           if (!res.ok) {
-            console.error(
-              "[auth] /auth/login failed",
-              res.status,
-              await res.text().catch(() => "<unreadable body>"),
+            const errorBody = await res.json().catch(() => null);
+            console.error("[auth] /auth/login failed", res.status, errorBody);
+            throw new ApiCredentialsError(
+              parseApiErrorMessage(errorBody, res.status),
             );
-            return null;
           }
 
           const body = (await res.json()) as ApiEnvelope<RealLoginData>;
@@ -96,7 +103,12 @@ export const authConfig: NextAuthConfig = {
             accessTokenExpires,
           };
         } catch (err) {
-          console.error("[auth] authorize() threw", err);
+          // ApiCredentialsError is already logged above with its backend
+          // status/body -- only unexpected failures (network down, bad JSON,
+          // resolveAccess throwing, ...) need a second, distinct log line.
+          if (!(err instanceof ApiCredentialsError)) {
+            console.error("[auth] authorize() threw", err);
+          }
           throw err;
         }
       },
