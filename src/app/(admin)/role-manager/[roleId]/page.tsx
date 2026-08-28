@@ -100,7 +100,7 @@ export default function RoleDetailPage({
         };
       }
       return (
-        existingRole?.permissions ?? {
+        (existingRole?.permissions as Record<string, boolean> | undefined) ?? {
           dashboard_read: true,
           dashboard_write: true,
           users_read: true,
