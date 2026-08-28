@@ -1,27 +1,30 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui";
 import { TableRenderer } from "@/components/table";
-import {
-  defaultRolesData,
-  rolesTableSchema,
-  type RoleItem,
-} from "@/schemas/tables/roles-table";
+import { apiEndpoints } from "@/lib/api-endpoints";
+import { parseApiErrorMessage } from "@/lib/api-envelope";
+import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
+import { rolesTableSchema, type RoleItem } from "@/schemas/tables/roles-table";
 
 export default function RoleManagerPage() {
   const commonT = useTranslations("common");
   const t = useTranslations("tables.roles");
-
-  const [roles, setRoles] = useState<RoleItem[]>(defaultRolesData);
+  const apiFetcher = useApiFetcher();
 
   const handleDeleteRole = async (row: unknown) => {
     const typedRow = row as RoleItem;
-    setRoles((prev) => prev.filter((r) => r.id !== typedRow.id));
+    const res = await apiFetcher(apiEndpoints.roles.byId(typedRow.id), {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new Error(parseApiErrorMessage(body, res.status));
+    }
   };
 
   return (
@@ -37,7 +40,6 @@ export default function RoleManagerPage() {
       {/* Schema-Driven Table */}
       <TableRenderer<RoleItem>
         schema={rolesTableSchema}
-        data={roles}
         actionHandlers={{
           deleteRole: handleDeleteRole,
         }}

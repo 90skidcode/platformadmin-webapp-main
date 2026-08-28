@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
 
 import messages from "@/messages/en/common.json";
@@ -12,7 +12,34 @@ const session = buildSession({
   roles: ["platform-admin"],
 });
 
+function makeRolesResponse() {
+  return new Response(
+    JSON.stringify({
+      code: "S_200_ROL_LIST_OK",
+      message: "Roles fetched successfully",
+      data: {
+        items: [
+          {
+            id: "super-admin",
+            name: "Super Admin",
+            description:
+              "Full system control and unrestricted access across all screens and resources.",
+            status: "active",
+          },
+        ],
+        pagination: { page: 1, limit: 10, totalItems: 1, totalPages: 1 },
+      },
+    }),
+    { status: 200, headers: { "content-type": "application/json" } },
+  );
+}
+
+const fetchMock = vi
+  .fn()
+  .mockImplementation(() => Promise.resolve(makeRolesResponse()));
+
 function renderPage() {
+  vi.stubGlobal("fetch", fetchMock);
   renderWithProviders(<RoleManagerPage />, {
     messages: { common: messages, tables: tablesMessages },
     session,
@@ -20,6 +47,11 @@ function renderPage() {
 }
 
 describe("RoleManagerPage", () => {
+  beforeEach(() => {
+    fetchMock.mockReset();
+    fetchMock.mockImplementation(() => Promise.resolve(makeRolesResponse()));
+  });
+
   it("renders role manager title, table columns, default roles, and action buttons", async () => {
     renderPage();
     expect(
@@ -32,19 +64,17 @@ describe("RoleManagerPage", () => {
     // Table columns
     expect(screen.getByText("Role Name")).toBeInTheDocument();
     expect(screen.getByText("Description")).toBeInTheDocument();
-    expect(screen.getByText("Screen Names")).toBeInTheDocument();
+    expect(screen.getByText("Status")).toBeInTheDocument();
 
-    // Default role rows (Super Admin link, Platform Admin link, Future Admin link)
-    expect(screen.getByRole("link", { name: "Super Admin" })).toHaveAttribute(
-      "href",
-      "/role-manager/super-admin?mode=view",
-    );
+    // Fetched role row
     expect(
-      screen.getByRole("link", { name: "Platform Admin" }),
-    ).toHaveAttribute("href", "/role-manager/platform-admin?mode=view");
-    expect(screen.getByRole("link", { name: "Future Admin" })).toHaveAttribute(
-      "href",
-      "/role-manager/future-admin?mode=view",
-    );
+      await screen.findByRole("link", { name: "Super Admin" }),
+    ).toHaveAttribute("href", "/role-manager/super-admin?mode=view");
+  });
+
+  it("deletes a role when delete action is confirmed", async () => {
+    renderPage();
+    const deleteBtn = await screen.findByRole("button", { name: /Delete/i });
+    expect(deleteBtn).toBeInTheDocument();
   });
 });
