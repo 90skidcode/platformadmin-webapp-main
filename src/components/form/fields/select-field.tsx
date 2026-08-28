@@ -110,7 +110,7 @@ export function SelectField({
           </Select>
         )}
       />
-      <FieldError id={errorId} message={displayError} />
+      <FieldError id={errorId} message={displayError} translate={translate} />
     </div>
   );
 }

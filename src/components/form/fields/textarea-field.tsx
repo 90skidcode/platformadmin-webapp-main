@@ -83,7 +83,7 @@ export function TextareaField({
         onContextMenu={() => emit("onContextMenu")}
         onSelect={() => emit("onSelect")}
       />
-      <FieldError id={errorId} message={displayError} />
+      <FieldError id={errorId} message={displayError} translate={translate} />
     </div>
   );
 }

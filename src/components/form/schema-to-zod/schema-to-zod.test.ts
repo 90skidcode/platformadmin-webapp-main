@@ -155,4 +155,79 @@ describe("schemaToZod", () => {
       expect(schemaToZod(fields).safeParse({}).success).toBe(true);
     });
   });
+
+  describe("password field validation — what the user sees when they submit", () => {
+    const passwordField: FormField[] = [
+      {
+        name: "password",
+        type: "password",
+        validation: {
+          required: true,
+          minLength: 8,
+          maxLength: 13,
+          pattern: "^(?=.*[a-z])(?=.*[A-Z]).{8,13}$",
+          messages: {
+            required: "passwordRequired",
+            minLength: "passwordComplexity",
+            maxLength: "passwordComplexity",
+            pattern: "passwordComplexity",
+          },
+        },
+      },
+    ];
+
+    it("tells the user the password field cannot be left blank, before any other rule is checked", () => {
+      // When the user submits without entering a password, they should see
+      // "Password is required" — not a complexity hint like "8–13 characters".
+      const result = schemaToZod(passwordField).safeParse({ password: "" });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe("passwordRequired");
+      }
+    });
+
+    it("tells the user the password is too short when they have typed something but not enough characters", () => {
+      // A partially entered password like "Ab" should get a complexity hint,
+      // not a "required" message — the user did try to enter something.
+      // eslint-disable-next-line sonarjs/no-hardcoded-passwords
+      const result = schemaToZod(passwordField).safeParse({ password: "Ab" });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe("passwordComplexity");
+      }
+    });
+
+    it("tells the user the password does not meet the complexity rules when it has enough length but wrong format", () => {
+      // e.g. "lowercaseonly" is long enough but missing an uppercase letter,
+      // so the user should see the complexity hint.
+      const result = schemaToZod(passwordField).safeParse({
+        // eslint-disable-next-line sonarjs/no-hardcoded-passwords -- test input
+        password: "lowercaseonly",
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe("passwordComplexity");
+      }
+    });
+
+    it("tells the user the email field cannot be left blank, before checking whether it is a valid email address", () => {
+      // When the user submits with an empty email, they should see
+      // "Email is required" — not "Invalid email format".
+      const emailFields: FormField[] = [
+        {
+          name: "email",
+          type: "email",
+          validation: {
+            required: true,
+            messages: { required: "emailRequired", email: "emailInvalid" },
+          },
+        },
+      ];
+      const result = schemaToZod(emailFields).safeParse({ email: "" });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe("emailRequired");
+      }
+    });
+  });
 });

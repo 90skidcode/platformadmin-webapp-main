@@ -8,6 +8,7 @@
 // between multiple backend URLs.
 import "server-only";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function resolveBaseUrl(_envId: string): string {
   return process.env.API_URL ?? "";
 }

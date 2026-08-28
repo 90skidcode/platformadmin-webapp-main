@@ -88,6 +88,47 @@ describe("FormActions", () => {
 
       expect(onClick).toHaveBeenCalledOnce();
     });
+
+    it("does not submit the form when the user clicks a non-submit button", () => {
+      // A 'Preview' or 'Cancel' button must never accidentally trigger form
+      // submission or validation — only the dedicated submit button should do that.
+      renderHarness({
+        schema: {
+          ...requiredFieldSchema,
+          actions: [
+            {
+              id: "preview",
+              type: "button",
+              label: "Preview",
+              onClick: "preview",
+            },
+          ],
+        },
+        actionHandlers: { preview: vi.fn() },
+      });
+      expect(screen.getByRole("button", { name: "Preview" })).toHaveAttribute(
+        "type",
+        "button",
+      );
+    });
+  });
+
+  describe("submitting the form by pressing Enter", () => {
+    it("allows the user to submit the form by pressing the Enter key on a submit button", () => {
+      // Users expect to press Enter to submit forms (e.g. after filling in a
+      // password). This only works when the button has type='submit'.
+      renderHarness({
+        schema: {
+          ...requiredFieldSchema,
+          actions: [{ id: "save", type: "submit", label: "Save" }],
+        },
+        actionHandlers: {},
+      });
+      expect(screen.getByRole("button", { name: "Save" })).toHaveAttribute(
+        "type",
+        "submit",
+      );
+    });
   });
 
   describe("a 'submit' action with an onClick", () => {
