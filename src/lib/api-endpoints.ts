@@ -55,6 +55,10 @@ export const apiEndpoints = {
     list: `${PROXY_BASE_PATH}/roles`,
     byId: (roleId: string) => `${PROXY_BASE_PATH}/roles/${roleId}`,
   },
+  screens: {
+    list: `${PROXY_BASE_PATH}/screens`,
+    byId: (screenId: string) => `${PROXY_BASE_PATH}/screens/${screenId}`,
+  },
   auditLogs: {
     list: `${PROXY_BASE_PATH}/audit-logs`,
     byId: (logId: string) => `${PROXY_BASE_PATH}/audit-logs/${logId}`,
