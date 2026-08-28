@@ -152,6 +152,10 @@
         "title": "Delete this role?",
         "message": "This will permanently remove the role and its permission matrix."
       }
+    },
+    "toast": {
+      "deleted": "Role deleted successfully.",
+      "genericError": "Could not delete role. Please try again."
     }
   }
 }

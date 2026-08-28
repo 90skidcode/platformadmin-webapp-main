@@ -6,26 +6,11 @@ import { Plus } from "lucide-react";
 
 import { Button } from "@/components/ui";
 import { TableRenderer } from "@/components/table";
-import { apiEndpoints } from "@/lib/api-endpoints";
-import { parseApiErrorMessage } from "@/lib/api-envelope";
-import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { rolesTableSchema, type RoleItem } from "@/schemas/tables/roles-table";
 
 export default function RoleManagerPage() {
   const commonT = useTranslations("common");
   const t = useTranslations("tables.roles");
-  const apiFetcher = useApiFetcher();
-
-  const handleDeleteRole = async (row: unknown) => {
-    const typedRow = row as RoleItem;
-    const res = await apiFetcher(apiEndpoints.roles.byId(typedRow.id), {
-      method: "DELETE",
-    });
-    if (!res.ok) {
-      const body = await res.json().catch(() => null);
-      throw new Error(parseApiErrorMessage(body, res.status));
-    }
-  };
 
   return (
     <div className="flex flex-col gap-6 p-6">
@@ -40,9 +25,6 @@ export default function RoleManagerPage() {
       {/* Schema-Driven Table */}
       <TableRenderer<RoleItem>
         schema={rolesTableSchema}
-        actionHandlers={{
-          deleteRole: handleDeleteRole,
-        }}
         toolbarEnd={
           <Link href="/role-manager/new">
             <Button className="gap-1.5">

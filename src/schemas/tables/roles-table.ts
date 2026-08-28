@@ -110,11 +110,21 @@ export const rolesTableSchema: TableSchema = {
       id: "delete",
       labelKey: "actions.delete",
       icon: "trash",
-      handler: "custom",
-      onClick: "deleteRole",
+      handler: "api",
+      endpoint: {
+        method: "DELETE",
+        url: apiEndpoints.roles.byId("{id}"),
+      },
       confirm: {
         titleKey: "confirm.delete.title",
         messageKey: "confirm.delete.message",
+      },
+      onSuccess: {
+        toast: { variant: "success", messageKey: "toast.deleted" },
+        refetch: true,
+      },
+      onError: {
+        toast: { variant: "error", messageKey: "toast.genericError" },
       },
     },
   ],
