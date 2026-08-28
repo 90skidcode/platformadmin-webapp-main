@@ -1,0 +1,101 @@
+{
+  "id": "role-form",
+  "i18nNamespace": "tables.roles",
+  "layout": { "columns": 1 },
+  "fields": [
+    {
+      "name": "name",
+      "type": "text",
+      "labelKey": "form.name",
+      "placeholder": "e.g. Super Admin, Support Lead",
+      "validation": {
+        "required": true,
+        "minLength": 2,
+        "maxLength": 50,
+        "messages": {
+          "required": "Role name is required",
+          "minLength": "Role name must be at least 2 characters",
+          "maxLength": "Role name cannot exceed 50 characters"
+        }
+      }
+    },
+    {
+      "name": "description",
+      "type": "textarea",
+      "labelKey": "form.description",
+      "placeholder": "Brief description of the permissions and responsibilities",
+      "validation": {
+        "required": true,
+        "minLength": 5,
+        "maxLength": 200,
+        "messages": {
+          "required": "Description is required",
+          "minLength": "Description must be at least 5 characters",
+          "maxLength": "Description cannot exceed 200 characters"
+        }
+      }
+    },
+    {
+      "name": "screens",
+      "type": "text",
+      "labelKey": "form.screens",
+      "placeholder": "e.g. Dashboard, User, Profile",
+      "defaultValue": "Dashboard, User, Profile",
+      "validation": {
+        "required": true,
+        "minLength": 2,
+        "maxLength": 100,
+        "messages": {
+          "required": "Screen names are required",
+          "minLength": "Screen names must be at least 2 characters",
+          "maxLength": "Screen names cannot exceed 100 characters"
+        }
+      }
+    },
+    {
+      "name": "dashboard_read",
+      "type": "checkbox",
+      "label": "Dashboard Read",
+      "defaultValue": false
+    },
+    {
+      "name": "dashboard_write",
+      "type": "checkbox",
+      "label": "Dashboard Write",
+      "defaultValue": false
+    },
+    {
+      "name": "users_read",
+      "type": "checkbox",
+      "label": "User Read",
+      "defaultValue": false
+    },
+    {
+      "name": "users_write",
+      "type": "checkbox",
+      "label": "User Write",
+      "defaultValue": false
+    },
+    {
+      "name": "profile_read",
+      "type": "checkbox",
+      "label": "Profile Read",
+      "defaultValue": false
+    },
+    {
+      "name": "profile_write",
+      "type": "checkbox",
+      "label": "Profile Write",
+      "defaultValue": false
+    }
+  ],
+  "actions": [
+    {
+      "id": "submit",
+      "type": "submit",
+      "labelKey": "actions.saveRole",
+      "variant": "primary",
+      "onClick": "saveRole"
+    }
+  ]
+}

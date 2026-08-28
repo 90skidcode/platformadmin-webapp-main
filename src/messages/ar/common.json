@@ -22,6 +22,8 @@
   "nav": {
     "dashboard": "لوحة التحكم",
     "users": "المستخدمون",
+    "auditLogs": "سجلات التدقيق",
+    "roleManager": "إدارة الأدوار",
     "inputEventsDemo": "عرض أحداث الإدخال"
   },
   "topbar": {

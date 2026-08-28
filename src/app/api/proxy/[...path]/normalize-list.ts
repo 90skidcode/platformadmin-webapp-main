@@ -12,12 +12,17 @@
 interface BackendPagination {
   page: number;
   limit: number;
-  total_items: number;
-  total_pages: number;
+  total_items?: number;
+  total_pages?: number;
+  totalItems?: number;
+  totalPages?: number;
 }
 
 interface BackendListEnvelope {
-  data?: { data?: unknown[]; pagination?: BackendPagination };
+  data?:
+    | { data?: unknown[]; items?: unknown[]; pagination?: BackendPagination }
+    | unknown[];
+  pagination?: BackendPagination;
 }
 
 /** `request.nextUrl.search`-shaped in, same shape out: either `""` or a
@@ -34,7 +39,7 @@ export function translateListSearchParams(search: string): string {
 }
 
 /** No-op (returns `raw` unchanged) for anything that isn't the backend's
- * nested-list shape -- single-record responses, mutation responses, and
+ * list shape -- single-record responses, mutation responses, and
  * non-JSON/error bodies all pass through untouched. */
 export function normalizeListBody(raw: string): string {
   let parsed: BackendListEnvelope;
@@ -44,20 +49,48 @@ export function normalizeListBody(raw: string): string {
     return raw;
   }
 
+  // Nested backend shape: { data: { data: [...], pagination: { ... } } }
   const list = parsed.data;
-  if (!list || !Array.isArray(list.data) || !list.pagination) return raw;
-
-  const { page, limit, total_items, total_pages } = list.pagination;
-  return JSON.stringify({
-    ...parsed,
-    data: {
-      items: list.data,
-      pagination: {
-        page,
-        limit,
-        totalItems: total_items,
-        totalPages: total_pages,
+  if (
+    list &&
+    typeof list === "object" &&
+    !Array.isArray(list) &&
+    Array.isArray(list.data) &&
+    list.pagination
+  ) {
+    const { page, limit, total_items, total_pages, totalItems, totalPages } =
+      list.pagination;
+    return JSON.stringify({
+      ...parsed,
+      data: {
+        items: list.data,
+        pagination: {
+          page,
+          limit,
+          totalItems: total_items ?? totalItems ?? 0,
+          totalPages: total_pages ?? totalPages ?? 1,
+        },
       },
-    },
-  });
+    });
+  }
+
+  // Top-level array shape: { data: [...], pagination: { ... } }
+  if (Array.isArray(parsed.data) && parsed.pagination) {
+    const { page, limit, total_items, total_pages, totalItems, totalPages } =
+      parsed.pagination;
+    return JSON.stringify({
+      ...parsed,
+      data: {
+        items: parsed.data,
+        pagination: {
+          page,
+          limit,
+          totalItems: total_items ?? totalItems ?? 0,
+          totalPages: total_pages ?? totalPages ?? 1,
+        },
+      },
+    });
+  }
+
+  return raw;
 }
