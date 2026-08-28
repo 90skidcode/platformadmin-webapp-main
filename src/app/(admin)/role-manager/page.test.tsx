@@ -37,14 +37,14 @@ describe("RoleManagerPage", () => {
     // Default role rows (Super Admin link, Platform Admin link, Future Admin link)
     expect(screen.getByRole("link", { name: "Super Admin" })).toHaveAttribute(
       "href",
-      "/role-manager/super-admin",
+      "/role-manager/super-admin?mode=view",
     );
     expect(
       screen.getByRole("link", { name: "Platform Admin" }),
-    ).toHaveAttribute("href", "/role-manager/platform-admin");
+    ).toHaveAttribute("href", "/role-manager/platform-admin?mode=view");
     expect(screen.getByRole("link", { name: "Future Admin" })).toHaveAttribute(
       "href",
-      "/role-manager/future-admin",
+      "/role-manager/future-admin?mode=view",
     );
   });
 });

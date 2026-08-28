@@ -133,13 +133,67 @@ describe("UsersPage", () => {
   });
 
   describe("editing a user", () => {
-    it("navigates to /users/{id} when Edit is clicked", async () => {
+    it("opens pre-filled with the row's data and PATCHes { name, email, status } on save", async () => {
       renderPage();
       await userEvent.click(
         await screen.findByRole("button", { name: "Edit" }),
       );
 
-      expect(pushMock).toHaveBeenCalledWith("/users/user-1");
+      const nameField = screen.getByLabelText(/^Name/);
+      expect(nameField).toHaveValue("Kavya Iyer");
+      expect(screen.getByLabelText(/^Email/)).toHaveValue("kavya@acme.example");
+
+      await userEvent.clear(nameField);
+      await userEvent.type(nameField, "Kavya I.");
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      await waitFor(() => expect(findCallByMethod("PATCH")).toBeDefined());
+      const [url, init] = findCallByMethod("PATCH")!;
+      expect(url).toBe("/api/proxy/users/user-1");
+      expect(JSON.parse((init as RequestInit).body as string)).toEqual({
+        name: "Kavya I.",
+        email: "kavya@acme.example",
+        status: "active",
+      });
+    });
+
+    it("displays the specific API error message in toast if PATCH fails", async () => {
+      fetchMock.mockImplementation((_url, init) => {
+        if ((init as RequestInit | undefined)?.method === "PATCH") {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                code: "E_422_VALIDATION_FAILED",
+                message: "Validation failed",
+                data: {
+                  errors: [
+                    {
+                      field: "name",
+                      issue: "Name must follow the valid format",
+                    },
+                  ],
+                },
+              }),
+              { status: 422, headers: { "content-type": "application/json" } },
+            ),
+          );
+        }
+        return Promise.resolve(makeUsersResponse());
+      });
+
+      renderPage();
+      await userEvent.click(
+        await screen.findByRole("button", { name: "Edit" }),
+      );
+
+      const nameField = await screen.findByLabelText(/^Name/);
+      await userEvent.clear(nameField);
+      await userEvent.type(nameField, "Invalid123");
+      await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+      expect(
+        await screen.findByText("Name must follow the valid format"),
+      ).toBeInTheDocument();
     });
   });
 
