@@ -85,6 +85,12 @@
       "ipAddress": "عنوان IP",
       "createdAt": "الوقت والتاريخ"
     },
+    "filters": {
+      "actor": "الفاعل",
+      "actorPlaceholder": "تصفية حسب الفاعل (البريد الإلكتروني)",
+      "fromDate": "من تاريخ",
+      "toDate": "إلى تاريخ"
+    },
     "actions": {
       "create": "إنشاء",
       "update": "تحديث",

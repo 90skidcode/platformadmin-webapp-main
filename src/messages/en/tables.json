@@ -87,6 +87,12 @@
       "ipAddress": "IP Address",
       "createdAt": "Timestamp"
     },
+    "filters": {
+      "actor": "Actor",
+      "actorPlaceholder": "Filter by actor (email)",
+      "fromDate": "From Date",
+      "toDate": "To Date"
+    },
     "actions": {
       "create": "Create",
       "update": "Update",

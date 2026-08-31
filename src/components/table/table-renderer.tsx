@@ -21,6 +21,8 @@ import {
   Badge,
   Button,
   Checkbox,
+  DateRangePicker,
+  formatDateIso,
   Input,
   Label,
   Select,
@@ -386,6 +388,121 @@ export function TableRenderer<T extends Record<string, unknown>>({
                   resolveText(translate, filter.label, filter.labelKey) ??
                   filter.accessorKey;
                 const fieldId = `table-filter-${filter.accessorKey}`;
+                const filterType =
+                  filter.type ?? (filter.options ? "select" : "text");
+
+                if (filterType === "date-range") {
+                  const fromKey =
+                    filter.fromAccessorKey ?? `${filter.accessorKey}_from`;
+                  const toKey =
+                    filter.toAccessorKey ?? `${filter.accessorKey}_to`;
+                  const rangeValue = {
+                    from: pendingFilters[fromKey] ?? null,
+                    to: pendingFilters[toKey] ?? null,
+                  };
+                  return (
+                    <div
+                      key={filter.accessorKey}
+                      className="flex flex-col gap-1.5"
+                    >
+                      <Label htmlFor={fieldId}>{filterLabel}</Label>
+                      <DateRangePicker
+                        id={fieldId}
+                        value={rangeValue}
+                        minDate={filter.minDate}
+                        maxDate={filter.maxDate}
+                        disablePast={filter.disablePast}
+                        disableFuture={filter.disableFuture}
+                        hidePastDates={filter.hidePastDates}
+                        onChange={(nextRange) => {
+                          setPendingFilters((current) => {
+                            const updated = { ...current };
+                            if (nextRange.from) {
+                              updated[fromKey] =
+                                typeof nextRange.from === "string"
+                                  ? nextRange.from
+                                  : formatDateIso(nextRange.from);
+                            } else {
+                              delete updated[fromKey];
+                            }
+                            if (nextRange.to) {
+                              updated[toKey] =
+                                typeof nextRange.to === "string"
+                                  ? nextRange.to
+                                  : formatDateIso(nextRange.to);
+                            } else {
+                              delete updated[toKey];
+                            }
+                            return updated;
+                          });
+                        }}
+                      />
+                    </div>
+                  );
+                }
+
+                if (filterType === "date") {
+                  return (
+                    <div
+                      key={filter.accessorKey}
+                      className="flex flex-col gap-1.5"
+                    >
+                      <Label htmlFor={fieldId}>{filterLabel}</Label>
+                      <Input
+                        id={fieldId}
+                        type="date"
+                        value={pendingFilters[filter.accessorKey] ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setPendingFilters((current) => {
+                            if (!val) {
+                              const rest = { ...current };
+                              delete rest[filter.accessorKey];
+                              return rest;
+                            }
+                            return { ...current, [filter.accessorKey]: val };
+                          });
+                        }}
+                      />
+                    </div>
+                  );
+                }
+
+                if (filterType === "text") {
+                  const placeholder =
+                    resolveText(
+                      translate,
+                      filter.placeholder,
+                      filter.placeholderKey,
+                    ) ?? filterLabel;
+                  return (
+                    <div
+                      key={filter.accessorKey}
+                      className="flex flex-col gap-1.5"
+                    >
+                      <Label htmlFor={fieldId}>{filterLabel}</Label>
+                      <Input
+                        id={fieldId}
+                        type="text"
+                        maxLength={filter.maxLength}
+                        placeholder={placeholder}
+                        value={pendingFilters[filter.accessorKey] ?? ""}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setPendingFilters((current) => {
+                            if (!val) {
+                              const rest = { ...current };
+                              delete rest[filter.accessorKey];
+                              return rest;
+                            }
+                            return { ...current, [filter.accessorKey]: val };
+                          });
+                        }}
+                      />
+                    </div>
+                  );
+                }
+
                 return (
                   <div
                     key={filter.accessorKey}
@@ -418,7 +535,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
                             label: filterLabel,
                           })}
                         </SelectItem>
-                        {filter.options.map((option) => (
+                        {filter.options?.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {resolveText(
                               translate,

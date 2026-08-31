@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { Session } from "next-auth";
 
 import messages from "@/messages/en/common.json";
@@ -65,5 +66,32 @@ describe("AuditLogsPage", () => {
     expect(
       screen.queryByRole("button", { name: "Delete" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("renders actor, from_date, and to_date filters in the filter sheet", async () => {
+    renderPage();
+    const filtersBtn = await screen.findByRole("button", { name: "Filters" });
+    await userEvent.click(filtersBtn);
+
+    expect(await screen.findByLabelText("Actor")).toBeInTheDocument();
+    expect(screen.getByLabelText("From Date")).toBeInTheDocument();
+    expect(screen.getByLabelText("To Date")).toBeInTheDocument();
+    expect(screen.getByLabelText("Action")).toBeInTheDocument();
+    expect(screen.getByLabelText("Resource Type")).toBeInTheDocument();
+    expect(screen.getByLabelText("Actor Type")).toBeInTheDocument();
+
+    const actorInput = screen.getByLabelText("Actor");
+    expect(actorInput).toHaveAttribute("type", "text");
+    expect(actorInput).toHaveAttribute("maxLength", "255");
+    expect(actorInput).toHaveAttribute(
+      "placeholder",
+      "Filter by actor (email)",
+    );
+
+    const fromDateInput = screen.getByLabelText("From Date");
+    expect(fromDateInput).toHaveAttribute("type", "date");
+
+    const toDateInput = screen.getByLabelText("To Date");
+    expect(toDateInput).toHaveAttribute("type", "date");
   });
 });
