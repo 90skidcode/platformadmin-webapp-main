@@ -367,6 +367,59 @@ describe("TableRenderer", () => {
         ),
       );
     });
+
+    it("server mode: submitting text and date filters adds them to the query params", async () => {
+      const apiFetcher = vi.fn().mockResolvedValue({
+        json: async () => ({
+          code: "S_200_EMP_LIST_OK",
+          message: "Employees fetched successfully",
+          data: {
+            items: [],
+            pagination: { page: 1, limit: 10, totalItems: 0, totalPages: 1 },
+          },
+        }),
+      });
+      const schema: TableSchema = {
+        ...baseSchema,
+        mode: "server",
+        endpoint: { url: "/audit-logs" },
+        filters: [
+          {
+            accessorKey: "actor",
+            label: "Actor",
+            type: "text",
+            maxLength: 255,
+          },
+          {
+            accessorKey: "from_date",
+            label: "From Date",
+            type: "date",
+          },
+          {
+            accessorKey: "to_date",
+            label: "To Date",
+            type: "date",
+          },
+        ],
+      };
+      renderTable(schema, { apiFetcher });
+
+      await userEvent.click(screen.getByRole("button", { name: "Filters" }));
+      await userEvent.type(
+        screen.getByRole("textbox", { name: "Actor" }),
+        "admin@example.com",
+      );
+      await userEvent.type(screen.getByLabelText("From Date"), "2026-08-01");
+      await userEvent.type(screen.getByLabelText("To Date"), "2026-08-31");
+      await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+
+      await waitFor(() => {
+        const lastCallUrl = apiFetcher.mock.calls.at(-1)?.[0] as string;
+        expect(lastCallUrl).toContain("actor=admin%40example.com");
+        expect(lastCallUrl).toContain("from_date=2026-08-01");
+        expect(lastCallUrl).toContain("to_date=2026-08-31");
+      });
+    });
   });
 
   describe("server mode", () => {
