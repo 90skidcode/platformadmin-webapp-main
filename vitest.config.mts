@@ -16,7 +16,12 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    fileParallelism: false,
+    pool: "threads",
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
     setupFiles: ["./src/test/setup.ts"],
     css: true,
     reporters: ["verbose"],
