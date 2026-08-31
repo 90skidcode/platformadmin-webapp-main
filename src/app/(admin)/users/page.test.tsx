@@ -12,6 +12,7 @@ import UsersPage from "./page";
 
 const session = buildSession({
   name: "Priya",
+  email: "priya@acme.example",
   roles: ["platform-admin"],
   permissions: [
     "users.read",
@@ -122,6 +123,37 @@ describe("UsersPage", () => {
         await screen.findByRole("button", { name: /Add User/ }),
       );
       expect(screen.getByRole("dialog")).toBeInTheDocument();
+    });
+
+    it("submits the create user form with Email header and payload", async () => {
+      renderPage();
+      await userEvent.click(
+        await screen.findByRole("button", { name: /Add User/ }),
+      );
+
+      const dialog = screen.getByRole("dialog");
+      const nameInput = screen.getByLabelText(/^Name/);
+      const emailInput = screen.getByLabelText(/^Email/);
+      const passwordInput = screen.getByLabelText(/^Password/);
+
+      await userEvent.type(nameInput, "John Doe");
+      await userEvent.type(emailInput, "john@example.com");
+      await userEvent.type(passwordInput, "S3cureP@ss");
+
+      const submitBtn = dialog.querySelector(
+        'button[type="submit"]',
+      ) as HTMLElement;
+      await userEvent.click(submitBtn);
+
+      await waitFor(() => expect(findCallByMethod("POST")).toBeDefined());
+      const [url, init] = findCallByMethod("POST")!;
+      expect(url).toBe("/api/proxy/users");
+      expect((init as RequestInit).headers).toEqual(
+        expect.objectContaining({
+          "Content-Type": "application/json",
+          Email: "priya@acme.example",
+        }),
+      );
     });
   });
 

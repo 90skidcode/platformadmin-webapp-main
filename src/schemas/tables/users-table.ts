@@ -50,6 +50,14 @@ export const usersTableSchema: TableSchema = {
       cell: "date",
       sortable: true,
     },
+    {
+      accessorKey: "created_by",
+      headerKey: "columns.createdBy",
+    },
+    {
+      accessorKey: "updated_by",
+      headerKey: "columns.updatedBy",
+    },
   ],
   // `permission` gates below are temporarily stripped, same reason as
   // nav-items.ts -- restore once the backend has real roles/permissions.
