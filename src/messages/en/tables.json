@@ -29,8 +29,8 @@
       "email": "Email",
       "status": "Status",
       "password": "Password",
-      "createdAt": "Created",
-      "updatedAt": "Updated"
+      "createdAt": "Created_at",
+      "updatedAt": "Updated_at"
     },
     "actions": {
       "edit": "Edit",
