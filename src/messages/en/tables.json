@@ -61,7 +61,7 @@
       "email": "Email"
     },
     "inviteDialog": {
-      "title": "Invite a new user"
+      "title": "Add User"
     },
     "roles": {
       "platform-admin": "Platform Admin",
