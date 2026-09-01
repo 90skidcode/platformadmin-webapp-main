@@ -41,13 +41,13 @@ export const usersTableSchema: TableSchema = {
     {
       accessorKey: "created_at",
       headerKey: "columns.createdAt",
-      cell: "date",
+      cell: "datetime",
       sortable: true,
     },
     {
       accessorKey: "updated_at",
       headerKey: "columns.updatedAt",
-      cell: "date",
+      cell: "datetime",
       sortable: true,
     },
     {

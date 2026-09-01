@@ -24,7 +24,6 @@ async function handler(
   const tenantId =
     cookieStore.get("admin-tenant")?.value ?? session.user.tenants[0]?.id ?? "";
 
-  const emailHeader = request.headers.get("email");
   const upstream = await callBackend(
     `/${path.join("/")}${translateListSearchParams(request.nextUrl.search)}`,
     {
@@ -32,7 +31,6 @@ async function handler(
       headers: {
         "Content-Type":
           request.headers.get("content-type") ?? "application/json",
-        ...(emailHeader ? { Email: emailHeader } : {}),
       },
       body: ["GET", "HEAD"].includes(request.method)
         ? undefined

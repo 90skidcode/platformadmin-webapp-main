@@ -92,12 +92,10 @@ export default function UsersPage() {
                   email: string;
                   password?: string;
                 };
-                const loggedInEmail = session?.user?.email ?? "";
                 const res = await apiFetcher(apiEndpoints.users.list, {
                   method: "POST",
                   headers: {
                     "Content-Type": "application/json",
-                    Email: loggedInEmail,
                   },
                   body: JSON.stringify({ name, email, password }),
                 });
