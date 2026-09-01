@@ -35,14 +35,20 @@ export default function ResetPasswordPage() {
   }, [router]);
 
   const fieldHandlers: FieldHandlers = {
-    checkPasswordMatch: (confirmValue, ctx) => {
-      const { new_password } = ctx.getValues() as Record<string, string>;
-      if (confirmValue && new_password && confirmValue !== new_password) {
+    checkPasswordMatch: (_value, ctx) => {
+      const { new_password, confirm_password } = ctx.getValues() as Record<
+        string,
+        string
+      >;
+      if (
+        confirm_password &&
+        new_password &&
+        confirm_password !== new_password
+      ) {
         ctx.setFieldState("confirm_password", {
           error: "validation.passwordsDoNotMatch",
         });
       } else {
-        // Clear error when they match
         ctx.setFieldState("confirm_password", {
           error: undefined,
         });
