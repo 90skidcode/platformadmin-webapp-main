@@ -7,19 +7,33 @@
       "name": "email",
       "type": "email",
       "labelKey": "fields.email.label",
-      "validation": { "required": true }
+      "validation": {
+        "required": true,
+        "messages": {
+          "required": "validation.emailRequired",
+          "email": "validation.emailInvalid"
+        }
+      }
     },
     {
       "name": "password",
       "type": "password",
       "labelKey": "fields.password.label",
-      "validation": { "required": true, "minLength": 8 }
+
+      "validation": {
+        "required": true,
+        "minLength": 8,
+        "messages": {
+          "required": "validation.passwordRequired",
+          "minLength": "validation.passwordMinLength"
+        }
+      }
     }
   ],
   "actions": [
     {
       "id": "submit",
-      "type": "button",
+      "type": "submit",
       "labelKey": "actions.signIn",
       "variant": "primary",
       "onClick": "signInWithCredentials"
