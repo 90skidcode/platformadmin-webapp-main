@@ -94,22 +94,22 @@ describe("Sidebar", () => {
     });
   });
 
-  describe("collapsed state (default)", () => {
-    it("hides the wordmark but keeps every nav item reachable by its accessible name", () => {
+  describe("expanded state (default)", () => {
+    it("shows the wordmark logo and nav item labels", () => {
       renderSidebar(makeSession());
-      expect(screen.queryByText("Platform Admin")).not.toBeInTheDocument();
+      expect(screen.getByText("Platform Admin")).toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: "Dashboard" }),
       ).toBeInTheDocument();
     });
   });
 
-  describe("expanded state", () => {
-    it("shows the wordmark logo and nav item labels", async () => {
+  describe("collapsed state", () => {
+    it("hides the wordmark but keeps every nav item reachable by its accessible name", async () => {
       renderSidebarWithToggle(makeSession());
       await userEvent.click(screen.getByRole("button", { name: "toggle" }));
 
-      expect(screen.getByText("Platform Admin")).toBeInTheDocument();
+      expect(screen.queryByText("Platform Admin")).not.toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: "Dashboard" }),
       ).toBeInTheDocument();

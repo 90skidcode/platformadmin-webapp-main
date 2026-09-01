@@ -22,24 +22,24 @@ afterEach(() => {
 
 describe("SidebarProvider", () => {
   describe("on first mount", () => {
-    it("defaults to collapsed when no preference is stored", () => {
+    it("defaults to expanded when no preference is stored", () => {
       render(
         <SidebarProvider>
           <Consumer />
         </SidebarProvider>,
       );
-      expect(screen.getByTestId("collapsed")).toHaveTextContent("true");
+      expect(screen.getByTestId("collapsed")).toHaveTextContent("false");
     });
 
     it("picks up a pre-existing stored preference", async () => {
-      window.localStorage.setItem(STORAGE_KEY, "0");
+      window.localStorage.setItem(STORAGE_KEY, "1");
       render(
         <SidebarProvider>
           <Consumer />
         </SidebarProvider>,
       );
       await waitFor(() =>
-        expect(screen.getByTestId("collapsed")).toHaveTextContent("false"),
+        expect(screen.getByTestId("collapsed")).toHaveTextContent("true"),
       );
     });
   });
@@ -52,12 +52,12 @@ describe("SidebarProvider", () => {
         </SidebarProvider>,
       );
       await userEvent.click(screen.getByRole("button", { name: "toggle" }));
-      expect(screen.getByTestId("collapsed")).toHaveTextContent("false");
-      expect(window.localStorage.getItem(STORAGE_KEY)).toBe("0");
-
-      await userEvent.click(screen.getByRole("button", { name: "toggle" }));
       expect(screen.getByTestId("collapsed")).toHaveTextContent("true");
       expect(window.localStorage.getItem(STORAGE_KEY)).toBe("1");
+
+      await userEvent.click(screen.getByRole("button", { name: "toggle" }));
+      expect(screen.getByTestId("collapsed")).toHaveTextContent("false");
+      expect(window.localStorage.getItem(STORAGE_KEY)).toBe("0");
     });
   });
 
