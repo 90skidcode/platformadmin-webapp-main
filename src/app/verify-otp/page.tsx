@@ -5,15 +5,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import { FormRenderer, type FormSchema } from "@/components/form";
 import { toast } from "@/components/toast";
-import { Button } from "@/components/ui";
+import { Button, OtpInput } from "@/components/ui";
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { pwresetSession } from "@/lib/auth/pwreset-session";
-import verifyOtpFormSchema from "@/schemas/forms/verify-otp-form.json";
 import { ROUTES } from "@/constants/routes";
 
 const RESEND_COOLDOWN_SECONDS = 60;
+const OTP_LENGTH = 5;
 
 export default function VerifyOtpPage() {
   const t = useTranslations("auth.verifyOtp");
@@ -21,6 +20,8 @@ export default function VerifyOtpPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState<string | null>(null);
+  const [otp, setOtp] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
@@ -28,7 +29,7 @@ export default function VerifyOtpPage() {
   useEffect(() => {
     const stored = pwresetSession.getEmail();
     if (!stored) {
-      router.replace("/forgot-password");
+      router.replace(ROUTES.FORGOT_PASSWORD);
       return;
     }
     setEmail(stored);
@@ -61,32 +62,38 @@ export default function VerifyOtpPage() {
     }
   }
 
-  const actionHandlers = {
-    verifyOtp: async (values: unknown) => {
-      const otp = ((values as Record<string, string>).otp ?? "").trim();
+  async function executeVerify(otpToVerify: string) {
+    const cleanOtp = otpToVerify.trim();
+    if (cleanOtp.length !== OTP_LENGTH || !email || isSubmitting) return;
 
+    setIsSubmitting(true);
+    try {
       const res = await fetch(apiEndpoints.auth.verifyOtp, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp }),
+        body: JSON.stringify({ email, otp: cleanOtp }),
       });
 
       if (res.ok) {
         pwresetSession.setOtpVerified();
-        router.push("/reset-password");
+        router.push(ROUTES.RESET_PASSWORD);
       } else {
         toast({ variant: "error", title: t("toast.verifyError") });
       }
-    },
-  };
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
-  // Don't render the form until the guard has resolved -- avoids a flash of
-  // content that would then immediately redirect away.
+  function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    executeVerify(otp);
+  }
+
   if (!email) return null;
 
   return (
     <div className="flex min-h-screen bg-background">
-      {/* ── Brand panel (matches login/page.tsx exactly) ── */}
       <div className="relative hidden w-2/5 flex-col justify-between overflow-hidden bg-primary px-12 py-16 text-primary-foreground lg:flex">
         <div
           aria-hidden="true"
@@ -130,12 +137,31 @@ export default function VerifyOtpPage() {
             {t("otpSentTo", { email })}
           </p>
 
-          <FormRenderer
-            schema={verifyOtpFormSchema as unknown as FormSchema}
-            actionHandlers={actionHandlers}
-          />
+          <form onSubmit={handleSubmit}>
+            <div className="my-6">
+              <OtpInput
+                id="verify-otp-input"
+                length={OTP_LENGTH}
+                value={otp}
+                onChange={setOtp}
+                onComplete={executeVerify}
+                disabled={isSubmitting}
+                autoFocus
+              />
+            </div>
 
-          {/* Resend OTP -- outside FormRenderer since it submits no field values */}
+            <Button
+              id="verify-otp-submit-button"
+              type="submit"
+              variant="primary"
+              className="w-full"
+              disabled={otp.length !== OTP_LENGTH || isSubmitting}
+              loading={isSubmitting}
+            >
+              {t("actions.verifyOtp")}
+            </Button>
+          </form>
+
           <div className="mt-4 flex justify-center">
             <Button
               id="resend-otp-button"
