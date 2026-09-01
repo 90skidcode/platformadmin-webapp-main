@@ -33,6 +33,17 @@
       "fieldG": {
         "label": "Field G (textarea)",
         "placeholder": "Multi-line text -- full event set, incl. paste/copy/cut/select"
+      },
+      "fieldH": {
+        "label": "Field H (DatePicker)",
+        "placeholder": "Pick a date",
+        "helpText": "Single DatePicker component with optional dependency validation."
+      },
+      "fieldI": {
+        "label": "Field I (DateRangePicker)",
+        "placeholder": "Select date range",
+        "helpText": "Selecting a date range triggers cross-field dependency validation on Field G.",
+        "rangeDependencyError": "Field G is invalid due to selected date range."
       }
     },
     "options": {

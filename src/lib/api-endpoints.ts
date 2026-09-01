@@ -63,4 +63,4 @@ export const apiEndpoints = {
     list: `${PROXY_BASE_PATH}/audit-logs`,
     byId: (logId: string) => `${PROXY_BASE_PATH}/audit-logs/${logId}`,
   },
-} as const;
+};

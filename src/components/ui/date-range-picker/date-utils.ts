@@ -99,11 +99,90 @@ export function getFirstDayOffset(
   return firstDay;
 }
 
+export function getMonthDays(
+  year: number,
+  month: number,
+  weekStartsOn: 0 | 1 = 0,
+): (number | null)[] {
+  const daysInMonth = getDaysInMonth(year, month);
+  const firstDayOffset = getFirstDayOffset(year, month, weekStartsOn);
+  const days: (number | null)[] = [];
+  for (let i = 0; i < firstDayOffset; i++) {
+    days.push(null);
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    days.push(day);
+  }
+  return days;
+}
+
 export function addMonths(date: Date, count: number): Date {
   const d = new Date(date);
   d.setDate(1);
   d.setMonth(d.getMonth() + count);
   return d;
+}
+
+export const MONTH_NAMES = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+export const WEEKDAY_NAMES_SUN = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+export const WEEKDAY_NAMES_MON = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
+
+export function isDateUnavailable({
+  date,
+  today,
+  minDate,
+  maxDate,
+  disablePast,
+  disableFuture,
+  isDateDisabled,
+}: {
+  date: Date;
+  today: Date;
+  minDate?: Date | null;
+  maxDate?: Date | null;
+  disablePast?: boolean;
+  disableFuture?: boolean;
+  isDateDisabled?: (date: Date) => boolean;
+}): boolean {
+  if (disablePast && isBeforeDay(date, today)) return true;
+  if (disableFuture && isAfterDay(date, today)) return true;
+  if (minDate && isBeforeDay(date, minDate)) return true;
+  if (maxDate && isAfterDay(date, maxDate)) return true;
+  if (isDateDisabled && isDateDisabled(date)) return true;
+  return false;
+}
+
+export function isDateHiddenHelper(
+  date: Date,
+  today: Date,
+  hidePastDates?: boolean,
+): boolean {
+  return Boolean(hidePastDates && isBeforeDay(date, today));
+}
+
+export function getWeekdays(weekStartsOn: 0 | 1 = 0): string[] {
+  return weekStartsOn === 1 ? WEEKDAY_NAMES_MON : WEEKDAY_NAMES_SUN;
+}
+
+export function isMonthAfter(a: Date, b: Date): boolean {
+  if (a.getFullYear() > b.getFullYear()) return true;
+  if (a.getFullYear() === b.getFullYear() && a.getMonth() > b.getMonth())
+    return true;
+  return false;
 }
 
 export function getDefaultPresets(): DateRangePreset[] {

@@ -1,55 +1,30 @@
 "use client";
 
 import * as React from "react";
-import {
-  Calendar as CalendarIcon,
-  ChevronLeft,
-  ChevronRight,
-  X,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils/cn";
+import { Portal, useControllableState } from "../primitives";
+import { DateInputTrigger, usePopoverPanel } from "./date-trigger";
 import {
-  Portal,
-  mergeRefs,
-  useControllableState,
-  useEscapeKey,
-  useOutsideClick,
-  usePopoverPosition,
-} from "../primitives";
-import {
+  MONTH_NAMES,
   addMonths,
   formatDateDisplay,
   formatDateIso,
-  getDaysInMonth,
   getDefaultPresets,
-  getFirstDayOffset,
+  getMonthDays,
+  getWeekdays,
   isAfterDay,
   isBeforeDay,
+  isDateHiddenHelper,
+  isDateUnavailable,
+  isMonthAfter,
   isSameDay,
   isWithinRange,
   parseDate,
   startOfDay,
 } from "./date-utils";
 import type { DateRange, DateRangePickerProps, DateRangePreset } from "./types";
-
-const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
-
-const WEEKDAY_NAMES_SUN = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
-const WEEKDAY_NAMES_MON = ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"];
 
 interface PopoverContentProps {
   triggerRef: React.RefObject<HTMLButtonElement | null>;
@@ -69,6 +44,145 @@ interface PopoverContentProps {
   hasValue: boolean;
 }
 
+interface DayCellProps {
+  day: number | null;
+  idx: number;
+  year: number;
+  month: number;
+  today: Date;
+  activeStart: Date | null;
+  activeEnd: Date | null;
+  tempFrom: Date | null;
+  tempTo: Date | null;
+  isDateDisabled: (date: Date) => boolean;
+  isDateHidden: (date: Date) => boolean;
+  onDateClick: (date: Date) => void;
+  onHoverDate: (date: Date) => void;
+}
+
+function getDayButtonClass({
+  isStart,
+  isEnd,
+  isInRange,
+  isCurrentDay,
+  isDisabled,
+}: {
+  isStart: boolean;
+  isEnd: boolean;
+  isInRange: boolean;
+  isCurrentDay: boolean;
+  isDisabled: boolean;
+}) {
+  const base =
+    "relative flex size-8 items-center justify-center text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none";
+
+  if (isDisabled) {
+    return cn(
+      base,
+      "cursor-not-allowed opacity-40 hover:bg-transparent hover:text-inherit",
+    );
+  }
+  if (isStart && isEnd) {
+    return cn(
+      base,
+      "rounded-md bg-primary font-semibold text-primary-foreground shadow-sm",
+    );
+  }
+  if (isStart) {
+    return cn(
+      base,
+      "rounded-l-md bg-primary font-semibold text-primary-foreground shadow-sm",
+    );
+  }
+  if (isEnd) {
+    return cn(
+      base,
+      "rounded-r-md bg-primary font-semibold text-primary-foreground shadow-sm",
+    );
+  }
+  if (isInRange) {
+    return cn(base, "rounded-none bg-accent/70 text-accent-foreground");
+  }
+  if (isCurrentDay) {
+    return cn(
+      base,
+      "rounded-md border border-primary font-bold text-primary hover:bg-accent hover:text-accent-foreground",
+    );
+  }
+  return cn(base, "rounded-md hover:bg-accent hover:text-accent-foreground");
+}
+
+function isDayDisabled(
+  date: Date,
+  tempFrom: Date | null,
+  tempTo: Date | null,
+  isDateDisabled: (d: Date) => boolean,
+): boolean {
+  if (isDateDisabled(date)) return true;
+  if (tempFrom && !tempTo && isBeforeDay(date, tempFrom)) return true;
+  return false;
+}
+
+function DayCell({
+  day,
+  idx,
+  year,
+  month,
+  today,
+  activeStart,
+  activeEnd,
+  tempFrom,
+  tempTo,
+  isDateDisabled,
+  isDateHidden,
+  onDateClick,
+  onHoverDate,
+}: Readonly<DayCellProps>) {
+  if (day === null) {
+    return <div key={`empty-${idx}`} className="size-8" />;
+  }
+
+  const date = new Date(year, month, day);
+  if (isDateHidden(date)) {
+    return <div key={`hidden-${day}`} className="size-8" />;
+  }
+
+  const isDisabled = isDayDisabled(date, tempFrom, tempTo, isDateDisabled);
+  const isStart = Boolean(activeStart && isSameDay(date, activeStart));
+  const isEnd = Boolean(activeEnd && isSameDay(date, activeEnd));
+  const isInRange = Boolean(
+    activeStart && activeEnd && isWithinRange(date, activeStart, activeEnd),
+  );
+  const isCurrentDay = isSameDay(date, today);
+
+  const className = getDayButtonClass({
+    isStart,
+    isEnd,
+    isInRange,
+    isCurrentDay,
+    isDisabled,
+  });
+
+  return (
+    <button
+      key={`day-${day}`}
+      type="button"
+      disabled={isDisabled}
+      onClick={() => onDateClick(date)}
+      onMouseEnter={() => {
+        if (tempFrom && !tempTo && !isDisabled) {
+          onHoverDate(date);
+        }
+      }}
+      aria-label={`${date.toDateString()}${isStart ? " (Start Date)" : ""}${isEnd ? " (End Date)" : ""}`}
+      aria-pressed={isStart || isEnd || isInRange}
+      className={className}
+    >
+      {day}
+    </button>
+  );
+}
+
 function DateRangePopoverContent({
   triggerRef,
   onClose,
@@ -86,7 +200,11 @@ function DateRangePopoverContent({
   isDateHidden,
   hasValue,
 }: Readonly<PopoverContentProps>) {
-  const contentRef = React.useRef<HTMLDivElement | null>(null);
+  const { contentRef, popoverStyle } = usePopoverPanel({
+    triggerRef,
+    align,
+    onClose,
+  });
   const [currentMonth, setCurrentMonth] = React.useState<Date>(initialMonth);
 
   // Temporary selection states
@@ -94,21 +212,8 @@ function DateRangePopoverContent({
   const [tempTo, setTempTo] = React.useState<Date | null>(selectedTo);
   const [hoverDate, setHoverDate] = React.useState<Date | null>(null);
 
-  const popoverStyle = usePopoverPosition(true, triggerRef, contentRef, {
-    side: "bottom",
-    align,
-    sideOffset: 6,
-  });
-
-  useEscapeKey(onClose, true);
-  const outsideRefs = React.useMemo(
-    () => [triggerRef, contentRef],
-    [triggerRef],
-  );
-  useOutsideClick(outsideRefs, onClose, true);
-
   const today = startOfDay(new Date());
-  const weekdays = weekStartsOn === 1 ? WEEKDAY_NAMES_MON : WEEKDAY_NAMES_SUN;
+  const weekdays = getWeekdays(weekStartsOn);
 
   function handleDateClick(date: Date) {
     if (isDateDisabled(date)) return;
@@ -118,16 +223,14 @@ function DateRangePopoverContent({
       setTempTo(null);
     } else if (tempFrom && !tempTo) {
       if (isBeforeDay(date, tempFrom)) {
-        setTempFrom(date);
-        setTempTo(null);
-      } else {
-        setTempTo(date);
-        onSelectRange({
-          from: formatDateIso(tempFrom),
-          to: formatDateIso(date),
-        });
-        onClose();
+        return;
       }
+      setTempTo(date);
+      onSelectRange({
+        from: formatDateIso(tempFrom),
+        to: formatDateIso(date),
+      });
+      onClose();
     }
   }
 
@@ -144,16 +247,7 @@ function DateRangePopoverContent({
   function renderMonthPane(monthDate: Date, monthIndex: number) {
     const year = monthDate.getFullYear();
     const month = monthDate.getMonth();
-    const daysInMonth = getDaysInMonth(year, month);
-    const firstDayOffset = getFirstDayOffset(year, month, weekStartsOn);
-
-    const days: (number | null)[] = [];
-    for (let i = 0; i < firstDayOffset; i++) {
-      days.push(null);
-    }
-    for (let day = 1; day <= daysInMonth; day++) {
-      days.push(day);
-    }
+    const days = getMonthDays(year, month, weekStartsOn);
 
     const activeStart = tempFrom;
     let activeEnd = tempTo;
@@ -204,67 +298,24 @@ function DateRangePopoverContent({
         </div>
 
         <div className="grid grid-cols-7 gap-1">
-          {days.map((day, idx) => {
-            if (day === null) {
-              return <div key={`empty-${idx}`} className="size-8" />;
-            }
-
-            const date = new Date(year, month, day);
-            const isDisabled = isDateDisabled(date);
-            const isHidden = isDateHidden(date);
-
-            if (isHidden) {
-              return <div key={`hidden-${day}`} className="size-8" />;
-            }
-
-            const isStart = activeStart ? isSameDay(date, activeStart) : false;
-            const isEnd = activeEnd ? isSameDay(date, activeEnd) : false;
-            const isInRange =
-              activeStart && activeEnd
-                ? isWithinRange(date, activeStart, activeEnd)
-                : false;
-            const isCurrentDay = isSameDay(date, today);
-
-            return (
-              <button
-                key={`day-${day}`}
-                type="button"
-                disabled={isDisabled}
-                onClick={() => handleDateClick(date)}
-                onMouseEnter={() => {
-                  if (tempFrom && !tempTo && !isDisabled) {
-                    setHoverDate(date);
-                  }
-                }}
-                aria-label={`${date.toDateString()}${isStart ? " (Start Date)" : ""}${isEnd ? " (End Date)" : ""}`}
-                aria-pressed={isStart || isEnd || isInRange}
-                className={cn(
-                  "relative flex size-8 items-center justify-center text-xs font-medium transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none",
-                  !isStart &&
-                    !isEnd &&
-                    !isInRange &&
-                    "rounded-md hover:bg-accent hover:text-accent-foreground",
-                  isCurrentDay &&
-                    !isStart &&
-                    !isEnd &&
-                    "border border-primary font-bold text-primary",
-                  isStart &&
-                    "rounded-l-md bg-primary font-semibold text-primary-foreground shadow-sm",
-                  isEnd &&
-                    "rounded-r-md bg-primary font-semibold text-primary-foreground shadow-sm",
-                  isStart && isEnd && "rounded-md",
-                  isInRange &&
-                    !isStart &&
-                    !isEnd &&
-                    "rounded-none bg-accent/70 text-accent-foreground",
-                  isDisabled &&
-                    "cursor-not-allowed opacity-40 hover:bg-transparent hover:text-inherit",
-                )}
-              >
-                {day}
-              </button>
-            );
-          })}
+          {days.map((day, idx) => (
+            <DayCell
+              key={`day-cell-${idx}`}
+              day={day}
+              idx={idx}
+              year={year}
+              month={month}
+              today={today}
+              activeStart={activeStart}
+              activeEnd={activeEnd}
+              tempFrom={tempFrom}
+              tempTo={tempTo}
+              isDateDisabled={isDateDisabled}
+              isDateHidden={isDateHidden}
+              onDateClick={handleDateClick}
+              onHoverDate={setHoverDate}
+            />
+          ))}
         </div>
       </div>
     );
@@ -374,21 +425,40 @@ export const DateRangePicker = React.forwardRef<
     const maxDate = parseDate(maxDateProp);
     const today = startOfDay(new Date());
 
-    const initialMonth = parsedFrom ?? minDate ?? today;
+    const initialMonth = React.useMemo(() => {
+      let baseMonth = parsedFrom ?? minDate ?? today;
+      if (numberOfMonths === 2) {
+        if (disableFuture) {
+          const nextMonth = addMonths(baseMonth, 1);
+          if (isMonthAfter(nextMonth, today)) {
+            baseMonth = addMonths(today, -1);
+          }
+        } else if (maxDate) {
+          const nextMonth = addMonths(baseMonth, 1);
+          if (isMonthAfter(nextMonth, maxDate)) {
+            baseMonth = addMonths(maxDate, -1);
+          }
+        }
+      }
+      return baseMonth;
+    }, [parsedFrom, minDate, maxDate, disableFuture, numberOfMonths, today]);
+
     const presets = customPresets ?? getDefaultPresets();
 
     function checkDateDisabled(date: Date): boolean {
-      if (disablePast && isBeforeDay(date, today)) return true;
-      if (disableFuture && isAfterDay(date, today)) return true;
-      if (minDate && isBeforeDay(date, minDate)) return true;
-      if (maxDate && isAfterDay(date, maxDate)) return true;
-      if (isDateDisabled && isDateDisabled(date)) return true;
-      return false;
+      return isDateUnavailable({
+        date,
+        today,
+        minDate,
+        maxDate,
+        disablePast,
+        disableFuture,
+        isDateDisabled,
+      });
     }
 
-    function checkDateHidden(date: Date): boolean {
-      return Boolean(hidePastDates && isBeforeDay(date, today));
-    }
+    const checkDateHidden = (d: Date) =>
+      isDateHiddenHelper(d, today, hidePastDates);
 
     function handleClear(e?: React.MouseEvent) {
       e?.stopPropagation();
@@ -415,48 +485,21 @@ export const DateRangePicker = React.forwardRef<
 
     return (
       <div className="relative inline-block w-full">
-        <button
-          ref={mergeRefs(forwardedRef, triggerRef)}
+        <DateInputTrigger
+          forwardedRef={forwardedRef}
+          triggerRef={triggerRef}
           id={id}
-          type="button"
           disabled={disabled}
-          aria-haspopup="dialog"
-          aria-expanded={open}
-          aria-label={ariaLabel ?? "Select date range"}
-          onClick={() => {
-            if (!disabled) setOpen(!open);
-          }}
-          className={cn(
-            "flex h-10 w-full items-center justify-between gap-2 rounded-lg border border-input bg-background px-3 py-2 text-sm text-foreground shadow-sm transition-colors hover:bg-accent/40 focus:border-primary focus:ring-4 focus:ring-ring/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
-            !hasValue && "text-muted-foreground",
-            className,
-          )}
-        >
-          <div className="flex items-center gap-2 truncate overflow-hidden">
-            <CalendarIcon
-              className="size-4 shrink-0 opacity-60"
-              aria-hidden="true"
-            />
-            <span className="truncate">{renderDisplayLabel()}</span>
-          </div>
-
-          <div className="flex items-center gap-1">
-            {showClear && hasValue && !disabled && (
-              <span
-                role="button"
-                tabIndex={0}
-                aria-label="Clear date range"
-                onClick={handleClear}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") handleClear();
-                }}
-                className="flex size-5 items-center justify-center rounded-full text-muted-foreground hover:bg-accent hover:text-foreground"
-              >
-                <X className="size-3.5" aria-hidden="true" />
-              </span>
-            )}
-          </div>
-        </button>
+          open={open}
+          ariaLabel={ariaLabel ?? "Select date range"}
+          className={className}
+          hasValue={hasValue}
+          displayLabel={renderDisplayLabel()}
+          showClear={showClear}
+          onToggleOpen={() => setOpen(!open)}
+          onClear={handleClear}
+          clearLabel="Clear date range"
+        />
 
         {open && (
           <DateRangePopoverContent

@@ -88,6 +88,7 @@
     "filters": {
       "actor": "الفاعل",
       "actorPlaceholder": "تصفية حسب الفاعل (البريد الإلكتروني)",
+      "dateRange": "النطاق الزمني",
       "fromDate": "من تاريخ",
       "toDate": "إلى تاريخ"
     },

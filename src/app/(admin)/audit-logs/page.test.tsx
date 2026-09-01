@@ -68,14 +68,13 @@ describe("AuditLogsPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders actor, from_date, and to_date filters in the filter sheet", async () => {
+  it("renders actor and date range picker filters in the filter sheet", async () => {
     renderPage();
     const filtersBtn = await screen.findByRole("button", { name: "Filters" });
     await userEvent.click(filtersBtn);
 
     expect(await screen.findByLabelText("Actor")).toBeInTheDocument();
-    expect(screen.getByLabelText("From Date")).toBeInTheDocument();
-    expect(screen.getByLabelText("To Date")).toBeInTheDocument();
+    expect(screen.getByLabelText("Date Range")).toBeInTheDocument();
     expect(screen.getByLabelText("Action")).toBeInTheDocument();
     expect(screen.getByLabelText("Resource Type")).toBeInTheDocument();
     expect(screen.getByLabelText("Actor Type")).toBeInTheDocument();
@@ -88,10 +87,7 @@ describe("AuditLogsPage", () => {
       "Filter by actor (email)",
     );
 
-    const fromDateInput = screen.getByLabelText("From Date");
-    expect(fromDateInput).toHaveAttribute("type", "date");
-
-    const toDateInput = screen.getByLabelText("To Date");
-    expect(toDateInput).toHaveAttribute("type", "date");
+    const dateRangePicker = screen.getByLabelText("Date Range");
+    expect(dateRangePicker).toHaveAttribute("aria-haspopup", "dialog");
   });
 });

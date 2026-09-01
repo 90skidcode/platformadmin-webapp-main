@@ -25,6 +25,14 @@ export const auditLogsTableSchema: TableSchema = {
   pageSize: 20,
   filters: [
     {
+      accessorKey: "date_range",
+      fromAccessorKey: "from_date",
+      toAccessorKey: "to_date",
+      labelKey: "filters.dateRange",
+      type: "date-range",
+      disableFuture: true,
+    },
+    {
       accessorKey: "actor",
       labelKey: "filters.actor",
       placeholderKey: "filters.actorPlaceholder",
@@ -65,16 +73,6 @@ export const auditLogsTableSchema: TableSchema = {
         { value: "system", labelKey: "actorTypes.system" },
         { value: "service", labelKey: "actorTypes.service" },
       ],
-    },
-    {
-      accessorKey: "from_date",
-      labelKey: "filters.fromDate",
-      type: "date",
-    },
-    {
-      accessorKey: "to_date",
-      labelKey: "filters.toDate",
-      type: "date",
     },
   ],
   columns: [

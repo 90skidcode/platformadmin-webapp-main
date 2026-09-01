@@ -20,6 +20,7 @@ const messages = {
       filtersDescription: "Narrow the table down using the fields below.",
       clearFilters: "Clear",
       applyFilters: "Apply",
+      pagination: "Pagination",
     },
     actions: { cancel: "Cancel", confirm: "Confirm" },
   },
@@ -487,6 +488,64 @@ describe("TableRenderer", () => {
 
       delete (HTMLElement.prototype as { offsetHeight?: unknown }).offsetHeight;
       delete (HTMLElement.prototype as { offsetWidth?: unknown }).offsetWidth;
+    });
+  });
+
+  describe("date-range filter", () => {
+    it("submits from_date and to_date query params in server mode", async () => {
+      const apiFetcher = vi.fn().mockResolvedValue({
+        json: async () => ({
+          code: "S_200_LIST_OK",
+          message: "Fetched successfully",
+          data: {
+            items: [],
+            pagination: { page: 1, limit: 10, totalItems: 0, totalPages: 1 },
+          },
+        }),
+      });
+
+      const schema: TableSchema = {
+        id: "audit-test",
+        i18nNamespace: "employees",
+        mode: "server",
+        endpoint: { url: "/api/proxy/audit-logs" },
+        columns: [{ accessorKey: "actor", header: "Actor" }],
+        filters: [
+          {
+            accessorKey: "date_range",
+            fromAccessorKey: "from_date",
+            toAccessorKey: "to_date",
+            label: "Date Range",
+            type: "date-range",
+          },
+        ],
+      };
+
+      renderTable(schema, { apiFetcher });
+
+      // Open filters sheet
+      const filtersBtn = await screen.findByRole("button", { name: "Filters" });
+      await userEvent.click(filtersBtn);
+
+      // Click DateRangePicker trigger
+      const dateRangeTrigger = screen.getByLabelText("Date Range");
+      await userEvent.click(dateRangeTrigger);
+
+      // Select preset "Last 7 Days"
+      const last7DaysPreset = screen.getByRole("button", {
+        name: "Last 7 Days",
+      });
+      await userEvent.click(last7DaysPreset);
+
+      // Click Apply
+      const applyBtn = screen.getByRole("button", { name: "Apply" });
+      await userEvent.click(applyBtn);
+
+      await waitFor(() => {
+        const lastCall = apiFetcher.mock.calls.at(-1)?.[0];
+        expect(lastCall).toContain("from_date=");
+        expect(lastCall).toContain("to_date=");
+      });
     });
   });
 });

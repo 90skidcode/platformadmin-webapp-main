@@ -169,4 +169,44 @@ describe("DateRangePicker", () => {
 
     expect(handleChange).toHaveBeenCalledWith({ from: null, to: null });
   });
+
+  it("disables all dates prior to the selected fromDate when selecting toDate", () => {
+    render(
+      <DateRangePicker
+        numberOfMonths={1}
+        minDate="2026-08-01"
+        defaultValue={{ from: null, to: null }}
+      />,
+    );
+
+    const trigger = screen.getByRole("button", { name: "Select date range" });
+    fireEvent.click(trigger);
+
+    // Select start date Aug 15, 2026
+    const day15 = screen.getByRole("button", { name: /Aug 15 2026/i });
+    fireEvent.click(day15);
+
+    // Any date prior to Aug 15 (e.g. Aug 10) must now be disabled
+    const day10 = screen.getByRole("button", { name: /Aug 10 2026/i });
+    const day20 = screen.getByRole("button", { name: /Aug 20 2026/i });
+
+    expect(day10).toBeDisabled();
+    expect(day20).not.toBeDisabled();
+  });
+
+  it("shows previous month and current month when disableFuture is true and numberOfMonths is 2", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-09-15T12:00:00.000Z"));
+
+    render(<DateRangePicker disableFuture numberOfMonths={2} />);
+
+    const trigger = screen.getByRole("button", { name: "Select date range" });
+    fireEvent.click(trigger);
+
+    expect(screen.getByText("August 2026")).toBeInTheDocument();
+    expect(screen.getByText("September 2026")).toBeInTheDocument();
+    expect(screen.queryByText("October 2026")).not.toBeInTheDocument();
+
+    vi.useRealTimers();
+  });
 });

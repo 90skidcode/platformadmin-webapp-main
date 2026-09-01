@@ -70,7 +70,13 @@ export interface TableRendererProps<T extends Record<string, unknown>> {
   /** Rendered at the right end of the toolbar row, alongside search/filters
    * (search left, filter + this on the right) -- e.g. a page's "+ New"
    * button. Page-specific, so it's a slot rather than a schema concept. */
-  toolbarEnd?: React.ReactNode;
+  toolbarEnd?:
+    | React.ReactNode
+    | ((context: {
+        filters: Record<string, string>;
+        search: string;
+        apiFetcher: ApiFetcher;
+      }) => React.ReactNode);
 }
 
 /** The JSON-driven table engine (plan §7.2/§9): `schema` in, a sortable,
@@ -119,7 +125,15 @@ export function TableRenderer<T extends Record<string, unknown>>({
 
   function submitFilters() {
     for (const filter of schema.filters ?? []) {
-      setFilter(filter.accessorKey, pendingFilters[filter.accessorKey] ?? "");
+      const filterType = filter.type ?? (filter.options ? "select" : "text");
+      if (filterType === "date-range") {
+        const fromKey = filter.fromAccessorKey ?? `${filter.accessorKey}_from`;
+        const toKey = filter.toAccessorKey ?? `${filter.accessorKey}_to`;
+        setFilter(fromKey, pendingFilters[fromKey] ?? "");
+        setFilter(toKey, pendingFilters[toKey] ?? "");
+      } else {
+        setFilter(filter.accessorKey, pendingFilters[filter.accessorKey] ?? "");
+      }
     }
     setFilterSheetOpen(false);
   }
@@ -127,11 +141,34 @@ export function TableRenderer<T extends Record<string, unknown>>({
   function clearFilters() {
     setPendingFilters({});
     for (const filter of schema.filters ?? []) {
-      setFilter(filter.accessorKey, "");
+      const filterType = filter.type ?? (filter.options ? "select" : "text");
+      if (filterType === "date-range") {
+        const fromKey = filter.fromAccessorKey ?? `${filter.accessorKey}_from`;
+        const toKey = filter.toAccessorKey ?? `${filter.accessorKey}_to`;
+        setFilter(fromKey, "");
+        setFilter(toKey, "");
+      } else {
+        setFilter(filter.accessorKey, "");
+      }
     }
   }
 
-  const activeFilterCount = Object.keys(filters).length;
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    for (const filter of schema.filters ?? []) {
+      const filterType = filter.type ?? (filter.options ? "select" : "text");
+      if (filterType === "date-range") {
+        const fromKey = filter.fromAccessorKey ?? `${filter.accessorKey}_from`;
+        const toKey = filter.toAccessorKey ?? `${filter.accessorKey}_to`;
+        if (filters[fromKey] || filters[toKey]) {
+          count += 1;
+        }
+      } else if (filters[filter.accessorKey]) {
+        count += 1;
+      }
+    }
+    return count;
+  }, [filters, schema.filters]);
 
   const columns = useMemo<ColumnDef<T>[]>(() => {
     const cols: ColumnDef<T>[] = [];
@@ -368,7 +405,9 @@ export function TableRenderer<T extends Record<string, unknown>>({
                 </button>
               </div>
             )}
-            {toolbarEnd}
+            {typeof toolbarEnd === "function"
+              ? toolbarEnd({ filters, search, apiFetcher: fetcher })
+              : toolbarEnd}
           </div>
         </div>
       )}
@@ -391,6 +430,17 @@ export function TableRenderer<T extends Record<string, unknown>>({
                 const filterType =
                   filter.type ?? (filter.options ? "select" : "text");
 
+                const handleFilterTextChange = (val: string) => {
+                  setPendingFilters((current) => {
+                    if (!val) {
+                      const rest = { ...current };
+                      delete rest[filter.accessorKey];
+                      return rest;
+                    }
+                    return { ...current, [filter.accessorKey]: val };
+                  });
+                };
+
                 if (filterType === "date-range") {
                   const fromKey =
                     filter.fromAccessorKey ?? `${filter.accessorKey}_from`;
@@ -408,6 +458,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
                       <Label htmlFor={fieldId}>{filterLabel}</Label>
                       <DateRangePicker
                         id={fieldId}
+                        aria-label={filterLabel}
                         value={rangeValue}
                         minDate={filter.minDate}
                         maxDate={filter.maxDate}
@@ -452,17 +503,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
                         id={fieldId}
                         type="date"
                         value={pendingFilters[filter.accessorKey] ?? ""}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setPendingFilters((current) => {
-                            if (!val) {
-                              const rest = { ...current };
-                              delete rest[filter.accessorKey];
-                              return rest;
-                            }
-                            return { ...current, [filter.accessorKey]: val };
-                          });
-                        }}
+                        onChange={(e) => handleFilterTextChange(e.target.value)}
                       />
                     </div>
                   );
@@ -487,17 +528,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
                         maxLength={filter.maxLength}
                         placeholder={placeholder}
                         value={pendingFilters[filter.accessorKey] ?? ""}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setPendingFilters((current) => {
-                            if (!val) {
-                              const rest = { ...current };
-                              delete rest[filter.accessorKey];
-                              return rest;
-                            }
-                            return { ...current, [filter.accessorKey]: val };
-                          });
-                        }}
+                        onChange={(e) => handleFilterTextChange(e.target.value)}
                       />
                     </div>
                   );

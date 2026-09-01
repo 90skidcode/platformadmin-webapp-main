@@ -90,6 +90,7 @@
     "filters": {
       "actor": "Actor",
       "actorPlaceholder": "Filter by actor (email)",
+      "dateRange": "Date Range",
       "fromDate": "From Date",
       "toDate": "To Date"
     },
