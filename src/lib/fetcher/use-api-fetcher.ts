@@ -5,14 +5,23 @@ import { useTranslations } from "next-intl";
 
 import { toast } from "@/components/toast";
 import { clearSessionCookiesAndSignOut } from "@/lib/auth/sign-out";
+import { SESSION_EXPIRED_LOGIN_URL } from "@/lib/auth/session-constants";
+import {
+  broadcastSessionActivity,
+  broadcastSessionExpired,
+} from "@/lib/auth/session-sync";
 
 // Module-level, not component state -- several TableRenderer/FormRenderer
 // instances can each hold their own `useApiFetcher()` callback and have
 // in-flight requests 401 around the same time (e.g. a page with two
 // tables). Only the first should toast + kick off sign-out; the rest are
-// redundant once that's underway, and `signOut()` itself already navigates
-// away, so this never needs resetting back to false.
+// redundant once that's underway.
 let sessionExpiredHandled = false;
+
+export interface ApiFetcherOptions extends RequestInit {
+  /** When true, marks request as background polling, so session is authenticated but lastActiveAt is not extended */
+  isBackground?: boolean;
+}
 
 /**
  * §6.3: genuinely trivial. No `Authorization` header, no base URL, no
@@ -20,32 +29,42 @@ let sessionExpiredHandled = false;
  * browser's Network tab shows `GET /api/proxy/employees` on this app's own
  * domain, never the real backend host, never a bearer token.
  *
- * `path` must already be the full same-origin path, `/api/proxy/...` --
- * this fetcher does no prefixing. `apiEndpoints.ts` entries (settings/
- * users.*) carry it baked in, and table/form JSON schemas' `endpoint.url`
- * values do too (they can't import a TS constant, so it's typed directly
- * into the schema).
- *
- * A 401 from the proxy means the session is gone or the backend rejected
- * the access token past the point a refresh could recover it (§4.3's
- * `RefreshAccessTokenError`) -- either way there's nothing left to retry
- * client-side, so it's treated the same as a manual sign-out: a toast, then
- * `clearSessionCookiesAndSignOut()` redirects to `/login`.
+ * Enforces session synchronization on qualifying activity responses and
+ * handles background polling headers (`isBackground`).
  */
 export function useApiFetcher() {
   const t = useTranslations("common");
 
   return useCallback(
-    async (path: string, options: RequestInit = {}) => {
-      const res = await fetch(path, options);
+    async (path: string, options: ApiFetcherOptions = {}) => {
+      const { isBackground, headers, ...restOptions } = options;
+      const requestHeaders = new Headers(headers);
 
-      if (res.status === 401 && !sessionExpiredHandled) {
-        sessionExpiredHandled = true;
-        toast({
-          variant: "error",
-          description: t("topbar.sessionExpiredToast"),
-        });
-        void clearSessionCookiesAndSignOut();
+      if (isBackground) {
+        requestHeaders.set("x-background-activity", "true");
+      }
+
+      const res = await fetch(path, {
+        ...restOptions,
+        headers: requestHeaders,
+      });
+
+      if (res.status === 401) {
+        if (!sessionExpiredHandled) {
+          sessionExpiredHandled = true;
+          broadcastSessionExpired();
+          toast({
+            variant: "error",
+            description: t("topbar.sessionExpiredToast"),
+          });
+          void clearSessionCookiesAndSignOut(SESSION_EXPIRED_LOGIN_URL);
+        }
+      } else if (res.ok) {
+        sessionExpiredHandled = false;
+        const lastActive = res.headers.get("X-Session-Last-Active");
+        if (lastActive) {
+          broadcastSessionActivity(Number(lastActive));
+        }
       }
 
       return res;

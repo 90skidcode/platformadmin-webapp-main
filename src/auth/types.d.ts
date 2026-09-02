@@ -23,7 +23,12 @@ declare module "next-auth" {
       tenants: { id: string; name: string }[];
     };
     accessToken: string;
-    error?: "RefreshAccessTokenError";
+    sessionCreatedAt?: number;
+    lastActiveAt?: number;
+    inactivityTimeoutMs?: number;
+    warningTimeMs?: number;
+    absoluteTimeoutMs?: number;
+    error?: "RefreshAccessTokenError" | "SessionExpiredError";
   }
 
   interface User {
@@ -34,11 +39,13 @@ declare module "next-auth" {
     accessToken: string;
     refreshToken: string;
     accessTokenExpires: number;
+    sessionCreatedAt?: number;
+    lastActiveAt?: number;
   }
 }
 
 declare module "next-auth/jwt" {
-  interface JWT extends DefaultJWT {
+  interface JWT {
     id?: string;
     roles?: string[];
     permissions?: string[];
@@ -46,6 +53,8 @@ declare module "next-auth/jwt" {
     accessToken?: string;
     refreshToken?: string;
     accessTokenExpires?: number;
-    error?: "RefreshAccessTokenError";
+    sessionCreatedAt?: number;
+    lastActiveAt?: number;
+    error?: "RefreshAccessTokenError" | "SessionExpiredError";
   }
 }

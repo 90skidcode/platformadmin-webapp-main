@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { useEffect } from "react";
 
 import { FormRenderer, type FormSchema } from "@/components/form";
 import { toast } from "@/components/toast";
 import { pwresetSession } from "@/lib/auth/pwreset-session";
+import { SESSION_EXPIRED_QUERY_PARAM } from "@/lib/auth/session-constants";
 import loginFormSchema from "@/schemas/forms/login-form.json";
-import { useEffect } from "react";
 
 /**
  * Split-screen auth layout (brand panel + form panel), matching the
@@ -29,12 +30,21 @@ import { useEffect } from "react";
 export default function LoginPage() {
   const t = useTranslations("auth.login");
   const commonT = useTranslations("common");
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
     pwresetSession.clear();
-  }, []);
+    const reason = searchParams.get("reason");
+    if (reason === SESSION_EXPIRED_QUERY_PARAM) {
+      const timer = setTimeout(() => {
+        toast({
+          variant: "error",
+          description: commonT("topbar.sessionExpiredToast"),
+        });
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, commonT]);
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -98,7 +108,8 @@ export default function LoginPage() {
                         : t("errors.invalidCredentials"),
                   });
                 } else {
-                  router.push(searchParams.get("from") ?? "/");
+                  // Clean navigation ensures full server re-render with fresh session timestamps
+                  window.location.href = searchParams.get("from") ?? "/";
                 }
               },
             }}
