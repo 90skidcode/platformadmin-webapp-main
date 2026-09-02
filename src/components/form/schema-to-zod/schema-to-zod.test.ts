@@ -230,4 +230,35 @@ describe("schemaToZod", () => {
       }
     });
   });
+
+  describe("an otp field", () => {
+    const otpFields: FormField[] = [
+      {
+        name: "otp",
+        type: "otp",
+        validation: {
+          required: true,
+          minLength: 5,
+          maxLength: 5,
+          pattern: "^[0-9]{5}$",
+        },
+      },
+    ];
+
+    it("rejects an empty otp value", () => {
+      expect(schemaToZod(otpFields).safeParse({ otp: "" }).success).toBe(false);
+    });
+
+    it("rejects an otp shorter than 5 digits", () => {
+      expect(schemaToZod(otpFields).safeParse({ otp: "123" }).success).toBe(
+        false,
+      );
+    });
+
+    it("accepts a valid 5-digit otp", () => {
+      expect(schemaToZod(otpFields).safeParse({ otp: "12345" }).success).toBe(
+        true,
+      );
+    });
+  });
 });

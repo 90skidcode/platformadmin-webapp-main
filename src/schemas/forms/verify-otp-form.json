@@ -5,7 +5,7 @@
   "fields": [
     {
       "name": "otp",
-      "type": "text",
+      "type": "otp",
       "labelKey": "fields.otp.label",
       "placeholderKey": "fields.otp.placeholder",
       "validation": {
