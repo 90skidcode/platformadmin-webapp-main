@@ -91,12 +91,12 @@ describe("Topbar", () => {
   });
 
   describe("the sidebar toggle", () => {
-    it("labels the button 'Expand sidebar' while collapsed (default), then 'Collapse sidebar' once clicked", async () => {
+    it("labels the button 'Collapse sidebar' while expanded (default), then 'Expand sidebar' once clicked", async () => {
       renderTopbar();
-      const toggle = screen.getByRole("button", { name: "Expand sidebar" });
+      const toggle = screen.getByRole("button", { name: "Collapse sidebar" });
       await userEvent.click(toggle);
       expect(
-        screen.getByRole("button", { name: "Collapse sidebar" }),
+        screen.getByRole("button", { name: "Expand sidebar" }),
       ).toBeInTheDocument();
     });
   });

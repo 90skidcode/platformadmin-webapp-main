@@ -10,8 +10,8 @@ import {
 } from "react";
 
 const SIDEBAR_STORAGE_KEY = "admin-sidebar-collapsed";
-// No stored preference yet (first-ever visit): sidebar starts shrunk.
-const DEFAULT_COLLAPSED = true;
+// Default: sidebar starts fully expanded and visible.
+const DEFAULT_COLLAPSED = false;
 
 interface SidebarContextValue {
   /** Desktop Sidebar only -- BottomNav (mobile) ignores this entirely. */

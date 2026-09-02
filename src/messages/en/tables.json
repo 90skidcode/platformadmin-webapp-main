@@ -29,8 +29,10 @@
       "email": "Email",
       "status": "Status",
       "password": "Password",
-      "createdAt": "Created",
-      "updatedAt": "Updated"
+      "createdAt": "Created_at",
+      "updatedAt": "Updated_at",
+      "createdBy": "Created_by",
+      "updatedBy": "Updated_by"
     },
     "actions": {
       "edit": "Edit",
@@ -61,7 +63,7 @@
       "email": "Email"
     },
     "inviteDialog": {
-      "title": "Invite a new user"
+      "title": "Add User"
     },
     "roles": {
       "platform-admin": "Platform Admin",

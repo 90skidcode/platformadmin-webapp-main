@@ -1,32 +1,7 @@
 import Link from "next/link";
 import { Badge, type BadgeProps } from "@/components/ui";
+import { formatDate } from "@/lib/utils/format";
 import type { TableColumn } from "./types";
-
-function formatDate(value: unknown): string {
-  if (!value) return "";
-  const date = new Date(String(value));
-  if (Number.isNaN(date.getTime())) return String(value);
-  return date.toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-function formatDateTime(value: unknown): string {
-  if (!value) return "";
-  const date = new Date(String(value));
-  if (Number.isNaN(date.getTime())) return String(value);
-  return date.toLocaleString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
-}
 
 /** Dispatches on `column.cell` (plan §18's registry-pattern note: a new
  * cell type is a new branch here, not a growing component). */
@@ -59,10 +34,10 @@ export function renderCell(
 
   switch (column.cell) {
     case "date":
-      return formatDate(resolvedValue);
+      return formatDate(resolvedValue as string | Date);
     case "datetime":
     case "timestamp":
-      return formatDateTime(resolvedValue);
+      return formatDate(resolvedValue as string | Date, { includeTime: true });
     case "email":
       return resolvedValue ? (
         <a

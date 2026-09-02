@@ -34,14 +34,22 @@ export const usersTableSchema: TableSchema = {
     {
       accessorKey: "created_at",
       headerKey: "columns.createdAt",
-      cell: "date",
+      cell: "datetime",
       sortable: true,
     },
     {
       accessorKey: "updated_at",
       headerKey: "columns.updatedAt",
-      cell: "date",
+      cell: "datetime",
       sortable: true,
+    },
+    {
+      accessorKey: "created_by",
+      headerKey: "columns.createdBy",
+    },
+    {
+      accessorKey: "updated_by",
+      headerKey: "columns.updatedBy",
     },
   ],
   // `permission` gates below are temporarily stripped, same reason as

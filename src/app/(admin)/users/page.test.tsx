@@ -12,6 +12,7 @@ import UsersPage from "./page";
 
 const session = buildSession({
   name: "Priya",
+  email: "priya@acme.example",
   roles: ["platform-admin"],
   permissions: [
     "users.read",

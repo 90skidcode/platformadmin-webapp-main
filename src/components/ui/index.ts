@@ -11,6 +11,7 @@ export * from "./dialog";
 export * from "./dropdown-menu";
 export * from "./input";
 export * from "./label";
+export * from "./otp-input";
 export * from "./select";
 export * from "./sheet";
 export * from "./skeleton";

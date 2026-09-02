@@ -15,32 +15,48 @@ export function formatPhoneNumber(phone: string): string {
   return phone;
 }
 
-/**
- * Format date to locale string
- * @param date - Date to format
- * @param locale - Locale string (default: 'en-US')
- * @returns Formatted date string
- */
+export interface FormatDateOptions {
+  includeTime?: boolean;
+}
+
 export function formatDate(
-  date: Date | string,
-  locale: string = "en-US",
+  date: Date | string | number | null | undefined,
+  options?: FormatDateOptions | boolean,
 ): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  return dateObj.toLocaleDateString(locale);
+  if (!date) return "";
+
+  const dateObj =
+    typeof date === "object" && date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(dateObj.getTime())) return String(date);
+
+  const includeTime =
+    typeof options === "boolean" ? options : (options?.includeTime ?? false);
+
+  const day = String(dateObj.getDate()).padStart(2, "0");
+  const month = dateObj.toLocaleString("en-US", { month: "short" });
+  const year = dateObj.getFullYear();
+
+  const formattedDate = `${day} ${month} ${year}`;
+
+  if (includeTime) {
+    const hours = String(dateObj.getHours()).padStart(2, "0");
+    const minutes = String(dateObj.getMinutes()).padStart(2, "0");
+    const seconds = String(dateObj.getSeconds()).padStart(2, "0");
+    return `${formattedDate} ${hours}:${minutes}:${seconds}`;
+  }
+
+  return formattedDate;
 }
 
 /**
- * Format date and time to locale string
+ * Format date and time (alias for formatDate with includeTime: true)
  * @param date - Date to format
- * @param locale - Locale string (default: 'en-US')
- * @returns Formatted date and time string
+ * @returns "31 Aug 2026 12:00:00"
  */
 export function formatDateTime(
-  date: Date | string,
-  locale: string = "en-US",
+  date: Date | string | number | null | undefined,
 ): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  return dateObj.toLocaleString(locale);
+  return formatDate(date, { includeTime: true });
 }
 
 /**

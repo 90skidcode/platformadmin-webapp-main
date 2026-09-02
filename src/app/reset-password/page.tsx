@@ -14,6 +14,7 @@ import { apiEndpoints } from "@/lib/api-endpoints";
 import { pwresetSession } from "@/lib/auth/pwreset-session";
 import resetPasswordFormSchema from "@/schemas/forms/reset-password-form.json";
 import { UseFormReturn } from "react-hook-form";
+import { ROUTES } from "@/constants/routes";
 
 export default function ResetPasswordPage() {
   const t = useTranslations("auth.resetPassword");
@@ -27,7 +28,7 @@ export default function ResetPasswordPage() {
     const storedEmail = pwresetSession.getEmail();
     const verified = pwresetSession.isOtpVerified();
     if (!storedEmail || !verified) {
-      router.replace("/forgot-password");
+      router.replace(ROUTES.FORGOT_PASSWORD);
       return;
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -35,14 +36,20 @@ export default function ResetPasswordPage() {
   }, [router]);
 
   const fieldHandlers: FieldHandlers = {
-    checkPasswordMatch: (confirmValue, ctx) => {
-      const { new_password } = ctx.getValues() as Record<string, string>;
-      if (confirmValue && new_password && confirmValue !== new_password) {
+    checkPasswordMatch: (_value, ctx) => {
+      const { new_password, confirm_password } = ctx.getValues() as Record<
+        string,
+        string
+      >;
+      if (
+        confirm_password &&
+        new_password &&
+        confirm_password !== new_password
+      ) {
         ctx.setFieldState("confirm_password", {
           error: "validation.passwordsDoNotMatch",
         });
       } else {
-        // Clear error when they match
         ctx.setFieldState("confirm_password", {
           error: undefined,
         });
@@ -78,7 +85,7 @@ export default function ResetPasswordPage() {
         // Clear all password-reset session state.
         pwresetSession.clear();
         toast({ variant: "success", title: t("toast.success") });
-        router.push("/login");
+        router.push(ROUTES.LOGIN);
       } else {
         toast({ variant: "error", title: t("toast.error") });
       }
