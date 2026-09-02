@@ -40,6 +40,7 @@ export default function LoginPage() {
         toast({
           variant: "error",
           description: commonT("topbar.sessionExpiredToast"),
+          duration: 6000,
         });
       }, 50);
       return () => clearTimeout(timer);
