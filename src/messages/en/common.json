@@ -24,7 +24,12 @@
     "users": "Users",
     "auditLogs": "Audit Logs",
     "roleManager": "Role Manager",
-    "inputEventsDemo": "Input Events Demo"
+    "inputEventsDemo": "Input Events Demo",
+    "price": "Price",
+    "priceTables": {
+      "mlr": "MLR",
+      "schemes": "Schemes"
+    }
   },
   "topbar": {
     "environment": "Environment",

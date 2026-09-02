@@ -151,5 +151,91 @@
         "message": "سيؤدي هذا الإجراء إلى حذف هذا الدور ومصفوفة الأذونات الخاصة به نهائيًا."
       }
     }
+  },
+  "mlr": {
+    "columns": {
+      "vehicle_type_id": "معرف نوع المركبة",
+      "brand_id": "معرف العلامة التجارية",
+      "lms_id": "معرف LMS",
+      "name": "الاسم",
+      "lms_name": "اسم LMS",
+      "provider_name": "اسم المزود",
+      "status": "الحالة",
+      "rate_3y": "السعر (3 سنوات)",
+      "rate_4y": "السعر (4 سنوات)",
+      "rate_5y": "السعر (5 سنوات)",
+      "rate_6y": "السعر (6 سنوات)",
+      "rate_7y": "السعر (7 سنوات)",
+      "createdAt": "تاريخ الإنشاء",
+      "updatedAt": "تاريخ التحديث",
+      "createdBy": "تم الإنشاء بواسطة",
+      "updatedBy": "تم التحديث بواسطة"
+    },
+    "actions": {
+      "newMlr": "إضافة MLR",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "save": "حفظ",
+      "cancel": "إلغاء"
+    },
+    "confirm": {
+      "delete": {
+        "title": "حذف هذا السجل؟",
+        "message": "لا يمكن التراجع عن هذا الإجراء."
+      }
+    },
+    "toast": {
+      "deleted": "تم حذف السجل بنجاح.",
+      "saved": "تم حفظ السجل بنجاح.",
+      "genericError": "تعذر إكمال هذا الإجراء. يرجى المحاولة مرة أخرى."
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "dialog": {
+      "newTitle": "إضافة تكوين MLR",
+      "editTitle": "تعديل MLR - {name}"
+    }
+  },
+  "schemes": {
+    "columns": {
+      "scheme_id": "معرف المخطط",
+      "scheme_description": "وصف المخطط",
+      "new_used": "جديد / مستعمل",
+      "vehicle_type": "نوع المركبة",
+      "scheme_group": "مجموعة المخطط",
+      "status": "الحالة",
+      "createdAt": "تاريخ الإنشاء",
+      "updatedAt": "تاريخ التحديث",
+      "createdBy": "تم الإنشاء بواسطة",
+      "updatedBy": "تم التحديث بواسطة"
+    },
+    "actions": {
+      "newScheme": "إضافة مخطط",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "save": "حفظ",
+      "cancel": "إلغاء"
+    },
+    "confirm": {
+      "delete": {
+        "title": "حذف هذا المخطط؟",
+        "message": "لا يمكن التراجع عن هذا الإجراء."
+      }
+    },
+    "toast": {
+      "deleted": "تم حذف المخطط بنجاح.",
+      "saved": "تم حفظ المخطط بنجاح.",
+      "genericError": "تعذر إكمال هذا الإجراء. يرجى المحاولة مرة أخرى."
+    },
+    "status": {
+      "active": "نشط",
+      "inactive": "غير نشط"
+    },
+    "dialog": {
+      "newTitle": "إضافة مخطط أسعار",
+      "editTitle": "تعديل المخطط - {name}"
+    }
   }
 }
