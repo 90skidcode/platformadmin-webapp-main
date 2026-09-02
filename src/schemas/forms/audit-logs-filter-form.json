@@ -1,0 +1,80 @@
+{
+  "id": "audit-logs-filter-form",
+  "i18nNamespace": "tables.auditLogs",
+  "fields": [
+    {
+      "name": "date_range",
+      "type": "date-range",
+      "labelKey": "filters.dateRange",
+      "disableFuture": true
+    },
+    {
+      "name": "action",
+      "type": "select",
+      "labelKey": "columns.action",
+      "placeholder": "All Actions",
+      "optionsSource": {
+        "type": "static",
+        "options": [
+          { "value": "", "label": "All Actions" },
+          { "value": "auth.login.success", "label": "auth.login.success" },
+          { "value": "auth.login.failure", "label": "auth.login.failure" },
+          { "value": "auth.logout", "label": "auth.logout" },
+          { "value": "user.create", "label": "user.create" },
+          { "value": "user.update", "label": "user.update" },
+          { "value": "user.delete", "label": "user.delete" },
+          { "value": "role.create", "label": "role.create" },
+          { "value": "role.update", "label": "role.update" },
+          { "value": "role.delete", "label": "role.delete" }
+        ]
+      }
+    },
+    {
+      "name": "resource_type",
+      "type": "select",
+      "labelKey": "columns.resourceType",
+      "placeholder": "All Resource Types",
+      "optionsSource": {
+        "type": "static",
+        "options": [
+          { "value": "", "label": "All Resource Types" },
+          { "value": "user", "labelKey": "resourceTypes.user" },
+          { "value": "role", "labelKey": "resourceTypes.role" },
+          { "value": "tenant", "labelKey": "resourceTypes.tenant" },
+          { "value": "auth", "labelKey": "resourceTypes.auth" },
+          { "value": "system", "labelKey": "resourceTypes.system" }
+        ]
+      }
+    },
+    {
+      "name": "actor_type",
+      "type": "select",
+      "labelKey": "columns.actorType",
+      "placeholder": "All Actor Types",
+      "optionsSource": {
+        "type": "static",
+        "options": [
+          { "value": "", "label": "All Actor Types" },
+          { "value": "user", "labelKey": "actorTypes.user" },
+          { "value": "system", "labelKey": "actorTypes.system" },
+          { "value": "service", "labelKey": "actorTypes.service" }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "clear",
+      "type": "button",
+      "label": "Clear filters",
+      "variant": "outline",
+      "onClick": "clearFilters"
+    },
+    {
+      "id": "apply",
+      "type": "submit",
+      "label": "Apply filters",
+      "onClick": "applyFilters"
+    }
+  ]
+}

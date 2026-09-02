@@ -22,23 +22,14 @@ import {
   Button,
   Checkbox,
   Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   Skeleton,
-  DateRangePicker,
-  type DateRange,
 } from "@/components/ui";
-import { formatDateIso } from "@/components/ui/date-range-picker/date-utils";
+import { FormRenderer, type FormSchema } from "@/components/form";
 import { useApiFetcher, type ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { resolveText } from "../form/fields/field-label";
 import { BulkActionsBar } from "./bulk-actions-bar";
@@ -46,6 +37,12 @@ import { renderCell } from "./cell-renderers";
 import { RowActionsCell } from "./row-actions-cell";
 import { TablePagination } from "./table-pagination";
 import { useTableData } from "./use-table-data";
+import {
+  applyFilterValues,
+  buildFilterDefaults,
+  getDateParamKeys,
+  resolveFiltersToFormSchema,
+} from "./table-filter-utils";
 import type { ActionHandlers, TableSchema } from "./types";
 
 /** Rows shown while a fetch (initial load, page/sort/filter change) is in
@@ -90,12 +87,6 @@ export function TableRenderer<T extends Record<string, unknown>>({
   const commonT = useTranslations("common");
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
-  // Draft filter values edited in the sheet -- kept separate from the
-  // applied `filters` below so Submit/Clear each pick when the table
-  // actually re-filters/re-fetches, instead of every keystroke doing it.
-  const [pendingFilters, setPendingFilters] = useState<Record<string, string>>(
-    {},
-  );
 
   const {
     rows,
@@ -113,48 +104,44 @@ export function TableRenderer<T extends Record<string, unknown>>({
     refetch,
   } = useTableData(schema, data, fetcher);
 
-  function openFilterSheet() {
-    setPendingFilters({ ...filters });
-    setFilterSheetOpen(true);
-  }
+  const filterFormSchema = useMemo<FormSchema | null>(() => {
+    return (
+      schema.filterSchema ??
+      resolveFiltersToFormSchema(
+        schema.filters,
+        schema.id,
+        schema.i18nNamespace,
+        commonT,
+      )
+    );
+  }, [
+    schema.filterSchema,
+    schema.filters,
+    schema.id,
+    schema.i18nNamespace,
+    commonT,
+  ]);
 
-  function submitFilters() {
-    for (const key of Object.keys(filters)) {
-      if (!pendingFilters[key]) {
-        setFilter(key, "");
-      }
-    }
-    for (const [key, value] of Object.entries(pendingFilters)) {
-      if (value) {
-        setFilter(key, value);
-      }
-    }
-    setFilterSheetOpen(false);
-  }
+  const filterDefaultValues = useMemo(
+    () => buildFilterDefaults(filterFormSchema?.fields, filters),
+    [filterFormSchema, filters],
+  );
 
   function clearFilters() {
-    setPendingFilters({});
     for (const key of Object.keys(filters)) {
       setFilter(key, "");
     }
   }
 
-  const activeFilterCount = (schema.filters ?? []).filter((filter) => {
-    if (filter.type === "date-range") {
-      const fromKey =
-        filter.fromParamName ??
-        (filter.accessorKey === "date_range"
-          ? "from_date"
-          : `${filter.accessorKey}_from`);
-      const toKey =
-        filter.toParamName ??
-        (filter.accessorKey === "date_range"
-          ? "to_date"
-          : `${filter.accessorKey}_to`);
+  const activeFilterCount = (filterFormSchema?.fields ?? []).filter((field) => {
+    if (field.type === "date-range") {
+      const { fromKey, toKey } = getDateParamKeys(field);
       return Boolean(filters[fromKey] || filters[toKey]);
     }
-    return Boolean(filters[filter.accessorKey]);
+    return Boolean(filters[field.name]);
   }).length;
+
+  const hasFilters = Boolean(filterFormSchema);
 
   const columns = useMemo<ColumnDef<T>[]>(() => {
     const cols: ColumnDef<T>[] = [];
@@ -350,22 +337,22 @@ export function TableRenderer<T extends Record<string, unknown>>({
                 onDone={() => setRowSelection({})}
               />
             )}
-            {!!schema.filters?.length && activeFilterCount === 0 && (
+            {hasFilters && activeFilterCount === 0 && (
               <Button
                 type="button"
                 variant="outline"
-                onClick={openFilterSheet}
+                onClick={() => setFilterSheetOpen(true)}
                 className="gap-2"
               >
                 <ListFilter className="size-4" aria-hidden="true" />
                 {commonT("table.filters")}
               </Button>
             )}
-            {!!schema.filters?.length && activeFilterCount > 0 && (
+            {hasFilters && activeFilterCount > 0 && (
               <div className="inline-flex h-10 items-center rounded-lg border border-border bg-background text-sm font-medium transition-colors">
                 <button
                   type="button"
-                  onClick={openFilterSheet}
+                  onClick={() => setFilterSheetOpen(true)}
                   className="inline-flex h-full items-center gap-2 rounded-l-lg px-3.5 hover:bg-accent hover:text-accent-foreground focus-visible:ring-4 focus-visible:ring-ring/20 focus-visible:outline-none"
                 >
                   <ListFilter className="size-4" aria-hidden="true" />
@@ -396,7 +383,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
         </div>
       )}
 
-      {!!schema.filters?.length && (
+      {hasFilters && filterFormSchema && (
         <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
           <SheetContent>
             <SheetHeader>
@@ -405,128 +392,28 @@ export function TableRenderer<T extends Record<string, unknown>>({
                 {commonT("table.filtersDescription")}
               </SheetDescription>
             </SheetHeader>
-            <div className="flex flex-1 flex-col gap-4 overflow-y-auto">
-              {schema.filters.map((filter) => {
-                const filterLabel =
-                  resolveText(translate, filter.label, filter.labelKey) ??
-                  filter.accessorKey;
-                const fieldId = `table-filter-${filter.accessorKey}`;
-
-                if (filter.type === "date-range") {
-                  const fromKey =
-                    filter.fromParamName ??
-                    (filter.accessorKey === "date_range"
-                      ? "from_date"
-                      : `${filter.accessorKey}_from`);
-                  const toKey =
-                    filter.toParamName ??
-                    (filter.accessorKey === "date_range"
-                      ? "to_date"
-                      : `${filter.accessorKey}_to`);
-                  const rangeValue: DateRange = {
-                    from: pendingFilters[fromKey] ?? null,
-                    to: pendingFilters[toKey] ?? null,
-                  };
-
-                  return (
-                    <div
-                      key={filter.accessorKey}
-                      className="flex flex-col gap-1.5"
-                    >
-                      <Label htmlFor={fieldId}>{filterLabel}</Label>
-                      <DateRangePicker
-                        id={fieldId}
-                        aria-label={filterLabel}
-                        value={rangeValue}
-                        onChange={(newRange) =>
-                          setPendingFilters((prev) => {
-                            const updated = { ...prev };
-                            if (newRange?.from) {
-                              updated[fromKey] =
-                                typeof newRange.from === "string"
-                                  ? newRange.from
-                                  : formatDateIso(newRange.from);
-                            } else {
-                              delete updated[fromKey];
-                            }
-                            if (newRange?.to) {
-                              updated[toKey] =
-                                typeof newRange.to === "string"
-                                  ? newRange.to
-                                  : formatDateIso(newRange.to);
-                            } else {
-                              delete updated[toKey];
-                            }
-                            return updated;
-                          })
-                        }
-                        minDate={filter.minDate}
-                        maxDate={filter.maxDate}
-                        disablePast={filter.disablePast}
-                        disableFuture={filter.disableFuture}
-                        hidePastDates={filter.hidePastDates}
-                      />
-                    </div>
-                  );
-                }
-
-                return (
-                  <div
-                    key={filter.accessorKey}
-                    className="flex flex-col gap-1.5"
-                  >
-                    <Label htmlFor={fieldId}>{filterLabel}</Label>
-                    <Select
-                      value={
-                        (pendingFilters[filter.accessorKey] as string) ?? ""
-                      }
-                      onValueChange={(value) =>
-                        setPendingFilters((current) => {
-                          if (!value) {
-                            const rest = { ...current };
-                            delete rest[filter.accessorKey];
-                            return rest;
-                          }
-                          return { ...current, [filter.accessorKey]: value };
-                        })
-                      }
-                    >
-                      <SelectTrigger id={fieldId} aria-label={filterLabel}>
-                        <SelectValue
-                          placeholder={commonT("table.allFilterOption", {
-                            label: filterLabel,
-                          })}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="">
-                          {commonT("table.allFilterOption", {
-                            label: filterLabel,
-                          })}
-                        </SelectItem>
-                        {filter.options?.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {resolveText(
-                              translate,
-                              option.label,
-                              option.labelKey,
-                            ) ?? option.value}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                );
-              })}
+            <div className="flex flex-1 flex-col gap-4 overflow-y-auto pt-4">
+              <FormRenderer
+                key={`${schema.id}-filter-form-${filterSheetOpen ? "open" : "closed"}`}
+                schema={filterFormSchema}
+                defaultValues={filterDefaultValues}
+                apiFetcher={fetcher}
+                actionHandlers={{
+                  applyFilters: async (rawValues) => {
+                    applyFilterValues(
+                      filterFormSchema.fields,
+                      rawValues,
+                      setFilter,
+                    );
+                    setFilterSheetOpen(false);
+                  },
+                  clearFilters: async () => {
+                    clearFilters();
+                    setFilterSheetOpen(false);
+                  },
+                }}
+              />
             </div>
-            <SheetFooter>
-              <Button type="button" variant="outline" onClick={clearFilters}>
-                {commonT("table.clearFilters")}
-              </Button>
-              <Button type="button" onClick={submitFilters}>
-                {commonT("table.applyFilters")}
-              </Button>
-            </SheetFooter>
           </SheetContent>
         </Sheet>
       )}

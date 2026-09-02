@@ -1,0 +1,35 @@
+{
+  "id": "users-filter-form",
+  "i18nNamespace": "tables.users",
+  "fields": [
+    {
+      "name": "status",
+      "type": "select",
+      "labelKey": "columns.status",
+      "placeholder": "All Statuses",
+      "optionsSource": {
+        "type": "static",
+        "options": [
+          { "value": "", "label": "All Statuses" },
+          { "value": "active", "labelKey": "status.active" },
+          { "value": "inactive", "labelKey": "status.inactive" }
+        ]
+      }
+    }
+  ],
+  "actions": [
+    {
+      "id": "clear",
+      "type": "button",
+      "label": "Clear filters",
+      "variant": "outline",
+      "onClick": "clearFilters"
+    },
+    {
+      "id": "apply",
+      "type": "submit",
+      "label": "Apply filters",
+      "onClick": "applyFilters"
+    }
+  ]
+}
