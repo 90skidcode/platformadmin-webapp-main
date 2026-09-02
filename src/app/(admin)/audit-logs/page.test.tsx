@@ -68,24 +68,17 @@ describe("AuditLogsPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("renders actor and date range picker filters in the filter sheet", async () => {
+  it("renders date range picker and select filters in the filter sheet", async () => {
+    const user = userEvent.setup();
     renderPage();
-    const filtersBtn = await screen.findByRole("button", { name: "Filters" });
-    await userEvent.click(filtersBtn);
 
-    expect(await screen.findByLabelText("Actor")).toBeInTheDocument();
-    expect(screen.getByLabelText("Date Range")).toBeInTheDocument();
+    const filtersBtn = await screen.findByRole("button", { name: "Filters" });
+    await user.click(filtersBtn);
+
+    expect(await screen.findByLabelText("Date Range")).toBeInTheDocument();
     expect(screen.getByLabelText("Action")).toBeInTheDocument();
     expect(screen.getByLabelText("Resource Type")).toBeInTheDocument();
     expect(screen.getByLabelText("Actor Type")).toBeInTheDocument();
-
-    const actorInput = screen.getByLabelText("Actor");
-    expect(actorInput).toHaveAttribute("type", "text");
-    expect(actorInput).toHaveAttribute("maxLength", "255");
-    expect(actorInput).toHaveAttribute(
-      "placeholder",
-      "Filter by actor (email)",
-    );
 
     const dateRangePicker = screen.getByLabelText("Date Range");
     expect(dateRangePicker).toHaveAttribute("aria-haspopup", "dialog");

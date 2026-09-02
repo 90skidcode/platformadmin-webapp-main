@@ -20,7 +20,6 @@ const messages = {
       filtersDescription: "Narrow the table down using the fields below.",
       clearFilters: "Clear",
       applyFilters: "Apply",
-      pagination: "Pagination",
     },
     actions: { cancel: "Cancel", confirm: "Confirm" },
   },
@@ -368,59 +367,6 @@ describe("TableRenderer", () => {
         ),
       );
     });
-
-    it("server mode: submitting text and date filters adds them to the query params", async () => {
-      const apiFetcher = vi.fn().mockResolvedValue({
-        json: async () => ({
-          code: "S_200_EMP_LIST_OK",
-          message: "Employees fetched successfully",
-          data: {
-            items: [],
-            pagination: { page: 1, limit: 10, totalItems: 0, totalPages: 1 },
-          },
-        }),
-      });
-      const schema: TableSchema = {
-        ...baseSchema,
-        mode: "server",
-        endpoint: { url: "/audit-logs" },
-        filters: [
-          {
-            accessorKey: "actor",
-            label: "Actor",
-            type: "text",
-            maxLength: 255,
-          },
-          {
-            accessorKey: "from_date",
-            label: "From Date",
-            type: "date",
-          },
-          {
-            accessorKey: "to_date",
-            label: "To Date",
-            type: "date",
-          },
-        ],
-      };
-      renderTable(schema, { apiFetcher });
-
-      await userEvent.click(screen.getByRole("button", { name: "Filters" }));
-      await userEvent.type(
-        screen.getByRole("textbox", { name: "Actor" }),
-        "admin@example.com",
-      );
-      await userEvent.type(screen.getByLabelText("From Date"), "2026-08-01");
-      await userEvent.type(screen.getByLabelText("To Date"), "2026-08-31");
-      await userEvent.click(screen.getByRole("button", { name: "Apply" }));
-
-      await waitFor(() => {
-        const lastCallUrl = apiFetcher.mock.calls.at(-1)?.[0] as string;
-        expect(lastCallUrl).toContain("actor=admin%40example.com");
-        expect(lastCallUrl).toContain("from_date=2026-08-01");
-        expect(lastCallUrl).toContain("to_date=2026-08-31");
-      });
-    });
   });
 
   describe("server mode", () => {
@@ -488,64 +434,6 @@ describe("TableRenderer", () => {
 
       delete (HTMLElement.prototype as { offsetHeight?: unknown }).offsetHeight;
       delete (HTMLElement.prototype as { offsetWidth?: unknown }).offsetWidth;
-    });
-  });
-
-  describe("date-range filter", () => {
-    it("submits from_date and to_date query params in server mode", async () => {
-      const apiFetcher = vi.fn().mockResolvedValue({
-        json: async () => ({
-          code: "S_200_LIST_OK",
-          message: "Fetched successfully",
-          data: {
-            items: [],
-            pagination: { page: 1, limit: 10, totalItems: 0, totalPages: 1 },
-          },
-        }),
-      });
-
-      const schema: TableSchema = {
-        id: "audit-test",
-        i18nNamespace: "employees",
-        mode: "server",
-        endpoint: { url: "/api/proxy/audit-logs" },
-        columns: [{ accessorKey: "actor", header: "Actor" }],
-        filters: [
-          {
-            accessorKey: "date_range",
-            fromAccessorKey: "from_date",
-            toAccessorKey: "to_date",
-            label: "Date Range",
-            type: "date-range",
-          },
-        ],
-      };
-
-      renderTable(schema, { apiFetcher });
-
-      // Open filters sheet
-      const filtersBtn = await screen.findByRole("button", { name: "Filters" });
-      await userEvent.click(filtersBtn);
-
-      // Click DateRangePicker trigger
-      const dateRangeTrigger = screen.getByLabelText("Date Range");
-      await userEvent.click(dateRangeTrigger);
-
-      // Select preset "Last 7 Days"
-      const last7DaysPreset = screen.getByRole("button", {
-        name: "Last 7 Days",
-      });
-      await userEvent.click(last7DaysPreset);
-
-      // Click Apply
-      const applyBtn = screen.getByRole("button", { name: "Apply" });
-      await userEvent.click(applyBtn);
-
-      await waitFor(() => {
-        const lastCall = apiFetcher.mock.calls.at(-1)?.[0];
-        expect(lastCall).toContain("from_date=");
-        expect(lastCall).toContain("to_date=");
-      });
     });
   });
 });

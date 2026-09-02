@@ -37,29 +37,26 @@ export interface TableFilterOption {
   labelKey?: string;
 }
 
-export type TableFilterType = "select" | "text" | "date" | "date-range";
+export type TableFilterType = "select" | "date-range";
 
-/** A filter over one column. `accessorKey` doubles as
- * the query-param name in `server` mode -- the mock backend (and any real
+/** An exact-match dropdown or date-range filter over one column. `accessorKey`
+ * doubles as the query-param name in `server` mode -- the mock backend (and any real
  * backend following the same convention) treats every non-reserved query
  * param on a paginated list endpoint as an exact-match filter, so adding a
  * filter here needs no backend code change, same spirit as `search`/`sort`. */
 export interface TableFilter {
   accessorKey: string;
-  fromAccessorKey?: string;
-  toAccessorKey?: string;
   label?: string;
   labelKey?: string;
   type?: TableFilterType;
-  placeholder?: string;
-  placeholderKey?: string;
-  maxLength?: number;
+  fromParamName?: string;
+  toParamName?: string;
+  options?: TableFilterOption[];
   minDate?: Date | string;
   maxDate?: Date | string;
   disablePast?: boolean;
   disableFuture?: boolean;
   hidePastDates?: boolean;
-  options?: TableFilterOption[];
 }
 
 interface ConfirmConfig {

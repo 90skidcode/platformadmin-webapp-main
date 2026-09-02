@@ -26,18 +26,11 @@ export const auditLogsTableSchema: TableSchema = {
   filters: [
     {
       accessorKey: "date_range",
-      fromAccessorKey: "from_date",
-      toAccessorKey: "to_date",
+      fromParamName: "from_date",
+      toParamName: "to_date",
       labelKey: "filters.dateRange",
       type: "date-range",
       disableFuture: true,
-    },
-    {
-      accessorKey: "actor",
-      labelKey: "filters.actor",
-      placeholderKey: "filters.actorPlaceholder",
-      type: "text",
-      maxLength: 255,
     },
     {
       accessorKey: "action",

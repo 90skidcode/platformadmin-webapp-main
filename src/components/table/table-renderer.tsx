@@ -21,8 +21,6 @@ import {
   Badge,
   Button,
   Checkbox,
-  DateRangePicker,
-  formatDateIso,
   Input,
   Label,
   Select,
@@ -37,7 +35,10 @@ import {
   SheetHeader,
   SheetTitle,
   Skeleton,
+  DateRangePicker,
+  type DateRange,
 } from "@/components/ui";
+import { formatDateIso } from "@/components/ui/date-range-picker/date-utils";
 import { useApiFetcher, type ApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { resolveText } from "../form/fields/field-label";
 import { BulkActionsBar } from "./bulk-actions-bar";
@@ -70,13 +71,7 @@ export interface TableRendererProps<T extends Record<string, unknown>> {
   /** Rendered at the right end of the toolbar row, alongside search/filters
    * (search left, filter + this on the right) -- e.g. a page's "+ New"
    * button. Page-specific, so it's a slot rather than a schema concept. */
-  toolbarEnd?:
-    | React.ReactNode
-    | ((context: {
-        filters: Record<string, string>;
-        search: string;
-        apiFetcher: ApiFetcher;
-      }) => React.ReactNode);
+  toolbarEnd?: React.ReactNode;
 }
 
 /** The JSON-driven table engine (plan §7.2/§9): `schema` in, a sortable,
@@ -119,20 +114,19 @@ export function TableRenderer<T extends Record<string, unknown>>({
   } = useTableData(schema, data, fetcher);
 
   function openFilterSheet() {
-    setPendingFilters(filters);
+    setPendingFilters({ ...filters });
     setFilterSheetOpen(true);
   }
 
   function submitFilters() {
-    for (const filter of schema.filters ?? []) {
-      const filterType = filter.type ?? (filter.options ? "select" : "text");
-      if (filterType === "date-range") {
-        const fromKey = filter.fromAccessorKey ?? `${filter.accessorKey}_from`;
-        const toKey = filter.toAccessorKey ?? `${filter.accessorKey}_to`;
-        setFilter(fromKey, pendingFilters[fromKey] ?? "");
-        setFilter(toKey, pendingFilters[toKey] ?? "");
-      } else {
-        setFilter(filter.accessorKey, pendingFilters[filter.accessorKey] ?? "");
+    for (const key of Object.keys(filters)) {
+      if (!pendingFilters[key]) {
+        setFilter(key, "");
+      }
+    }
+    for (const [key, value] of Object.entries(pendingFilters)) {
+      if (value) {
+        setFilter(key, value);
       }
     }
     setFilterSheetOpen(false);
@@ -140,35 +134,27 @@ export function TableRenderer<T extends Record<string, unknown>>({
 
   function clearFilters() {
     setPendingFilters({});
-    for (const filter of schema.filters ?? []) {
-      const filterType = filter.type ?? (filter.options ? "select" : "text");
-      if (filterType === "date-range") {
-        const fromKey = filter.fromAccessorKey ?? `${filter.accessorKey}_from`;
-        const toKey = filter.toAccessorKey ?? `${filter.accessorKey}_to`;
-        setFilter(fromKey, "");
-        setFilter(toKey, "");
-      } else {
-        setFilter(filter.accessorKey, "");
-      }
+    for (const key of Object.keys(filters)) {
+      setFilter(key, "");
     }
   }
 
-  const activeFilterCount = useMemo(() => {
-    let count = 0;
-    for (const filter of schema.filters ?? []) {
-      const filterType = filter.type ?? (filter.options ? "select" : "text");
-      if (filterType === "date-range") {
-        const fromKey = filter.fromAccessorKey ?? `${filter.accessorKey}_from`;
-        const toKey = filter.toAccessorKey ?? `${filter.accessorKey}_to`;
-        if (filters[fromKey] || filters[toKey]) {
-          count += 1;
-        }
-      } else if (filters[filter.accessorKey]) {
-        count += 1;
-      }
+  const activeFilterCount = (schema.filters ?? []).filter((filter) => {
+    if (filter.type === "date-range") {
+      const fromKey =
+        filter.fromParamName ??
+        (filter.accessorKey === "date_range"
+          ? "from_date"
+          : `${filter.accessorKey}_from`);
+      const toKey =
+        filter.toParamName ??
+        (filter.accessorKey === "date_range"
+          ? "to_date"
+          : `${filter.accessorKey}_to`);
+      return Boolean(filters[fromKey] || filters[toKey]);
     }
-    return count;
-  }, [filters, schema.filters]);
+    return Boolean(filters[filter.accessorKey]);
+  }).length;
 
   const columns = useMemo<ColumnDef<T>[]>(() => {
     const cols: ColumnDef<T>[] = [];
@@ -405,9 +391,7 @@ export function TableRenderer<T extends Record<string, unknown>>({
                 </button>
               </div>
             )}
-            {typeof toolbarEnd === "function"
-              ? toolbarEnd({ filters, search, apiFetcher: fetcher })
-              : toolbarEnd}
+            {toolbarEnd}
           </div>
         </div>
       )}
@@ -427,29 +411,23 @@ export function TableRenderer<T extends Record<string, unknown>>({
                   resolveText(translate, filter.label, filter.labelKey) ??
                   filter.accessorKey;
                 const fieldId = `table-filter-${filter.accessorKey}`;
-                const filterType =
-                  filter.type ?? (filter.options ? "select" : "text");
 
-                const handleFilterTextChange = (val: string) => {
-                  setPendingFilters((current) => {
-                    if (!val) {
-                      const rest = { ...current };
-                      delete rest[filter.accessorKey];
-                      return rest;
-                    }
-                    return { ...current, [filter.accessorKey]: val };
-                  });
-                };
-
-                if (filterType === "date-range") {
+                if (filter.type === "date-range") {
                   const fromKey =
-                    filter.fromAccessorKey ?? `${filter.accessorKey}_from`;
+                    filter.fromParamName ??
+                    (filter.accessorKey === "date_range"
+                      ? "from_date"
+                      : `${filter.accessorKey}_from`);
                   const toKey =
-                    filter.toAccessorKey ?? `${filter.accessorKey}_to`;
-                  const rangeValue = {
+                    filter.toParamName ??
+                    (filter.accessorKey === "date_range"
+                      ? "to_date"
+                      : `${filter.accessorKey}_to`);
+                  const rangeValue: DateRange = {
                     from: pendingFilters[fromKey] ?? null,
                     to: pendingFilters[toKey] ?? null,
                   };
+
                   return (
                     <div
                       key={filter.accessorKey}
@@ -460,75 +438,33 @@ export function TableRenderer<T extends Record<string, unknown>>({
                         id={fieldId}
                         aria-label={filterLabel}
                         value={rangeValue}
+                        onChange={(newRange) =>
+                          setPendingFilters((prev) => {
+                            const updated = { ...prev };
+                            if (newRange?.from) {
+                              updated[fromKey] =
+                                typeof newRange.from === "string"
+                                  ? newRange.from
+                                  : formatDateIso(newRange.from);
+                            } else {
+                              delete updated[fromKey];
+                            }
+                            if (newRange?.to) {
+                              updated[toKey] =
+                                typeof newRange.to === "string"
+                                  ? newRange.to
+                                  : formatDateIso(newRange.to);
+                            } else {
+                              delete updated[toKey];
+                            }
+                            return updated;
+                          })
+                        }
                         minDate={filter.minDate}
                         maxDate={filter.maxDate}
                         disablePast={filter.disablePast}
                         disableFuture={filter.disableFuture}
                         hidePastDates={filter.hidePastDates}
-                        onChange={(nextRange) => {
-                          setPendingFilters((current) => {
-                            const updated = { ...current };
-                            if (nextRange.from) {
-                              updated[fromKey] =
-                                typeof nextRange.from === "string"
-                                  ? nextRange.from
-                                  : formatDateIso(nextRange.from);
-                            } else {
-                              delete updated[fromKey];
-                            }
-                            if (nextRange.to) {
-                              updated[toKey] =
-                                typeof nextRange.to === "string"
-                                  ? nextRange.to
-                                  : formatDateIso(nextRange.to);
-                            } else {
-                              delete updated[toKey];
-                            }
-                            return updated;
-                          });
-                        }}
-                      />
-                    </div>
-                  );
-                }
-
-                if (filterType === "date") {
-                  return (
-                    <div
-                      key={filter.accessorKey}
-                      className="flex flex-col gap-1.5"
-                    >
-                      <Label htmlFor={fieldId}>{filterLabel}</Label>
-                      <Input
-                        id={fieldId}
-                        type="date"
-                        value={pendingFilters[filter.accessorKey] ?? ""}
-                        onChange={(e) => handleFilterTextChange(e.target.value)}
-                      />
-                    </div>
-                  );
-                }
-
-                if (filterType === "text") {
-                  const placeholder =
-                    resolveText(
-                      translate,
-                      filter.placeholder,
-                      filter.placeholderKey,
-                    ) ?? filterLabel;
-                  return (
-                    <div
-                      key={filter.accessorKey}
-                      className="flex flex-col gap-1.5"
-                    >
-                      <Label htmlFor={fieldId}>{filterLabel}</Label>
-                      <Input
-                        id={fieldId}
-                        type="text"
-                        maxLength={filter.maxLength}
-                        placeholder={placeholder}
-                        value={pendingFilters[filter.accessorKey] ?? ""}
-                        onChange={(e) => handleFilterTextChange(e.target.value)}
                       />
                     </div>
                   );
@@ -541,7 +477,9 @@ export function TableRenderer<T extends Record<string, unknown>>({
                   >
                     <Label htmlFor={fieldId}>{filterLabel}</Label>
                     <Select
-                      value={pendingFilters[filter.accessorKey] ?? ""}
+                      value={
+                        (pendingFilters[filter.accessorKey] as string) ?? ""
+                      }
                       onValueChange={(value) =>
                         setPendingFilters((current) => {
                           if (!value) {

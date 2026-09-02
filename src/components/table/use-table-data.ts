@@ -146,31 +146,7 @@ export function useTableData<T extends Record<string, unknown>>(
     }
     for (const [key, value] of Object.entries(filters)) {
       if (!value) continue;
-      if (key === "from_date") {
-        result = result.filter((row) => {
-          const rowDate = String(row.created_at ?? row.createdAt ?? "").slice(
-            0,
-            10,
-          );
-          return rowDate ? rowDate >= value : true;
-        });
-      } else if (key === "to_date") {
-        result = result.filter((row) => {
-          const rowDate = String(row.created_at ?? row.createdAt ?? "").slice(
-            0,
-            10,
-          );
-          return rowDate ? rowDate <= value : true;
-        });
-      } else {
-        result = result.filter((row) => {
-          const cellVal = String(row[key] ?? "");
-          return (
-            cellVal.toLowerCase() === value.toLowerCase() ||
-            cellVal.toLowerCase().includes(value.toLowerCase())
-          );
-        });
-      }
+      result = result.filter((row) => String(row[key] ?? "") === value);
     }
     return result;
   }, [schema.mode, schema.columns, allRows, search, filters]);
