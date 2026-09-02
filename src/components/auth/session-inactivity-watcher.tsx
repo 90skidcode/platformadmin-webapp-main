@@ -265,7 +265,7 @@ export function SessionInactivityWatcher({
             })}
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="gap-2 sm:gap-0">
+        <AlertDialogFooter className="gap-3 sm:gap-3">
           <Button
             variant="outline"
             onClick={handleSignOut}
