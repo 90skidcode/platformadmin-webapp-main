@@ -1,7 +1,5 @@
 import { apiEndpoints } from "@/lib/api-endpoints";
 import type { TableSchema } from "@/components/table";
-import type { FormSchema } from "@/components/form";
-import auditLogsFilterFormSchema from "@/schemas/forms/audit-logs-filter-form.json";
 
 export interface AuditLogRow {
   [key: string]: unknown;
@@ -25,7 +23,6 @@ export const auditLogsTableSchema: TableSchema = {
   endpoint: { url: apiEndpoints.auditLogs.list },
   search: { enabled: false },
   pageSize: 20,
-  filterSchema: auditLogsFilterFormSchema as unknown as FormSchema,
   filters: [
     {
       accessorKey: "date_range",

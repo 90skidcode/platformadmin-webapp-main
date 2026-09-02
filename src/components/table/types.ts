@@ -108,8 +108,6 @@ export interface BulkAction extends BaseAction {
   endpoint?: ActionEndpoint;
 }
 
-import type { FormSchema } from "../form/types";
-
 export interface TableSchema {
   id: string;
   i18nNamespace?: string;
@@ -123,9 +121,6 @@ export interface TableSchema {
   bulkActions?: BulkAction[];
   selectable?: boolean;
   search?: { enabled?: boolean; placeholderKey?: string };
-  /** Rich JSON FormSchema for the filter sheet. If provided, FormRenderer uses this directly. */
-  filterSchema?: FormSchema;
-  /** Legacy/simple table filters list. Automatically converted to FormSchema if filterSchema is omitted. */
   filters?: TableFilter[];
   pageSize?: number;
   /** Row-virtualizes the desktop table body (plan §10's perf pass), worth

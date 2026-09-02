@@ -105,22 +105,13 @@ export function TableRenderer<T extends Record<string, unknown>>({
   } = useTableData(schema, data, fetcher);
 
   const filterFormSchema = useMemo<FormSchema | null>(() => {
-    return (
-      schema.filterSchema ??
-      resolveFiltersToFormSchema(
-        schema.filters,
-        schema.id,
-        schema.i18nNamespace,
-        commonT,
-      )
+    return resolveFiltersToFormSchema(
+      schema.filters,
+      schema.id,
+      schema.i18nNamespace,
+      commonT,
     );
-  }, [
-    schema.filterSchema,
-    schema.filters,
-    schema.id,
-    schema.i18nNamespace,
-    commonT,
-  ]);
+  }, [schema.filters, schema.id, schema.i18nNamespace, commonT]);
 
   const filterDefaultValues = useMemo(
     () => buildFilterDefaults(filterFormSchema?.fields, filters),

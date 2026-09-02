@@ -1,7 +1,5 @@
 import { apiEndpoints } from "@/lib/api-endpoints";
 import type { TableSchema } from "@/components/table";
-import type { FormSchema } from "@/components/form";
-import usersFilterFormSchema from "@/schemas/forms/users-filter-form.json";
 
 // `.ts`, not `.json`, so `endpoint.url` can come from `apiEndpoints.ts`
 // instead of a hand-typed literal (§6.2). `delete`'s url keeps the `{id}`
@@ -14,7 +12,17 @@ export const usersTableSchema: TableSchema = {
   mode: "server",
   endpoint: { url: apiEndpoints.users.list },
   search: { enabled: true },
-  filterSchema: usersFilterFormSchema as unknown as FormSchema,
+  filters: [
+    {
+      accessorKey: "status",
+      labelKey: "columns.status",
+      placeholder: "All Statuses",
+      options: [
+        { value: "active", labelKey: "status.active" },
+        { value: "inactive", labelKey: "status.inactive" },
+      ],
+    },
+  ],
   pageSize: 10,
   // Real `/users` records are `{ id, name, email, status, created_at,
   // updated_at }` -- no `roles` (see nav-items.ts's note on RBAC being
