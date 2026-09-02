@@ -2,28 +2,26 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useSession } from "next-auth/react";
 import { Plus } from "lucide-react";
 
 import {
   Button,
-  Input,
-  Label,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
   Sheet,
   SheetContent,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui";
+import { FormRenderer } from "@/components/form";
 import { TableRenderer } from "@/components/table";
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { parseApiErrorMessage } from "@/lib/api-envelope";
 import { useApiFetcher } from "@/lib/fetcher/use-api-fetcher";
 import { schemesTableSchema } from "@/schemas/tables/price/schemes-table";
+import {
+  createSchemeFormSchema,
+  editSchemeFormSchema,
+} from "@/schemas/forms/price/schemes-form";
 
 interface SchemesRow {
   [key: string]: unknown;
@@ -40,68 +38,13 @@ interface SchemesRow {
 }
 
 export default function SchemesPage() {
-  const t = useTranslations("tables.schemes");
+  const { data: session } = useSession();
   const apiFetcher = useApiFetcher();
-  const [tableKey, setTableKey] = useState(0);
-  const [isAddOpen, setIsAddOpen] = useState(false);
+  const t = useTranslations("tables.schemes");
+  const [addOpen, setAddOpen] = useState(false);
   const [editingRow, setEditingRow] = useState<SchemesRow | null>(null);
-  const [formData, setFormData] = useState<Partial<SchemesRow>>({});
-  const [saving, setSaving] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
-
+  const [tableKey, setTableKey] = useState(0);
   const refreshTable = () => setTableKey((k) => k + 1);
-
-  function handleOpenAdd() {
-    setFormData({
-      scheme_id: undefined,
-      scheme_description: "",
-      new_used: "NEW",
-      vehicle_type: "4W",
-      scheme_group: 1,
-      status: "active",
-    });
-    setFormError(null);
-    setIsAddOpen(true);
-  }
-
-  function handleOpenEdit(row: SchemesRow) {
-    setEditingRow(row);
-    setFormData({ ...row });
-    setFormError(null);
-  }
-
-  async function handleSave(isEdit: boolean) {
-    setSaving(true);
-    setFormError(null);
-    try {
-      const url =
-        isEdit && editingRow
-          ? apiEndpoints.price.schemes.byId(editingRow.scheme_id)
-          : apiEndpoints.price.schemes.list;
-      const method = isEdit ? "PUT" : "POST";
-
-      const res = await apiFetcher(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        throw new Error(parseApiErrorMessage(body, res.status));
-      }
-
-      setIsAddOpen(false);
-      setEditingRow(null);
-      refreshTable();
-    } catch (err) {
-      setFormError(
-        err instanceof Error ? err.message : t("toast.genericError"),
-      );
-    } finally {
-      setSaving(false);
-    }
-  }
 
   return (
     <div className="flex flex-col gap-4 p-6">
@@ -117,178 +60,80 @@ export default function SchemesPage() {
         key={tableKey}
         schema={schemesTableSchema}
         actionHandlers={{
-          editScheme: async (row) => handleOpenEdit(row as SchemesRow),
+          editScheme: async (row) => setEditingRow(row as SchemesRow),
         }}
         toolbarEnd={
-          <Button onClick={handleOpenAdd}>
-            <Plus className="size-4" />
-            {t("actions.newScheme")}
-          </Button>
+          !!session && (
+            <Button onClick={() => setAddOpen(true)}>
+              <Plus />
+              {t("actions.newScheme")}
+            </Button>
+          )
         }
       />
 
-      {/* Add / Edit Drawer */}
+      <Sheet open={addOpen} onOpenChange={setAddOpen}>
+        <SheetContent className="overflow-y-auto sm:max-w-md">
+          <SheetHeader>
+            <SheetTitle>{t("dialog.newTitle")}</SheetTitle>
+          </SheetHeader>
+          <FormRenderer
+            schema={createSchemeFormSchema}
+            onRefetch={refreshTable}
+            actionHandlers={{
+              createScheme: async (values) => {
+                const res = await apiFetcher(apiEndpoints.price.schemes.list, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(values),
+                });
+                if (!res.ok) {
+                  const body = await res.json().catch(() => null);
+                  throw new Error(parseApiErrorMessage(body, res.status));
+                }
+                setAddOpen(false);
+              },
+            }}
+          />
+        </SheetContent>
+      </Sheet>
+
       <Sheet
-        open={isAddOpen || !!editingRow}
-        onOpenChange={(open) => {
-          if (!open) {
-            setIsAddOpen(false);
-            setEditingRow(null);
-          }
-        }}
+        open={!!editingRow}
+        onOpenChange={(open) => !open && setEditingRow(null)}
       >
         <SheetContent className="overflow-y-auto sm:max-w-md">
           <SheetHeader>
             <SheetTitle>
               {editingRow
                 ? t("dialog.editTitle", { name: editingRow.scheme_description })
-                : t("dialog.newTitle")}
+                : ""}
             </SheetTitle>
           </SheetHeader>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              handleSave(!!editingRow);
-            }}
-            className="flex flex-col gap-4 py-4"
-          >
-            {formError && (
-              <div className="rounded-md bg-destructive/10 p-3 text-xs text-destructive">
-                {formError}
-              </div>
-            )}
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="scheme-description">
-                {t("columns.scheme_description")}
-              </Label>
-              <Input
-                id="scheme-description"
-                required
-                value={formData.scheme_description ?? ""}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    scheme_description: e.target.value,
-                  }))
-                }
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="scheme-id">{t("columns.scheme_id")}</Label>
-                <Input
-                  id="scheme-id"
-                  type="number"
-                  required
-                  disabled={!!editingRow}
-                  value={formData.scheme_id ?? ""}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      scheme_id: Number(e.target.value),
-                    }))
+          {editingRow && (
+            <FormRenderer
+              schema={editSchemeFormSchema}
+              defaultValues={{ ...editingRow }}
+              onRefetch={refreshTable}
+              actionHandlers={{
+                saveScheme: async (values) => {
+                  const res = await apiFetcher(
+                    apiEndpoints.price.schemes.byId(editingRow.scheme_id),
+                    {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify(values),
+                    },
+                  );
+                  if (!res.ok) {
+                    const body = await res.json().catch(() => null);
+                    throw new Error(parseApiErrorMessage(body, res.status));
                   }
-                />
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="scheme-group">
-                  {t("columns.scheme_group")}
-                </Label>
-                <Input
-                  id="scheme-group"
-                  type="number"
-                  value={formData.scheme_group ?? ""}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      scheme_group: Number(e.target.value),
-                    }))
-                  }
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="scheme-new-used">{t("columns.new_used")}</Label>
-                <Select
-                  value={formData.new_used ?? "NEW"}
-                  onValueChange={(val) =>
-                    setFormData((prev) => ({ ...prev, new_used: val }))
-                  }
-                >
-                  <SelectTrigger id="scheme-new-used">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="NEW">New</SelectItem>
-                    <SelectItem value="USED">Used</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex flex-col gap-1.5">
-                <Label htmlFor="scheme-vehicle-type">
-                  {t("columns.vehicle_type")}
-                </Label>
-                <Select
-                  value={formData.vehicle_type ?? "4W"}
-                  onValueChange={(val) =>
-                    setFormData((prev) => ({ ...prev, vehicle_type: val }))
-                  }
-                >
-                  <SelectTrigger id="scheme-vehicle-type">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2W">2 Wheeler</SelectItem>
-                    <SelectItem value="4W">4 Wheeler</SelectItem>
-                    <SelectItem value="CV">Commercial Vehicle</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <Label htmlFor="scheme-status">{t("columns.status")}</Label>
-              <Select
-                value={formData.status ?? "active"}
-                onValueChange={(val) =>
-                  setFormData((prev) => ({ ...prev, status: val }))
-                }
-              >
-                <SelectTrigger id="scheme-status">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">{t("status.active")}</SelectItem>
-                  <SelectItem value="inactive">
-                    {t("status.inactive")}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <SheetFooter className="mt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setIsAddOpen(false);
                   setEditingRow(null);
-                }}
-              >
-                {t("actions.cancel")}
-              </Button>
-              <Button type="submit" disabled={saving}>
-                {saving ? "Saving..." : t("actions.save")}
-              </Button>
-            </SheetFooter>
-          </form>
+                },
+              }}
+            />
+          )}
         </SheetContent>
       </Sheet>
     </div>
