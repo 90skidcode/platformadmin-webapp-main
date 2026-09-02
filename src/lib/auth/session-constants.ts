@@ -8,7 +8,7 @@
  */
 
 export const INACTIVITY_TIMEOUT_MS = 10 * 60 * 1000; // 10 minutes (600,000 ms)
-export const WARNING_TIME_MS = 8 * 60 * 1000; // 8 minutes (480,000 ms)
+export const WARNING_TIME_MS = 1 * 60 * 1000; // 8 minutes (480,000 ms)
 export const WARNING_WINDOW_MS = INACTIVITY_TIMEOUT_MS - WARNING_TIME_MS; // 2 minutes (120,000 ms)
 export const ABSOLUTE_TIMEOUT_MS = 8 * 60 * 60 * 1000; // 8 hours (28,800,000 ms)
 

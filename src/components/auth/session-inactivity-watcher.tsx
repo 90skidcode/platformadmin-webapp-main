@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTranslations } from "next-intl";
 
+import { Clock } from "lucide-react";
+
 import {
   AlertDialog,
   AlertDialogContent,
@@ -256,25 +258,46 @@ export function SessionInactivityWatcher({
 
   return (
     <AlertDialog open={isWarningOpen}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{t("warningTitle")}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {t("warningMessage", {
-              time: formatCountdown(remainingSeconds),
-            })}
+      <AlertDialogContent className="max-w-md text-center sm:text-center">
+        <div className="flex flex-col items-center gap-4 py-2">
+          {/* Warning / clock icon inside content */}
+          <div className="flex size-14 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400">
+            <Clock className="size-7" aria-hidden="true" />
+          </div>
+
+          <AlertDialogHeader className="items-center text-center sm:text-center">
+            <AlertDialogTitle className="text-xl font-semibold">
+              {t("warningTitle")}
+            </AlertDialogTitle>
+          </AlertDialogHeader>
+
+          {/* Large, prominent countdown value */}
+          <div
+            aria-live="polite"
+            className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl"
+          >
+            {formatCountdown(remainingSeconds)}
+          </div>
+
+          {/* Supporting message below the countdown */}
+          <AlertDialogDescription className="max-w-xs text-center text-sm text-muted-foreground">
+            {t("warningMessage")}
           </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="gap-3 sm:gap-3">
+        </div>
+
+        <AlertDialogFooter className="mt-2 flex-col-reverse gap-3 sm:flex-row sm:justify-center sm:gap-3">
           <Button
             variant="outline"
+            className="w-full sm:w-auto sm:min-w-32"
             onClick={handleSignOut}
             disabled={isExtending}
           >
             {t("signOut")}
           </Button>
+
           <Button
             variant="primary"
+            className="w-full sm:w-auto sm:min-w-32"
             onClick={handleContinueSession}
             disabled={isExtending}
           >

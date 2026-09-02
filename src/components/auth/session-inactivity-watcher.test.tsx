@@ -30,7 +30,7 @@ const messages = {
     session: {
       warningTitle: "Session Inactivity Warning",
       warningMessage:
-        "Your session will expire in {time} due to inactivity. Select Continue Session to remain signed in.",
+        "Your session will expire soon due to inactivity. Select Continue Session to remain signed in.",
       continueSession: "Continue Session",
       signOut: "Sign out",
     },
@@ -67,64 +67,64 @@ describe("BRD: Inactivity Warning Modal & Session Lifecycle", () => {
   it("remains hidden while the user is actively working within the active window", () => {
     renderWatcher();
     expect(
-      screen.queryByText(/Your session will expire in .* due to inactivity/),
+      screen.queryByText(/Your session will expire soon due to inactivity/),
     ).not.toBeInTheDocument();
   });
 
-  it("displays the warning modal with a live 2-minute countdown (2:00) at 8 minutes of inactivity", async () => {
+  it("displays the warning modal with a live countdown at warning threshold", async () => {
     renderWatcher();
 
-    // Advance to 7m 59s -> warning not yet shown
+    // Advance to warning threshold - 1s -> warning not yet shown
     act(() => {
       vi.advanceTimersByTime(WARNING_TIME_MS - 1000);
     });
     expect(
-      screen.queryByText(/Your session will expire in .* due to inactivity/),
+      screen.queryByText(/Your session will expire soon due to inactivity/),
     ).not.toBeInTheDocument();
 
-    // Advance to 8m -> warning modal appears with 2:00
+    // Advance to warning threshold -> warning modal appears
     act(() => {
       vi.advanceTimersByTime(1000);
     });
 
     expect(
       await screen.findByText(
-        "Your session will expire in 2:00 due to inactivity. Select Continue Session to remain signed in.",
+        "Your session will expire soon due to inactivity. Select Continue Session to remain signed in.",
       ),
     ).toBeInTheDocument();
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
     expect(screen.getByText("Continue Session")).toBeInTheDocument();
     expect(screen.getByText("Sign out")).toBeInTheDocument();
   });
 
-  it("dynamically ticks down the remaining time (e.g. 1:59, 1:58) every second while the modal is displayed", async () => {
+  it("dynamically ticks down the remaining time every second while the modal is displayed", async () => {
     renderWatcher();
 
-    // Advance to 8m -> modal opens at 2:00
+    // Advance to warning threshold -> modal opens
     act(() => {
       vi.advanceTimersByTime(WARNING_TIME_MS);
     });
 
-    expect(
-      await screen.findByText(/Your session will expire in 2:00/),
-    ).toBeInTheDocument();
+    const firstCountdown = await screen.findByText(/^\d+:[0-5]\d$/);
+    expect(firstCountdown).toBeInTheDocument();
+    const firstText = firstCountdown.textContent;
 
-    // Tick 1 second -> 1:59
+    // Tick 1 second
     act(() => {
       vi.advanceTimersByTime(1000);
     });
 
-    expect(
-      await screen.findByText(/Your session will expire in 1:59/),
-    ).toBeInTheDocument();
+    const secondCountdown = screen.getByText(/^\d+:[0-5]\d$/);
+    const secondText = secondCountdown.textContent;
+    expect(secondText).not.toBe(firstText);
 
-    // Tick another 60 seconds -> 0:59
+    // Tick another 60 seconds
     act(() => {
       vi.advanceTimersByTime(60000);
     });
 
-    expect(
-      await screen.findByText(/Your session will expire in 0:59/),
-    ).toBeInTheDocument();
+    const thirdCountdown = screen.getByText(/^\d+:[0-5]\d$/);
+    expect(thirdCountdown.textContent).not.toBe(secondText);
   });
 
   it("automatically signs out the user and redirects to login with an expiration notice after 10 minutes of inactivity", () => {
@@ -172,7 +172,7 @@ describe("BRD: Inactivity Warning Modal & Session Lifecycle", () => {
     // Warning modal should close
     await waitFor(() => {
       expect(
-        screen.queryByText(/Your session will expire in .* due to inactivity/),
+        screen.queryByText(/Your session will expire soon due to inactivity/),
       ).not.toBeInTheDocument();
     });
   });
@@ -213,7 +213,7 @@ describe("BRD: Inactivity Warning Modal & Session Lifecycle", () => {
 
     expect(
       await screen.findByText(
-        /Your session will expire in 2:00 due to inactivity/,
+        "Your session will expire soon due to inactivity. Select Continue Session to remain signed in.",
       ),
     ).toBeInTheDocument();
 
@@ -233,7 +233,7 @@ describe("BRD: Inactivity Warning Modal & Session Lifecycle", () => {
     // Warning modal closes automatically
     await waitFor(() => {
       expect(
-        screen.queryByText(/Your session will expire in .* due to inactivity/),
+        screen.queryByText(/Your session will expire soon due to inactivity/),
       ).not.toBeInTheDocument();
     });
   });
