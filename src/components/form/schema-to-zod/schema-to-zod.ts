@@ -30,6 +30,7 @@ function fieldToZodType(field: FormField): ZodTypeAny {
       return z.any().optional();
     case "email":
       return applyStringValidation(z.string(), v, true);
+    case "otp":
     default:
       return applyStringValidation(z.string(), v);
   }

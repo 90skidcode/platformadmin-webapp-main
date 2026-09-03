@@ -17,6 +17,7 @@ export type FormFieldType =
   | "checkbox"
   | "switch"
   | "date"
+  | "otp"
   | "hidden";
 
 export interface FieldValidationMessages {
@@ -138,6 +139,8 @@ export interface FormField {
   helpTextKey?: string;
   defaultValue?: unknown;
   disabled?: boolean;
+  /** `otp` only -- number of digit boxes (defaults to validation.maxLength or 5). */
+  length?: number;
   /** Out of the schema's `layout.columns` grid, how many columns this field spans. */
   colSpan?: 1 | 2 | 3;
   validation?: FieldValidation;
