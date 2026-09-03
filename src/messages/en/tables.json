@@ -88,7 +88,8 @@
       "actorType": "Actor Type",
       "actor": "User",
       "ipAddress": "IP Address",
-      "createdAt": "Timestamp"
+      "createdAt": "Timestamp",
+      "viewJson": "View JSON"
     },
     "filters": {
       "actor": "Actor",
@@ -140,6 +141,7 @@
       "status": "Status"
     },
     "status": {
+      "all": "All",
       "active": "Active",
       "inactive": "Inactive"
     },
@@ -167,6 +169,94 @@
     "toast": {
       "deleted": "Role deleted successfully.",
       "genericError": "Could not delete role. Please try again."
+    }
+  },
+  "mlr": {
+    "columns": {
+      "vehicle_type_id": "Vehicle Type ID",
+      "brand_id": "Brand ID",
+      "lms_id": "LMS ID",
+      "name": "Name",
+      "lms_name": "LMS Name",
+      "provider_name": "Provider Name",
+      "status": "Status",
+      "rate_3y": "Rate (3Y)",
+      "rate_4y": "Rate (4Y)",
+      "rate_5y": "Rate (5Y)",
+      "rate_6y": "Rate (6Y)",
+      "rate_7y": "Rate (7Y)",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "createdBy": "Created By",
+      "updatedBy": "Updated By"
+    },
+    "actions": {
+      "newMlr": "Add MLR",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "confirm": {
+      "delete": {
+        "title": "Delete this MLR record?",
+        "message": "This action cannot be undone."
+      }
+    },
+    "toast": {
+      "deleted": "MLR record deleted successfully.",
+      "saved": "MLR record saved successfully.",
+      "genericError": "Could not complete this action. Please try again."
+    },
+    "status": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "dialog": {
+      "newTitle": "Add MLR Configuration",
+      "editTitle": "Edit MLR - {name}"
+    }
+  },
+  "schemes": {
+    "columns": {
+      "scheme_id": "Scheme ID",
+      "scheme_description": "Scheme Description",
+      "new_used": "New / Used",
+      "vehicle_type": "Vehicle Type",
+      "scheme_group": "Scheme Group",
+      "status": "Status",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "createdBy": "Created By",
+      "updatedBy": "Updated By"
+    },
+    "actions": {
+      "newScheme": "Add Scheme",
+      "edit": "Edit",
+      "delete": "Delete",
+      "save": "Save",
+      "cancel": "Cancel"
+    },
+    "confirm": {
+      "delete": {
+        "title": "Delete this scheme?",
+        "message": "This action cannot be undone."
+      }
+    },
+    "toast": {
+      "deleted": "Scheme deleted successfully.",
+      "saved": "Scheme saved successfully.",
+      "genericError": "Could not complete this action. Please try again."
+    },
+    "status": {
+      "all": "All",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "dialog": {
+      "newTitle": "Add Price Scheme",
+      "editTitle": "Edit Scheme - {name}"
     }
   }
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Badge, type BadgeProps } from "@/components/ui";
 import { formatDate } from "@/lib/utils/format";
+import { JsonViewerCell } from "./json-viewer-cell";
 import type { TableColumn } from "./types";
 
 /** Dispatches on `column.cell` (plan §18's registry-pattern note: a new
@@ -70,6 +71,8 @@ export function renderCell(
         </Link>
       );
     }
+    case "json":
+      return <JsonViewerCell row={row} value={value} />;
     default:
       return resolvedValue == null ? "" : String(resolvedValue);
   }

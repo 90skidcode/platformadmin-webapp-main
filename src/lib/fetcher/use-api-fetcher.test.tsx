@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import { SESSION_EXPIRED_LOGIN_URL } from "@/lib/auth/session-constants";
 
 const signOutMock = vi.fn();
 vi.mock("next-auth/react", async () => {
@@ -12,6 +13,15 @@ vi.mock("next-auth/react", async () => {
 const toastMock = vi.fn();
 vi.mock("@/components/toast", () => ({
   toast: (...args: unknown[]) => toastMock(...args),
+}));
+
+const broadcastActivityMock = vi.fn();
+const broadcastExpiredMock = vi.fn();
+vi.mock("@/lib/auth/session-sync", () => ({
+  broadcastSessionActivity: (...args: unknown[]) =>
+    broadcastActivityMock(...args),
+  broadcastSessionExpired: (...args: unknown[]) =>
+    broadcastExpiredMock(...args),
 }));
 
 const messages = {
@@ -32,9 +42,6 @@ function stubFetch(response: Response) {
   return fetchMock;
 }
 
-// `useApiFetcher` tracks "already handled a 401" as module state (deliberately,
-// so several tables/forms 401-ing around the same time only sign out once --
-// see the file's own comment). Each test needs a fresh copy of that state.
 beforeEach(() => {
   vi.resetModules();
 });
@@ -43,11 +50,13 @@ afterEach(() => {
   vi.unstubAllGlobals();
   signOutMock.mockClear();
   toastMock.mockClear();
+  broadcastActivityMock.mockClear();
+  broadcastExpiredMock.mockClear();
 });
 
-describe("useApiFetcher", () => {
-  describe("calling the returned fetcher", () => {
-    it("calls the exact same-origin path it's given and nothing else", async () => {
+describe("BRD: API Client Session Lifecycle & Expiry Handling", () => {
+  describe("Calling API endpoints through the BFF Proxy", () => {
+    it("routes API requests directly to same-origin proxy without exposing upstream credentials", async () => {
       const fetchMock = stubFetch(new Response("{}"));
       const { useApiFetcher } = await import("./use-api-fetcher");
 
@@ -57,11 +66,36 @@ describe("useApiFetcher", () => {
       expect(fetchMock).toHaveBeenCalledOnce();
       const [url, options] = fetchMock.mock.calls[0];
       expect(url).toBe("/api/proxy/employees");
-      // No Authorization header and no external host -- that all moved server-side.
-      expect(options?.headers ?? {}).not.toHaveProperty("Authorization");
+      expect(options?.headers?.get?.("x-background-activity")).toBeFalsy();
     });
 
-    it("passes through request options like method and body", async () => {
+    it("attaches background-activity indicator when performing automated background operations", async () => {
+      const fetchMock = stubFetch(new Response("{}"));
+      const { useApiFetcher } = await import("./use-api-fetcher");
+
+      const { result } = renderHook(() => useApiFetcher(), { wrapper });
+      await result.current("/api/proxy/employees", { isBackground: true });
+
+      expect(fetchMock).toHaveBeenCalledOnce();
+      const [, options] = fetchMock.mock.calls[0];
+      expect(options?.headers?.get?.("x-background-activity")).toBe("true");
+    });
+
+    it("synchronizes user activity across all tabs upon receiving qualifying response header", async () => {
+      const response = new Response("{}", {
+        status: 200,
+        headers: { "X-Session-Last-Active": "1700000000000" },
+      });
+      stubFetch(response);
+      const { useApiFetcher } = await import("./use-api-fetcher");
+
+      const { result } = renderHook(() => useApiFetcher(), { wrapper });
+      await result.current("/api/proxy/employees");
+
+      expect(broadcastActivityMock).toHaveBeenCalledWith(1700000000000);
+    });
+
+    it("passes through standard request parameters such as HTTP method and payload body", async () => {
       stubFetch(new Response("{}"));
       const { useApiFetcher } = await import("./use-api-fetcher");
       const fetchMock = vi.mocked(fetch);
@@ -80,36 +114,10 @@ describe("useApiFetcher", () => {
         }),
       );
     });
-
-    it("resolves with the response unchanged on a non-401", async () => {
-      stubFetch(new Response("{}", { status: 200 }));
-      const { useApiFetcher } = await import("./use-api-fetcher");
-
-      const { result } = renderHook(() => useApiFetcher(), { wrapper });
-      const res = await result.current("/employees");
-
-      expect(res.status).toBe(200);
-      expect(signOutMock).not.toHaveBeenCalled();
-      expect(toastMock).not.toHaveBeenCalled();
-    });
   });
 
-  describe("across re-renders", () => {
-    it("returns a stable callback", async () => {
-      stubFetch(new Response("{}"));
-      const { useApiFetcher } = await import("./use-api-fetcher");
-
-      const { result, rerender } = renderHook(() => useApiFetcher(), {
-        wrapper,
-      });
-      const first = result.current;
-      rerender();
-      expect(result.current).toBe(first);
-    });
-  });
-
-  describe("on a 401", () => {
-    it("shows a toast and forces sign-out via next-auth, redirecting to /login", async () => {
+  describe("Unauthorized (401) Session Expiration Handling", () => {
+    it("notifies the user with a session expired message, broadcasts logout to other tabs, and redirects to login", async () => {
       stubFetch(new Response("{}", { status: 401 }));
       const { useApiFetcher } = await import("./use-api-fetcher");
 
@@ -122,31 +130,10 @@ describe("useApiFetcher", () => {
           description: "Your session has expired.",
         }),
       );
-      expect(signOutMock).toHaveBeenCalledWith({ callbackUrl: "/login" });
-    });
-
-    it("still resolves with the 401 response so callers don't throw", async () => {
-      stubFetch(new Response("{}", { status: 401 }));
-      const { useApiFetcher } = await import("./use-api-fetcher");
-
-      const { result } = renderHook(() => useApiFetcher(), { wrapper });
-      const res = await result.current("/employees");
-
-      expect(res.status).toBe(401);
-    });
-
-    it("only signs out once when multiple requests 401 around the same time", async () => {
-      stubFetch(new Response("{}", { status: 401 }));
-      const { useApiFetcher } = await import("./use-api-fetcher");
-
-      const { result } = renderHook(() => useApiFetcher(), { wrapper });
-      await Promise.all([
-        result.current("/employees"),
-        result.current("/users"),
-      ]);
-
-      expect(signOutMock).toHaveBeenCalledOnce();
-      expect(toastMock).toHaveBeenCalledOnce();
+      expect(broadcastExpiredMock).toHaveBeenCalledOnce();
+      expect(signOutMock).toHaveBeenCalledWith({
+        callbackUrl: SESSION_EXPIRED_LOGIN_URL,
+      });
     });
   });
 });

@@ -24,7 +24,12 @@
     "users": "Users",
     "auditLogs": "Audit Logs",
     "roleManager": "Role Manager",
-    "inputEventsDemo": "Input Events Demo"
+    "inputEventsDemo": "Input Events Demo",
+    "price": "Price",
+    "priceTables": {
+      "mlr": "MLR",
+      "schemes": "Schemes"
+    }
   },
   "topbar": {
     "environment": "Environment",
@@ -58,7 +63,14 @@
     "filtersDescription": "Narrow the table down using the fields below.",
     "clearFilters": "Clear",
     "clearAllFilters": "Clear all filters",
-    "applyFilters": "Apply"
+    "applyFilters": "Apply",
+    "viewJson": "View JSON",
+    "jsonDetails": "Log Details",
+    "jsonDetailsDescription": "Full JSON payload and response attributes.",
+    "copyJson": "Copy JSON",
+    "jsonCopied": "Copied!",
+    "structuredView": "Structured Details",
+    "rawJsonView": "Raw JSON"
   },
   "loading": "Loading...",
   "dashboard": {

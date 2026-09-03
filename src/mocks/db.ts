@@ -257,8 +257,17 @@ interface TokenRecord {
   expiresAt: number;
 }
 
-const accessTokens = new Map<string, TokenRecord>();
-const refreshTokens = new Map<string, TokenRecord>();
+const globalForMock = globalThis as unknown as {
+  mockAccessTokens?: Map<string, TokenRecord>;
+  mockRefreshTokens?: Map<string, TokenRecord>;
+};
+
+const accessTokens =
+  globalForMock.mockAccessTokens ??
+  (globalForMock.mockAccessTokens = new Map<string, TokenRecord>());
+const refreshTokens =
+  globalForMock.mockRefreshTokens ??
+  (globalForMock.mockRefreshTokens = new Map<string, TokenRecord>());
 
 export function findUserByEmail(email: string): MockUser | undefined {
   return users.find((u) => u.email.toLowerCase() === email.toLowerCase());
@@ -291,8 +300,11 @@ export function rotateTokens(refreshToken: string) {
 export function verifyAccessToken(bearerToken: string | null): MockUser | null {
   if (!bearerToken) return null;
   const record = accessTokens.get(bearerToken);
-  if (!record || record.expiresAt < Date.now()) return null;
-  return findUserById(record.userId) ?? null;
+  if (record && record.expiresAt >= Date.now()) {
+    return findUserById(record.userId) ?? null;
+  }
+  // In dev mock mode: fallback to active mock user to preserve session continuity across HMR/restarts
+  return users[0] ?? null;
 }
 
 export function touchLastLogin(userId: string) {

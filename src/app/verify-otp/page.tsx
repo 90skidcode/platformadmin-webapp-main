@@ -5,14 +5,15 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import { FormRenderer, type FormSchema } from "@/components/form";
 import { toast } from "@/components/toast";
-import { Button, OtpInput } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { apiEndpoints } from "@/lib/api-endpoints";
 import { pwresetSession } from "@/lib/auth/pwreset-session";
+import verifyOtpFormSchema from "@/schemas/forms/verify-otp-form.json";
 import { ROUTES } from "@/constants/routes";
 
 const RESEND_COOLDOWN_SECONDS = 60;
-const OTP_LENGTH = 5;
 
 export default function VerifyOtpPage() {
   const t = useTranslations("auth.verifyOtp");
@@ -20,8 +21,6 @@ export default function VerifyOtpPage() {
   const router = useRouter();
 
   const [email, setEmail] = useState<string | null>(null);
-  const [otp, setOtp] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
@@ -62,16 +61,15 @@ export default function VerifyOtpPage() {
     }
   }
 
-  async function executeVerify(otpToVerify: string) {
-    const cleanOtp = otpToVerify.trim();
-    if (cleanOtp.length !== OTP_LENGTH || !email || isSubmitting) return;
+  const actionHandlers = {
+    verifyOtp: async (values: unknown) => {
+      const otp = ((values as Record<string, string>).otp ?? "").trim();
+      if (!email) return;
 
-    setIsSubmitting(true);
-    try {
       const res = await fetch(apiEndpoints.auth.verifyOtp, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp: cleanOtp }),
+        body: JSON.stringify({ email, otp }),
       });
 
       if (res.ok) {
@@ -80,15 +78,8 @@ export default function VerifyOtpPage() {
       } else {
         toast({ variant: "error", title: t("toast.verifyError") });
       }
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    executeVerify(otp);
-  }
+    },
+  };
 
   if (!email) return null;
 
@@ -137,30 +128,10 @@ export default function VerifyOtpPage() {
             {t("otpSentTo", { email })}
           </p>
 
-          <form onSubmit={handleSubmit}>
-            <div className="my-6">
-              <OtpInput
-                id="verify-otp-input"
-                length={OTP_LENGTH}
-                value={otp}
-                onChange={setOtp}
-                onComplete={executeVerify}
-                disabled={isSubmitting}
-                autoFocus
-              />
-            </div>
-
-            <Button
-              id="verify-otp-submit-button"
-              type="submit"
-              variant="primary"
-              className="w-full"
-              disabled={otp.length !== OTP_LENGTH || isSubmitting}
-              loading={isSubmitting}
-            >
-              {t("actions.verifyOtp")}
-            </Button>
-          </form>
+          <FormRenderer
+            schema={verifyOtpFormSchema as unknown as FormSchema}
+            actionHandlers={actionHandlers}
+          />
 
           <div className="mt-4 flex justify-center">
             <Button

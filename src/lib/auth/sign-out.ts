@@ -3,18 +3,19 @@
 import { signOut } from "next-auth/react";
 
 import { deleteCookie } from "@/lib/utils/cookies";
+import { LAST_ACTIVE_COOKIE_NAME } from "./session-constants";
 
 /**
- * Clears the environment/tenant switcher cookies -- a fresh sign-in
- * shouldn't inherit the previous session's switcher state (plan §5) --
+ * Clears the environment/tenant/inactivity cookies -- a fresh sign-in
+ * shouldn't inherit the previous session's switcher or activity state (plan §5) --
  * then hands off to NextAuth's `signOut()`, which redirects to `/login`.
  *
- * Shared by the Topbar's manual "Sign out" menu item and the API fetcher's
- * forced sign-out on a 401 (session gone, or the backend rejected the
- * access token past the point a refresh could recover it).
+ * Shared by Topbar's manual "Sign out", the Inactivity Watcher modal,
+ * and the API fetcher's forced sign-out on a 401.
  */
-export function clearSessionCookiesAndSignOut() {
+export function clearSessionCookiesAndSignOut(callbackUrl = "/login") {
   deleteCookie("admin-environment");
   deleteCookie("admin-tenant");
-  return signOut({ callbackUrl: "/login" });
+  deleteCookie(LAST_ACTIVE_COOKIE_NAME);
+  return signOut({ callbackUrl });
 }

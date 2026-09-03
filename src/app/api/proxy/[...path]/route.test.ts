@@ -1,5 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
+import { signActivityTimestamp } from "@/lib/auth/session-activity.server";
+import {
+  ABSOLUTE_TIMEOUT_MS,
+  INACTIVITY_TIMEOUT_MS,
+  LAST_ACTIVE_COOKIE_NAME,
+  SESSION_ERRORS,
+} from "@/lib/auth/session-constants";
 
 const authMock = vi.fn();
 const cookiesMock = vi.fn();
@@ -17,7 +24,10 @@ function makeCookieStore(values: Record<string, string>) {
   };
 }
 
-async function callRoute(path: string[], init?: { method?: string }) {
+async function callRoute(
+  path: string[],
+  init?: { method?: string; headers?: Record<string, string> },
+) {
   const { GET, POST } = await import("./route");
   const request = new NextRequest(
     `http://localhost/api/proxy/${path.join("/")}`,
@@ -27,13 +37,13 @@ async function callRoute(path: string[], init?: { method?: string }) {
   return handler(request, { params: Promise.resolve({ path }) });
 }
 
-describe("BFF proxy route", () => {
+describe("BRD: BFF Proxy Session Guard & Activity Tracking", () => {
   beforeEach(() => {
     vi.resetAllMocks();
   });
 
-  describe("with no session", () => {
-    it("returns 401 and never calls the backend", async () => {
+  describe("Session Validity & Access Control", () => {
+    it("blocks backend API access and returns 401 when no authenticated user session exists", async () => {
       authMock.mockResolvedValue(null);
       cookiesMock.mockResolvedValue(makeCookieStore({}));
 
@@ -42,10 +52,116 @@ describe("BFF proxy route", () => {
       expect(response.status).toBe(401);
       expect(callBackendMock).not.toHaveBeenCalled();
     });
+
+    it("blocks backend API access and returns 401 when user session has already expired", async () => {
+      authMock.mockResolvedValue({
+        accessToken: "tok",
+        error: SESSION_ERRORS.EXPIRED,
+      });
+      cookiesMock.mockResolvedValue(makeCookieStore({}));
+
+      const response = await callRoute(["employees"]);
+
+      expect(response.status).toBe(401);
+      expect(callBackendMock).not.toHaveBeenCalled();
+    });
+
+    it("blocks backend API access and returns 401 when user inactivity has reached or exceeded 10 minutes", async () => {
+      const now = Date.now();
+      const lastActive = now - (INACTIVITY_TIMEOUT_MS + 5000); // inactive
+
+      authMock.mockResolvedValue({
+        accessToken: "tok",
+        sessionCreatedAt: now - 30 * 60 * 1000,
+        lastActiveAt: lastActive,
+        user: { tenants: [] },
+      });
+      cookiesMock.mockResolvedValue(
+        makeCookieStore({
+          [LAST_ACTIVE_COOKIE_NAME]: signActivityTimestamp(lastActive),
+        }),
+      );
+
+      const response = await callRoute(["employees"]);
+
+      expect(response.status).toBe(401);
+      expect(callBackendMock).not.toHaveBeenCalled();
+    });
+
+    it("blocks backend API access and returns 401 when the session reaches the 8-hour absolute maximum limit", async () => {
+      const now = Date.now();
+      const sessionCreatedAt = now - (ABSOLUTE_TIMEOUT_MS + 5000); // > 8 hours ago
+      const lastActive = now - 1000; // active recently
+
+      authMock.mockResolvedValue({
+        accessToken: "tok",
+        sessionCreatedAt,
+        lastActiveAt: lastActive,
+        user: { tenants: [] },
+      });
+      cookiesMock.mockResolvedValue(
+        makeCookieStore({
+          [LAST_ACTIVE_COOKIE_NAME]: signActivityTimestamp(lastActive),
+        }),
+      );
+
+      const response = await callRoute(["employees"]);
+
+      expect(response.status).toBe(401);
+      expect(callBackendMock).not.toHaveBeenCalled();
+    });
   });
 
-  describe("resolving tenant/environment for the backend call", () => {
-    it("uses the session's access token and the cookie-resolved tenant/env", async () => {
+  describe("Qualifying User Activity vs Background Polling Isolation", () => {
+    it("updates the session activity cookie and returns last-active header on user-initiated actions", async () => {
+      const now = Date.now();
+      authMock.mockResolvedValue({
+        accessToken: "tok",
+        sessionCreatedAt: now - 60000,
+        lastActiveAt: now - 60000,
+        user: { tenants: [] },
+      });
+      cookiesMock.mockResolvedValue(
+        makeCookieStore({
+          [LAST_ACTIVE_COOKIE_NAME]: signActivityTimestamp(now - 60000),
+        }),
+      );
+      callBackendMock.mockResolvedValue(new Response("{}", { status: 200 }));
+
+      const response = await callRoute(["employees"]);
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("X-Session-Last-Active")).toBeTruthy();
+      expect(response.cookies.get(LAST_ACTIVE_COOKIE_NAME)).toBeTruthy();
+    });
+
+    it("authenticates background polling requests without resetting or extending the user inactivity timer", async () => {
+      const now = Date.now();
+      authMock.mockResolvedValue({
+        accessToken: "tok",
+        sessionCreatedAt: now - 60000,
+        lastActiveAt: now - 60000,
+        user: { tenants: [] },
+      });
+      cookiesMock.mockResolvedValue(
+        makeCookieStore({
+          [LAST_ACTIVE_COOKIE_NAME]: signActivityTimestamp(now - 60000),
+        }),
+      );
+      callBackendMock.mockResolvedValue(new Response("{}", { status: 200 }));
+
+      const response = await callRoute(["employees"], {
+        headers: { "x-background-activity": "true" },
+      });
+
+      expect(response.status).toBe(200);
+      expect(response.headers.get("X-Session-Last-Active")).toBeNull();
+      expect(response.cookies.get(LAST_ACTIVE_COOKIE_NAME)).toBeUndefined();
+    });
+  });
+
+  describe("Backend Context Forwarding & Data Relaying", () => {
+    it("forwards the active tenant and environment context with the upstream request", async () => {
       authMock.mockResolvedValue({
         accessToken: "session-token",
         user: { tenants: [{ id: "acme", name: "Acme" }] },
@@ -73,7 +189,7 @@ describe("BFF proxy route", () => {
       );
     });
 
-    it("falls back to the session's first tenant when no tenant cookie is set", async () => {
+    it("falls back to the user's primary assigned tenant when no explicit tenant selection is made", async () => {
       authMock.mockResolvedValue({
         accessToken: "session-token",
         user: { tenants: [{ id: "globex", name: "Globex" }] },
@@ -89,10 +205,8 @@ describe("BFF proxy route", () => {
         expect.objectContaining({ envId: "production", tenantId: "globex" }),
       );
     });
-  });
 
-  describe("relaying the backend's response", () => {
-    it("never relays the backend's own auth/tenant request headers back to the client", async () => {
+    it("protects internal upstream credentials by never exposing backend-internal response headers to the client", async () => {
       authMock.mockResolvedValue({ accessToken: "t", user: { tenants: [] } });
       cookiesMock.mockResolvedValue(makeCookieStore({}));
       callBackendMock.mockResolvedValue(

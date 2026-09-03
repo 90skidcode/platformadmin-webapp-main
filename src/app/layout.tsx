@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import "./globals.css";
+import { auth } from "@/auth/auth";
 import { Toaster } from "@/components/toast";
 import { isRtlLocale } from "@/i18n/request";
 import { Providers } from "./providers";
@@ -33,6 +34,7 @@ export default async function RootLayout({
   const nonce = (await headers()).get("x-nonce") ?? undefined;
   const locale = await getLocale();
   const messages = await getMessages();
+  const session = await auth();
 
   return (
     <html lang={locale} dir={isRtlLocale(locale) ? "rtl" : "ltr"}>
@@ -43,7 +45,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }}
         />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <Providers>
+          <Providers session={session}>
             {children}
             <Toaster />
           </Providers>

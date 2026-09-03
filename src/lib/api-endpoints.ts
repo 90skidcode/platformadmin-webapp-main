@@ -63,4 +63,14 @@ export const apiEndpoints = {
     list: `${PROXY_BASE_PATH}/audit-logs`,
     byId: (logId: string) => `${PROXY_BASE_PATH}/audit-logs/${logId}`,
   },
-};
+  price: {
+    mlr: {
+      list: `${PROXY_BASE_PATH}/price/mlr`,
+      byId: (id: string | number) => `${PROXY_BASE_PATH}/price/mlr/${id}`,
+    },
+    schemes: {
+      list: `${PROXY_BASE_PATH}/price/schemes`,
+      byId: (id: string | number) => `${PROXY_BASE_PATH}/price/schemes/${id}`,
+    },
+  },
+} as const;

@@ -24,7 +24,12 @@
     "users": "المستخدمون",
     "auditLogs": "سجلات التدقيق",
     "roleManager": "إدارة الأدوار",
-    "inputEventsDemo": "عرض أحداث الإدخال"
+    "inputEventsDemo": "عرض أحداث الإدخال",
+    "price": "السعر",
+    "priceTables": {
+      "mlr": "MLR",
+      "schemes": "المخططات"
+    }
   },
   "topbar": {
     "environment": "البيئة",
@@ -58,7 +63,14 @@
     "filtersDescription": "قم بتضييق الجدول باستخدام الحقول أدناه.",
     "clearFilters": "مسح",
     "clearAllFilters": "مسح جميع الفلاتر",
-    "applyFilters": "تطبيق"
+    "applyFilters": "تطبيق",
+    "viewJson": "عرض JSON",
+    "jsonDetails": "تفاصيل السجل",
+    "jsonDetailsDescription": "حمولة JSON الكاملة وخصائص الاستجابة.",
+    "copyJson": "نسخ JSON",
+    "jsonCopied": "تم النسخ!",
+    "structuredView": "تفاصيل مهيكلة",
+    "rawJsonView": "JSON الأولي"
   },
   "loading": "جارٍ التحميل...",
   "dashboard": {

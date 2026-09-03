@@ -3,6 +3,7 @@ import { DateField } from "./fields/date-field";
 import { DateRangeField } from "./fields/date-range-field";
 import type { FieldComponentProps } from "./fields/field-types";
 import { HiddenField } from "./fields/hidden-field";
+import { OtpField } from "./fields/otp-field";
 import { SelectField } from "./fields/select-field";
 import { SwitchField } from "./fields/switch-field";
 import { TextField } from "./fields/text-field";
@@ -26,5 +27,6 @@ export const FIELD_REGISTRY: Record<
   select: SelectField,
   checkbox: CheckboxField,
   switch: SwitchField,
+  otp: OtpField,
   hidden: HiddenField,
 };

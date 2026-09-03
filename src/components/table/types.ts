@@ -13,7 +13,8 @@ export type CellType =
   | "datetime"
   | "timestamp"
   | "email"
-  | "link";
+  | "link"
+  | "json";
 
 export interface TableColumn {
   accessorKey: string;

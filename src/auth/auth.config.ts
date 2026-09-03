@@ -3,6 +3,12 @@ import { CredentialsSignin, type NextAuthConfig } from "next-auth";
 
 import { parseApiErrorMessage, type ApiEnvelope } from "@/lib/api-envelope";
 import { apiEndpoints } from "@/lib/api-endpoints";
+import {
+  ABSOLUTE_TIMEOUT_MS,
+  INACTIVITY_TIMEOUT_MS,
+  SESSION_ERRORS,
+  WARNING_TIME_MS,
+} from "@/lib/auth/session-constants";
 import { resolveAccess, type LoginResponse } from "./resolve-roles";
 import { refreshAccessToken } from "./refresh-token";
 import { decodeJwtPayload } from "./decode-jwt";
@@ -93,6 +99,7 @@ export const authConfig: NextAuthConfig = {
           // fine: RBAC gating itself is disabled for now (permissions.ts).
           const access = await resolveAccess(loginResponse, accessToken);
 
+          const now = Date.now();
           return {
             id: loginResponse.user.id,
             name: loginResponse.user.name,
@@ -101,6 +108,8 @@ export const authConfig: NextAuthConfig = {
             accessToken,
             refreshToken,
             accessTokenExpires,
+            sessionCreatedAt: now,
+            lastActiveAt: now,
           };
         } catch (err) {
           // ApiCredentialsError is already logged above with its backend
@@ -117,6 +126,15 @@ export const authConfig: NextAuthConfig = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) return { ...token, ...user }; // first sign-in: seed from authorize()
+
+      // Absolute 8-hour ceiling from original login (never extended)
+      if (
+        typeof token.sessionCreatedAt === "number" &&
+        Date.now() - token.sessionCreatedAt >= ABSOLUTE_TIMEOUT_MS
+      ) {
+        return { ...token, error: SESSION_ERRORS.EXPIRED };
+      }
+
       if (Date.now() < (token.accessTokenExpires as number)) return token;
       return refreshAccessToken(token); // rotate before the backend token expires
     },
@@ -127,7 +145,15 @@ export const authConfig: NextAuthConfig = {
       session.user.tenants =
         (token.tenants as { id: string; name: string }[]) ?? [];
       session.accessToken = token.accessToken as string;
-      session.error = token.error as "RefreshAccessTokenError" | undefined; // client forces sign-out on this
+      session.sessionCreatedAt = token.sessionCreatedAt as number | undefined;
+      session.lastActiveAt = token.lastActiveAt as number | undefined;
+      session.inactivityTimeoutMs = INACTIVITY_TIMEOUT_MS;
+      session.warningTimeMs = WARNING_TIME_MS;
+      session.absoluteTimeoutMs = ABSOLUTE_TIMEOUT_MS;
+      session.error = token.error as
+        | "RefreshAccessTokenError"
+        | typeof SESSION_ERRORS.EXPIRED
+        | undefined;
       return session;
     },
   },
