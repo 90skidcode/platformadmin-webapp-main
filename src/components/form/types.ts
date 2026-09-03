@@ -17,6 +17,7 @@ export type FormFieldType =
   | "checkbox"
   | "switch"
   | "date"
+  | "date-range"
   | "otp"
   | "hidden";
 
@@ -168,6 +169,18 @@ export interface FormField {
    * stringified (`"true"`/`"false"`) -- the same stringification the event
    * log already does for this control's onCheckedChange entries. */
   onCheckedChange?: string;
+  /** Earliest selectable date boundary for date / date-range fields. */
+  minDate?: string;
+  /** Latest selectable date boundary for date / date-range fields. */
+  maxDate?: string;
+  /** Disables any dates before today for date / date-range fields. */
+  disablePast?: boolean;
+  /** Disables any dates after today for date / date-range fields. */
+  disableFuture?: boolean;
+  /** Hides dates before today completely from the calendar view. */
+  hidePastDates?: boolean;
+  /** Whether to show quick presets panel. Default: true. */
+  showPresets?: boolean;
 }
 
 export type ButtonVariant =

@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import type { Session } from "next-auth";
 
 import messages from "@/messages/en/common.json";
@@ -65,5 +66,36 @@ describe("AuditLogsPage", () => {
     expect(
       screen.queryByRole("button", { name: "Delete" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("renders date range picker and select filters in the filter sheet", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    const filtersBtn = await screen.findByRole("button", { name: "Filters" });
+    await user.click(filtersBtn);
+
+    expect(await screen.findByLabelText("Date Range")).toBeInTheDocument();
+    expect(screen.getByLabelText("Action")).toBeInTheDocument();
+    expect(screen.getByLabelText("Resource Type")).toBeInTheDocument();
+    expect(screen.getByLabelText("Actor Type")).toBeInTheDocument();
+
+    const dateRangePicker = screen.getByLabelText("Date Range");
+    expect(dateRangePicker).toHaveAttribute("aria-haspopup", "dialog");
+  });
+
+  it("includes 'All' option in select filters", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    const filtersBtn = await screen.findByRole("button", { name: "Filters" });
+    await user.click(filtersBtn);
+
+    const resourceTypeTrigger = screen.getByLabelText("Resource Type");
+    await user.click(resourceTypeTrigger);
+
+    const options = await screen.findAllByRole("option");
+    const optionLabels = options.map((opt) => opt.textContent?.trim());
+    expect(optionLabels).toContain("All");
   });
 });

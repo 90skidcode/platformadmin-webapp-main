@@ -6,7 +6,13 @@ export function resolveText(
   explicit: string | undefined,
   key: string | undefined,
 ): string | undefined {
-  if (key) return translate(key);
+  if (key) {
+    try {
+      return translate(key);
+    } catch {
+      return explicit ?? key;
+    }
+  }
   return explicit;
 }
 

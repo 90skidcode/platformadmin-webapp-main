@@ -28,6 +28,10 @@ function fieldToZodType(field: FormField): ZodTypeAny {
         : z.boolean();
     case "hidden":
       return z.any().optional();
+    case "date-range":
+      return z.any().optional();
+    case "date":
+      return applyStringValidation(z.string(), v);
     case "email":
       return applyStringValidation(z.string(), v, true);
     case "otp":

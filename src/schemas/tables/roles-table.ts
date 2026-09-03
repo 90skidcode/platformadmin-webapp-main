@@ -1,5 +1,6 @@
 import { apiEndpoints } from "@/lib/api-endpoints";
 import type { TableSchema } from "@/components/table";
+import { createDeleteAction } from "./common-columns";
 
 export interface RoleItem {
   [key: string]: unknown;
@@ -106,16 +107,6 @@ export const rolesTableSchema: TableSchema = {
       handler: "navigate",
       target: "/role-manager/{id}?mode=edit",
     },
-    {
-      id: "delete",
-      labelKey: "actions.delete",
-      icon: "trash",
-      handler: "custom",
-      onClick: "deleteRole",
-      confirm: {
-        titleKey: "confirm.delete.title",
-        messageKey: "confirm.delete.message",
-      },
-    },
+    createDeleteAction(apiEndpoints.roles.byId("{id}")),
   ],
 };

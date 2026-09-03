@@ -144,9 +144,32 @@ export function paginate<T extends object>(
   let result = items;
 
   for (const [key, value] of Object.entries(params.filters)) {
-    result = result.filter(
-      (item) => String(item[key as keyof T] ?? "") === value,
-    );
+    if (key === "from_date") {
+      result = result.filter((item) => {
+        const itemRecord = item as Record<string, unknown>;
+        const rowDate = String(
+          itemRecord.created_at ?? itemRecord.createdAt ?? "",
+        ).slice(0, 10);
+        return rowDate ? rowDate >= value : true;
+      });
+    } else if (key === "to_date") {
+      result = result.filter((item) => {
+        const itemRecord = item as Record<string, unknown>;
+        const rowDate = String(
+          itemRecord.created_at ?? itemRecord.createdAt ?? "",
+        ).slice(0, 10);
+        return rowDate ? rowDate <= value : true;
+      });
+    } else {
+      result = result.filter(
+        (item) =>
+          String(item[key as keyof T] ?? "").toLowerCase() ===
+            value.toLowerCase() ||
+          String(item[key as keyof T] ?? "")
+            .toLowerCase()
+            .includes(value.toLowerCase()),
+      );
+    }
   }
 
   if (params.search) {

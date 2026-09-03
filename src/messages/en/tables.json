@@ -71,6 +71,7 @@
       "viewer": "Viewer"
     },
     "status": {
+      "all": "All",
       "active": "Active",
       "inactive": "Inactive",
       "invited": "Invited",
@@ -90,7 +91,15 @@
       "createdAt": "Timestamp",
       "viewJson": "View JSON"
     },
+    "filters": {
+      "actor": "Actor",
+      "actorPlaceholder": "Filter by actor (email)",
+      "dateRange": "Date Range",
+      "fromDate": "From Date",
+      "toDate": "To Date"
+    },
     "actions": {
+      "all": "All",
       "create": "Create",
       "update": "Update",
       "delete": "Delete",
@@ -132,6 +141,7 @@
       "status": "Status"
     },
     "status": {
+      "all": "All",
       "active": "Active",
       "inactive": "Inactive"
     },
@@ -155,6 +165,10 @@
         "title": "Delete this role?",
         "message": "This will permanently remove the role and its permission matrix."
       }
+    },
+    "toast": {
+      "deleted": "Role deleted successfully.",
+      "genericError": "Could not delete role. Please try again."
     }
   },
   "mlr": {
@@ -195,6 +209,7 @@
       "genericError": "Could not complete this action. Please try again."
     },
     "status": {
+      "all": "All",
       "active": "Active",
       "inactive": "Inactive"
     },
@@ -235,6 +250,7 @@
       "genericError": "Could not complete this action. Please try again."
     },
     "status": {
+      "all": "All",
       "active": "Active",
       "inactive": "Inactive"
     },

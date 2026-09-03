@@ -25,9 +25,18 @@ export const auditLogsTableSchema: TableSchema = {
   pageSize: 20,
   filters: [
     {
+      accessorKey: "date_range",
+      fromParamName: "from_date",
+      toParamName: "to_date",
+      labelKey: "filters.dateRange",
+      type: "date-range",
+      disableFuture: true,
+    },
+    {
       accessorKey: "action",
       labelKey: "columns.action",
       options: [
+        { value: "all", label: "All", labelKey: "actions.all" },
         { value: "auth.login.success", label: "auth.login.success" },
         { value: "auth.login.failure", label: "auth.login.failure" },
         { value: "auth.logout", label: "auth.logout" },
@@ -43,6 +52,7 @@ export const auditLogsTableSchema: TableSchema = {
       accessorKey: "resource_type",
       labelKey: "columns.resourceType",
       options: [
+        { value: "all", labelKey: "resourceTypes.all" },
         { value: "user", labelKey: "resourceTypes.user" },
         { value: "role", labelKey: "resourceTypes.role" },
         { value: "tenant", labelKey: "resourceTypes.tenant" },
@@ -54,6 +64,7 @@ export const auditLogsTableSchema: TableSchema = {
       accessorKey: "actor_type",
       labelKey: "columns.actorType",
       options: [
+        { value: "all", labelKey: "actorTypes.all" },
         { value: "user", labelKey: "actorTypes.user" },
         { value: "system", labelKey: "actorTypes.system" },
         { value: "service", labelKey: "actorTypes.service" },

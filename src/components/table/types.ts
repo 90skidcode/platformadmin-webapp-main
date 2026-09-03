@@ -38,8 +38,10 @@ export interface TableFilterOption {
   labelKey?: string;
 }
 
-/** An exact-match dropdown filter over one column. `accessorKey` doubles as
- * the query-param name in `server` mode -- the mock backend (and any real
+export type TableFilterType = "select" | "date-range";
+
+/** An exact-match dropdown or date-range filter over one column. `accessorKey`
+ * doubles as the query-param name in `server` mode -- the mock backend (and any real
  * backend following the same convention) treats every non-reserved query
  * param on a paginated list endpoint as an exact-match filter, so adding a
  * filter here needs no backend code change, same spirit as `search`/`sort`. */
@@ -47,7 +49,17 @@ export interface TableFilter {
   accessorKey: string;
   label?: string;
   labelKey?: string;
-  options: TableFilterOption[];
+  placeholder?: string;
+  placeholderKey?: string;
+  type?: TableFilterType;
+  fromParamName?: string;
+  toParamName?: string;
+  options?: TableFilterOption[];
+  minDate?: Date | string;
+  maxDate?: Date | string;
+  disablePast?: boolean;
+  disableFuture?: boolean;
+  hidePastDates?: boolean;
 }
 
 interface ConfirmConfig {
@@ -110,7 +122,6 @@ export interface TableSchema {
   bulkActions?: BulkAction[];
   selectable?: boolean;
   search?: { enabled?: boolean; placeholderKey?: string };
-  /** One dropdown per entry, rendered beside the search box. */
   filters?: TableFilter[];
   pageSize?: number;
   /** Row-virtualizes the desktop table body (plan §10's perf pass), worth

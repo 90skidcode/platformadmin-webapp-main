@@ -84,8 +84,23 @@ export default function InputEventsDemoPage() {
     // handler can target its own field, not just another one: `ctx` doesn't
     // distinguish "self" from "other", it's just a name.
     customErrorHandler: (_value, ctx) => {
-      console.log("customErrorHandler fired, setting Field G error");
       ctx.setFieldState("fieldG", { error: "Custom error triggered!" });
+    },
+    handleDateFieldChange: (value, ctx) => {
+      ctx.setFieldState("fieldB", {
+        value: value ? `Selected Date: ${value}` : undefined,
+      });
+    },
+    handleDateRangeFieldChange: (value, ctx) => {
+      if (value) {
+        ctx.setFieldState("fieldG", {
+          error: t("fields.fieldI.rangeDependencyError"),
+        });
+      } else {
+        ctx.setFieldState("fieldG", {
+          error: undefined,
+        });
+      }
     },
   };
 

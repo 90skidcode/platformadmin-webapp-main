@@ -15,6 +15,7 @@ export const statusFilter: TableFilter = {
   accessorKey: "status",
   labelKey: "columns.status",
   options: [
+    { value: "all", labelKey: "status.all" },
     { value: "active", labelKey: "status.active" },
     { value: "inactive", labelKey: "status.inactive" },
   ],

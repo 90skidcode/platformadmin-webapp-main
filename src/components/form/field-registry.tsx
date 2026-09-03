@@ -1,4 +1,6 @@
 import { CheckboxField } from "./fields/checkbox-field";
+import { DateField } from "./fields/date-field";
+import { DateRangeField } from "./fields/date-range-field";
 import type { FieldComponentProps } from "./fields/field-types";
 import { HiddenField } from "./fields/hidden-field";
 import { OtpField } from "./fields/otp-field";
@@ -19,7 +21,8 @@ export const FIELD_REGISTRY: Record<
   email: TextField,
   password: TextField,
   number: TextField,
-  date: TextField,
+  date: DateField,
+  "date-range": DateRangeField,
   textarea: TextareaField,
   select: SelectField,
   checkbox: CheckboxField,

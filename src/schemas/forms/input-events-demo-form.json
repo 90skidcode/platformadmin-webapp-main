@@ -58,6 +58,22 @@
       "type": "textarea",
       "labelKey": "fields.fieldG.label",
       "placeholderKey": "fields.fieldG.placeholder"
+    },
+    {
+      "name": "fieldH",
+      "type": "date",
+      "labelKey": "fields.fieldH.label",
+      "placeholderKey": "fields.fieldH.placeholder",
+      "helpTextKey": "fields.fieldH.helpText",
+      "onValueChange": "handleDateFieldChange"
+    },
+    {
+      "name": "fieldI",
+      "type": "date-range",
+      "labelKey": "fields.fieldI.label",
+      "placeholderKey": "fields.fieldI.placeholder",
+      "helpTextKey": "fields.fieldI.helpText",
+      "onValueChange": "handleDateRangeFieldChange"
     }
   ],
   "actions": [

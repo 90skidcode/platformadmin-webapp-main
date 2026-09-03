@@ -198,6 +198,26 @@ describe("UsersPage", () => {
     });
   });
 
+  describe("filtering users", () => {
+    it("renders status filter with All option in the filter sheet", async () => {
+      const user = userEvent.setup();
+      renderPage();
+
+      const filtersBtn = await screen.findByRole("button", { name: "Filters" });
+      await user.click(filtersBtn);
+
+      const statusTrigger = screen.getByLabelText("Status");
+      expect(statusTrigger).toBeInTheDocument();
+      await user.click(statusTrigger);
+
+      const options = await screen.findAllByRole("option");
+      const optionLabels = options.map((opt) => opt.textContent?.trim());
+      expect(optionLabels).toContain("All");
+      expect(optionLabels).toContain("Active");
+      expect(optionLabels).toContain("Inactive");
+    });
+  });
+
   describe("deleting a user", () => {
     it("confirms, then DELETEs the row", async () => {
       renderPage();

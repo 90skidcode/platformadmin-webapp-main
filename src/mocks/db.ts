@@ -39,6 +39,19 @@ export interface MockEmployee {
   status: "active" | "onboarding" | "offboarded";
 }
 
+export interface MockAuditLog {
+  id: string;
+  actor: string;
+  actor_id?: string;
+  actor_email?: string;
+  action: string;
+  resource_type: string;
+  resource_id?: string;
+  actor_type: string;
+  ip_address: string;
+  created_at: string;
+}
+
 const ACCESS_TOKEN_TTL_MS = 5 * 60 * 1000; // 5 minutes -- short enough to exercise rotation in a dev session
 const REFRESH_TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
@@ -164,6 +177,78 @@ export const employees: MockEmployee[] = [
     title: "Support Lead",
     startDate: "2023-11-20",
     status: "offboarded",
+  },
+];
+
+export const auditLogs: MockAuditLog[] = [
+  {
+    id: "audit-1",
+    actor: "admin@platform.local",
+    actor_id: "user-1",
+    actor_email: "admin@platform.local",
+    action: "auth.login.success",
+    resource_type: "auth",
+    resource_id: "user-1",
+    actor_type: "user",
+    ip_address: "127.0.0.1",
+    created_at: "2026-08-31T09:12:00.000Z",
+  },
+  {
+    id: "audit-2",
+    actor: "admin@platform.local",
+    actor_id: "user-1",
+    actor_email: "admin@platform.local",
+    action: "user.create",
+    resource_type: "user",
+    resource_id: "user-4",
+    actor_type: "user",
+    ip_address: "127.0.0.1",
+    created_at: "2026-08-30T14:22:00.000Z",
+  },
+  {
+    id: "audit-3",
+    actor: "manager@platform.local",
+    actor_id: "user-2",
+    actor_email: "manager@platform.local",
+    action: "auth.login.success",
+    resource_type: "auth",
+    resource_id: "user-2",
+    actor_type: "user",
+    ip_address: "127.0.0.1",
+    created_at: "2026-08-29T11:05:00.000Z",
+  },
+  {
+    id: "audit-4",
+    actor: "manager@platform.local",
+    actor_id: "user-2",
+    actor_email: "manager@platform.local",
+    action: "role.update",
+    resource_type: "role",
+    resource_id: "role-2",
+    actor_type: "user",
+    ip_address: "127.0.0.1",
+    created_at: "2026-08-25T16:30:00.000Z",
+  },
+  {
+    id: "audit-5",
+    actor: "system@platform.local",
+    action: "user.update",
+    resource_type: "user",
+    resource_id: "user-3",
+    actor_type: "system",
+    ip_address: "127.0.0.1",
+    created_at: "2026-08-20T08:00:00.000Z",
+  },
+  {
+    id: "audit-6",
+    actor: "viewer@platform.local",
+    actor_id: "user-3",
+    actor_email: "viewer@platform.local",
+    action: "auth.login.failure",
+    resource_type: "auth",
+    actor_type: "user",
+    ip_address: "127.0.0.1",
+    created_at: "2026-08-15T10:15:00.000Z",
   },
 ];
 

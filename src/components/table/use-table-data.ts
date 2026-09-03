@@ -175,7 +175,7 @@ export function useTableData<T extends Record<string, unknown>>(
     filters,
     setFilter: (accessorKey, value) => {
       setFilters((current) => {
-        if (!value) {
+        if (!value || value === "all") {
           const rest = { ...current };
           delete rest[accessorKey];
           return rest;
