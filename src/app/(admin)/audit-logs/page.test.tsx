@@ -83,4 +83,19 @@ describe("AuditLogsPage", () => {
     const dateRangePicker = screen.getByLabelText("Date Range");
     expect(dateRangePicker).toHaveAttribute("aria-haspopup", "dialog");
   });
+
+  it("includes 'All' option in select filters", async () => {
+    const user = userEvent.setup();
+    renderPage();
+
+    const filtersBtn = await screen.findByRole("button", { name: "Filters" });
+    await user.click(filtersBtn);
+
+    const resourceTypeTrigger = screen.getByLabelText("Resource Type");
+    await user.click(resourceTypeTrigger);
+
+    const options = await screen.findAllByRole("option");
+    const optionLabels = options.map((opt) => opt.textContent?.trim());
+    expect(optionLabels).toContain("All");
+  });
 });

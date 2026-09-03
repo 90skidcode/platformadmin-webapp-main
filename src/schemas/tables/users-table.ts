@@ -18,6 +18,7 @@ export const usersTableSchema: TableSchema = {
       labelKey: "columns.status",
       placeholder: "All Statuses",
       options: [
+        { value: "all", labelKey: "status.all" },
         { value: "active", labelKey: "status.active" },
         { value: "inactive", labelKey: "status.inactive" },
       ],

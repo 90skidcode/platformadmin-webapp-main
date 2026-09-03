@@ -68,6 +68,7 @@
       "viewer": "مشاهد"
     },
     "status": {
+      "all": "الكل",
       "active": "نشط",
       "inactive": "غير نشط",
       "invited": "مدعو",
@@ -93,6 +94,7 @@
       "toDate": "إلى تاريخ"
     },
     "actions": {
+      "all": "الكل",
       "create": "إنشاء",
       "update": "تحديث",
       "delete": "حذف",

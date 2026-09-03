@@ -71,6 +71,7 @@
       "viewer": "Viewer"
     },
     "status": {
+      "all": "All",
       "active": "Active",
       "inactive": "Inactive",
       "invited": "Invited",
@@ -97,6 +98,7 @@
       "toDate": "To Date"
     },
     "actions": {
+      "all": "All",
       "create": "Create",
       "update": "Update",
       "delete": "Delete",

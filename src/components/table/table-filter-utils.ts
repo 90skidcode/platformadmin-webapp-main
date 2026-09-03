@@ -28,7 +28,11 @@ export function buildFilterDefaults(
         to: filters[toKey] ?? null,
       };
     } else {
-      defaults[field.name] = filters[field.name] ?? "";
+      const filterVal = filters[field.name];
+      const hasAllOption =
+        field.optionsSource?.type === "static" &&
+        field.optionsSource.options.some((opt) => opt.value === "all");
+      defaults[field.name] = filterVal || (hasAllOption ? "all" : "");
     }
   }
   return defaults;
