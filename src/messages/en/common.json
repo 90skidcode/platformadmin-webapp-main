@@ -58,7 +58,14 @@
     "filtersDescription": "Narrow the table down using the fields below.",
     "clearFilters": "Clear",
     "clearAllFilters": "Clear all filters",
-    "applyFilters": "Apply"
+    "applyFilters": "Apply",
+    "viewJson": "View JSON",
+    "jsonDetails": "Log Details",
+    "jsonDetailsDescription": "Full JSON payload and response attributes.",
+    "copyJson": "Copy JSON",
+    "jsonCopied": "Copied!",
+    "structuredView": "Structured Details",
+    "rawJsonView": "Raw JSON"
   },
   "loading": "Loading...",
   "dashboard": {

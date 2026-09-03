@@ -83,7 +83,8 @@
       "actorType": "نوع الفاعل",
       "actor": "المستخدم",
       "ipAddress": "عنوان IP",
-      "createdAt": "الوقت والتاريخ"
+      "createdAt": "الوقت والتاريخ",
+      "viewJson": "عرض JSON"
     },
     "actions": {
       "create": "إنشاء",

@@ -87,7 +87,8 @@
       "actorType": "Actor Type",
       "actor": "User",
       "ipAddress": "IP Address",
-      "createdAt": "Timestamp"
+      "createdAt": "Timestamp",
+      "viewJson": "View JSON"
     },
     "actions": {
       "create": "Create",

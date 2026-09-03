@@ -58,7 +58,14 @@
     "filtersDescription": "قم بتضييق الجدول باستخدام الحقول أدناه.",
     "clearFilters": "مسح",
     "clearAllFilters": "مسح جميع الفلاتر",
-    "applyFilters": "تطبيق"
+    "applyFilters": "تطبيق",
+    "viewJson": "عرض JSON",
+    "jsonDetails": "تفاصيل السجل",
+    "jsonDetailsDescription": "حمولة JSON الكاملة وخصائص الاستجابة.",
+    "copyJson": "نسخ JSON",
+    "jsonCopied": "تم النسخ!",
+    "structuredView": "تفاصيل مهيكلة",
+    "rawJsonView": "JSON الأولي"
   },
   "loading": "جارٍ التحميل...",
   "dashboard": {

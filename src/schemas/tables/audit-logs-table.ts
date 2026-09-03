@@ -90,5 +90,10 @@ export const auditLogsTableSchema: TableSchema = {
       cell: "datetime",
       sortable: true,
     },
+    {
+      accessorKey: "view_json",
+      headerKey: "columns.viewJson",
+      cell: "json",
+    },
   ],
 };
