@@ -48,4 +48,24 @@ export const NAV_ITEMS: NavItem[] = [
     href: "/input-events-demo",
     icon: "mousePointerClick",
   },
+  {
+    id: "price",
+    labelKey: "nav.price",
+    href: "/price/mlr",
+    icon: "badgePercent",
+    children: [
+      {
+        id: "price-mlr",
+        labelKey: "nav.priceTables.mlr",
+        href: "/price/mlr",
+        icon: "tag",
+      },
+      {
+        id: "price-schemes",
+        labelKey: "nav.priceTables.schemes",
+        href: "/price/schemes",
+        icon: "receipt",
+      },
+    ],
+  },
 ];

@@ -1,5 +1,8 @@
 import {
+  BadgePercent,
   Bell,
+  ChevronDown,
+  ChevronRight,
   Eye,
   History,
   LayoutDashboard,
@@ -9,8 +12,10 @@ import {
   Palette,
   Pencil,
   Plus,
+  Receipt,
   Settings,
   ShieldCheck,
+  Tag,
   Trash2,
   Users,
 } from "lucide-react";
@@ -31,4 +36,9 @@ export const ICON_REGISTRY: Record<string, LucideIcon> = {
   eye: Eye,
   bell: Bell,
   mousePointerClick: MousePointerClick,
+  badgePercent: BadgePercent,
+  receipt: Receipt,
+  tag: Tag,
+  chevronDown: ChevronDown,
+  chevronRight: ChevronRight,
 };

@@ -24,7 +24,12 @@
     "users": "المستخدمون",
     "auditLogs": "سجلات التدقيق",
     "roleManager": "إدارة الأدوار",
-    "inputEventsDemo": "عرض أحداث الإدخال"
+    "inputEventsDemo": "عرض أحداث الإدخال",
+    "price": "السعر",
+    "priceTables": {
+      "mlr": "MLR",
+      "schemes": "المخططات"
+    }
   },
   "topbar": {
     "environment": "البيئة",
