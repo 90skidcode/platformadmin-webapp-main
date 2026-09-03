@@ -3,23 +3,64 @@ import { cookies } from "next/headers";
 
 import { auth } from "@/auth/auth";
 import { callBackend } from "@/lib/backend-client/backend-client.server";
+import {
+  getActivityCookieOptions,
+  resolveLastActiveTimestamp,
+  signActivityTimestamp,
+  validateSessionState,
+} from "@/lib/auth/session-activity.server";
+import {
+  LAST_ACTIVE_COOKIE_NAME,
+  SESSION_ERRORS,
+  SESSION_EXPIRY_REASONS,
+} from "@/lib/auth/session-constants";
 import { normalizeListBody, translateListSearchParams } from "./normalize-list";
 
 /**
  * §6.2: the only place the real backend URL and the real access token meet.
  * Every `endpoint.url` in every form/table schema resolves through here --
  * the browser only ever sees same-origin `/api/proxy/*` (§6.4).
+ *
+ * Enforces BRD session inactivity (20m) and absolute ceiling (8h).
  */
 async function handler(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
 ) {
   const session = await auth();
-  if (!session)
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!session || session.error === SESSION_ERRORS.EXPIRED) {
+    return NextResponse.json(
+      {
+        error: "unauthorized",
+        code: SESSION_EXPIRY_REASONS.INACTIVITY_TIMEOUT,
+      },
+      { status: 401 },
+    );
+  }
+
+  const cookieStore = await cookies();
+  const sessionCreatedAt = session.sessionCreatedAt ?? Date.now();
+  const lastActiveCookie = cookieStore.get(LAST_ACTIVE_COOKIE_NAME)?.value;
+  const rawLastActiveAt = resolveLastActiveTimestamp(
+    lastActiveCookie,
+    session.lastActiveAt ?? sessionCreatedAt,
+  );
+  // Stale companion cookie from a previous session can never precede this session's creation time
+  const lastActiveAt = Math.max(sessionCreatedAt, rawLastActiveAt);
+
+  // Enforce server-side session inactivity and absolute limit
+  const validation = validateSessionState(sessionCreatedAt, lastActiveAt);
+  if (!validation.valid) {
+    return NextResponse.json(
+      {
+        error: "unauthorized",
+        code: validation.reason ?? SESSION_EXPIRY_REASONS.INACTIVITY_TIMEOUT,
+      },
+      { status: 401 },
+    );
+  }
 
   const { path } = await params; // Next.js 16: params is a Promise (§4.6)
-  const cookieStore = await cookies();
   const envId = cookieStore.get("admin-environment")?.value ?? "production";
   const tenantId =
     cookieStore.get("admin-tenant")?.value ?? session.user.tenants[0]?.id ?? "";
@@ -47,16 +88,28 @@ async function handler(
       ? normalizeListBody(rawBody)
       : rawBody;
 
-  // KNOWN GAP, tracked in §6.4: non-2xx backend errors should map to a
-  // generic shape before returning them. Fine for this repo's own mock
-  // backend; not fine for a real upstream that might relay a stack trace.
-  return new NextResponse(body, {
+  const response = new NextResponse(body, {
     status: upstream.status,
     headers: {
       "Content-Type":
         upstream.headers.get("content-type") ?? "application/json",
     },
   });
+
+  // Distinguish qualifying activity vs background polling:
+  // Background polling requests pass `X-Background-Activity: true` and authenticate
+  // without extending `lastActiveAt`.
+  const isBackground = request.headers.get("x-background-activity") === "true";
+
+  if (!isBackground) {
+    const now = Date.now();
+    const signed = signActivityTimestamp(now);
+    const cookieOpts = getActivityCookieOptions();
+    response.cookies.set(cookieOpts.name, signed, cookieOpts);
+    response.headers.set("X-Session-Last-Active", String(now));
+  }
+
+  return response;
 }
 
 export {
